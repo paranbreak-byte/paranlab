@@ -4,9 +4,10 @@ const ParanLabCore = {
             <header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
                 <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
                     <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a>
-                    <nav class="flex gap-4 md:gap-6 text-sm font-bold text-slate-500">
+                    <nav class="hidden md:flex gap-6 text-sm font-bold text-slate-500">
                         <a href="/ahp/" class="hover:text-blue-600 transition-colors">AHP 분석</a>
-                        <a href="/swot/" class="hover:text-emerald-600 transition-colors">SWOT 분석</a>
+                        <a href="/swot/" class="hover:text-emerald-600 transition-colors">SWOT 전략</a>
+                        <a href="/pros-cons/" class="hover:text-indigo-600 transition-colors">장단점 분석</a>
                     </nav>
                 </div>
             </header>
@@ -47,22 +48,18 @@ const ParanLabCore = {
         const root = document.getElementById('root');
         if (!root) return;
 
-        // 헤더 삽입
         const headerElem = document.createElement('div');
         headerElem.innerHTML = this.layout.header;
         document.body.insertBefore(headerElem, document.body.firstChild);
 
-        // 상단 광고 삽입
         const adTopElem = document.createElement('div');
         adTopElem.innerHTML = this.layout.adTop;
         root.parentNode.insertBefore(adTopElem, root);
 
-        // 푸터 삽입
         const footerElem = document.createElement('div');
         footerElem.innerHTML = this.layout.footer;
         document.body.appendChild(footerElem);
     }
 };
 
-// 실행
 window.addEventListener('load', () => ParanLabCore.render());
