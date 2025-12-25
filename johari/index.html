@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>조하리의 창 자기분석 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .johari-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="johari-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function JohariApp() {
+            const [step, setStep] = useState(1); // 1: 성격 키워드 선택, 2: 결과
+            const [selectedSelf, setSelectedSelf] = useState([]); // 내가 생각하는 나
+            const [selectedOthers, setSelectedOthers] = useState([]); // 남이 말해준 나
+
+            const traits = [
+                "친절한", "자신감 있는", "차분한", "똑똑한", "복잡한", "믿음직한", 
+                "활발한", "동정심 많은", "적응력 있는", "대담한", "독립적인", "수줍은",
+                "성숙한", "행복한", "인내심 있는", "종교적인", "반응이 빠른", "자랑스러운",
+                "관대한", "논리적인", "조용한", "유능한", "따뜻한", "겸손한"
+            ];
+
+            const toggleSelf = (t) => {
+                if (selectedSelf.includes(t)) setSelectedSelf(selectedSelf.filter(item => item !== t));
+                else setSelectedSelf([...selectedSelf, t]);
+            };
+
+            const toggleOthers = (t) => {
+                if (selectedOthers.includes(t)) setSelectedOthers(selectedOthers.filter(item => item !== t));
+                else setSelectedOthers([...selectedOthers, t]);
+            };
+
+            const windows = useMemo(() => {
+                return {
+                    open: selectedSelf.filter(t => selectedOthers.includes(t)), // 둘 다 아는 것
+                    blind: selectedOthers.filter(t => !selectedSelf.includes(t)), // 남만 아는 것
+                    hidden: selectedSelf.filter(t => !selectedOthers.includes(t)), // 나만 아는 것
+                    unknown: traits.filter(t => !selectedSelf.includes(t) && !selectedOthers.includes(t)) // 둘 다 모르는 것
+                };
+            }, [selectedSelf, selectedOthers]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>조하리의 창 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;}.box{padding:20px;border-radius:15px;border:1px solid #eee;min-height:100px;}</style></head>
+                    <body>
+                        <h1>🪟 조하리의 창 자기분석 보고서</h1>
+                        <div class="grid">
+                            <div class="box" style="background:#eff6ff;"><h3>1. 열린 창 (Open)</h3>${windows.open.join(', ') || '없음'}</div>
+                            <div class="box" style="background:#fef2f2;"><h3>2. 눈먼 창 (Blind)</h3>${windows.blind.join(', ') || '없음'}</div>
+                            <div class="box" style="background:#f0fdf4;"><h3>3. 숨겨진 창 (Hidden)</h3>${windows.hidden.join(', ') || '없음'}</div>
+                            <div class="box" style="background:#f8fafc;"><h3>4. 미지의 창 (Unknown)</h3>${windows.unknown.slice(0, 5).join(', ')}...</div>
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `johari_window_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-4 text-center">나를 표현하는 단어 선택</h2>
+                                <p className="text-slate-500 mb-10 text-center font-medium">먼저 <span className="text-blue-600 font-bold">내가 생각하는 나의 모습</span>을 모두 고르세요.</p>
+                                <div className="flex flex-wrap gap-2 justify-center mb-12">
+                                    {traits.map(t => (
+                                        <button key={t} onClick={()=>toggleSelf(t)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${selectedSelf.includes(t) ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                <p className="text-slate-500 mb-10 text-center font-medium">다음으로 <span className="text-rose-600 font-bold">타인이 나에게 자주 말하는 모습</span>을 고르세요.</p>
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {traits.map(t => (
+                                        <button key={t} onClick={()=>toggleOthers(t)} className={`px-4 py-2 rounded-full text-sm font-bold transition-all ${selectedOthers.includes(t) ? 'bg-rose-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                                <button onClick={()=>setStep(2)} className="w-full mt-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">조하리의 창 분석 결과</h2>
+                                <div className="johari-grid">
+                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100">
+                                        <h3 className="text-blue-700 font-black mb-2">1. 열린 창 (Open)</h3>
+                                        <p className="text-[10px] text-blue-400 font-bold mb-4 uppercase">나도 알고 남도 아는 나의 모습</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.open.map(t => <span key={t} className="px-3 py-1 bg-white text-blue-600 rounded-full text-xs font-bold shadow-sm">{t}</span>)}
+                                        </div>
+                                    </div>
+                                    <div className="p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100">
+                                        <h3 className="text-rose-700 font-black mb-2">2. 눈먼 창 (Blind)</h3>
+                                        <p className="text-[10px] text-rose-400 font-bold mb-4 uppercase">남은 아는데 나는 모르는 모습</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.blind.map(t => <span key={t} className="px-3 py-1 bg-white text-rose-600 rounded-full text-xs font-bold shadow-sm">{t}</span>)}
+                                        </div>
+                                    </div>
+                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100">
+                                        <h3 className="text-emerald-700 font-black mb-2">3. 숨겨진 창 (Hidden)</h3>
+                                        <p className="text-[10px] text-emerald-400 font-bold mb-4 uppercase">나만 알고 남은 모르는 모습</p>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.hidden.map(t => <span key={t} className="px-3 py-1 bg-white text-emerald-600 rounded-full text-xs font-bold shadow-sm">{t}</span>)}
+                                        </div>
+                                    </div>
+                                    <div className="p-6 bg-slate-50 rounded-[2rem] border-2 border-slate-100">
+                                        <h3 className="text-slate-700 font-black mb-2">4. 미지의 창 (Unknown)</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold mb-4 uppercase">나도 남도 아직 모르는 잠재력</p>
+                                        <p className="text-xs text-slate-400 italic">아직 발견되지 않은 당신의 가능성입니다.</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 테스트하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('johari-app')).render(<JohariApp />);
+    </script>
+</body>
+</html>
