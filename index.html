@@ -9,35 +9,62 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
-        .tool-card { transition: all 0.3s ease; }
-        .tool-card:hover { transform: translateY(-8px); }
+        .tool-item:hover { background-color: #f1f5f9; transform: translateX(4px); }
+        .tool-item { transition: all 0.2s ease; }
     </style>
 </head>
 <body>
     <div id="root">
-        <section class="max-w-4xl mx-auto px-6 py-12">
-            <div class="text-center mb-20">
-                <h2 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">현명한 선택을 위한<br>30가지 도구</h2>
-                <p class="text-slate-500 text-lg font-medium">복잡한 고민을 데이터로 해결하는 당신만의 의사결정 연구소</p>
+        <section class="max-w-5xl mx-auto px-6 py-12">
+            <!-- 히어로 섹션 -->
+            <div class="mb-20">
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight leading-tight">
+                    복잡한 고민을 위한<br><span class="text-blue-600">명쾌한 도구들</span>
+                </h2>
+                <p class="text-slate-500 text-lg font-medium max-w-xl">
+                    경영학적 사고 도구를 일상의 언어로 풀었습니다. 상황에 맞는 도구를 선택하여 최선의 결론을 도출하세요.
+                </p>
             </div>
 
-            <div class="space-y-24">
-                <div>
-                    <h3 class="text-2xl font-black text-blue-600 mb-8 flex items-center gap-3">선택과 결정 (Decision)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-결정"></div>
+            <!-- 카테고리별 컴팩트 그리드 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-12">
+                
+                <!-- 1. 결정 섹션 -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-black text-blue-600 mb-6 flex items-center gap-2">
+                        <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
+                        선택과 결정 (Decision)
+                    </h3>
+                    <div class="space-y-1" id="cat-결정"></div>
                 </div>
-                <div>
-                    <h3 class="text-2xl font-black text-emerald-600 mb-8 flex items-center gap-3">분석과 전략 (Strategy)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-전략"></div>
+
+                <!-- 2. 전략 섹션 -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-black text-emerald-600 mb-6 flex items-center gap-2">
+                        <span class="w-2 h-6 bg-emerald-600 rounded-full"></span>
+                        분석과 전략 (Strategy)
+                    </h3>
+                    <div class="space-y-1" id="cat-전략"></div>
                 </div>
-                <div>
-                    <h3 class="text-2xl font-black text-indigo-600 mb-8 flex items-center gap-3">아이디어 기획 (Planning)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-기획"></div>
+
+                <!-- 3. 기획 섹션 -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-black text-indigo-600 mb-6 flex items-center gap-2">
+                        <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
+                        아이디어 기획 (Planning)
+                    </h3>
+                    <div class="space-y-1" id="cat-기획"></div>
                 </div>
-                <div>
-                    <h3 class="text-2xl font-black text-rose-600 mb-8 flex items-center gap-3">자기계발 (Self-Dev)</h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-자기계발"></div>
+
+                <!-- 4. 자기계발 섹션 -->
+                <div class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100">
+                    <h3 class="text-xl font-black text-rose-600 mb-6 flex items-center gap-2">
+                        <span class="w-2 h-6 bg-rose-600 rounded-full"></span>
+                        자기계발 (Self-Dev)
+                    </h3>
+                    <div class="space-y-1" id="cat-자기계발"></div>
                 </div>
+
             </div>
         </section>
     </div>
@@ -48,17 +75,20 @@
             tools.forEach(t => {
                 const container = document.getElementById(`cat-${t.category}`);
                 if (!container) return;
-                const card = document.createElement('div');
-                card.className = `tool-card p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between`;
-                card.innerHTML = `
-                    <div>
-                        <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-slate-400 mb-6">${t.name[0]}</div>
-                        <h4 class="text-xl font-black text-slate-800 mb-2">${t.name}</h4>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-8">전문적인 프레임워크를 통해 당신의 고민을 명쾌하게 정리해 드립니다.</p>
+                
+                const item = document.createElement('a');
+                item.href = t.href;
+                item.className = "tool-item group flex items-center justify-between p-4 rounded-2xl border border-transparent";
+                item.innerHTML = `
+                    <div class="flex flex-col">
+                        <span class="font-bold text-slate-800 group-hover:text-blue-600 transition-colors">${t.name}</span>
+                        <span class="text-xs text-slate-400 font-medium">${t.desc}</span>
                     </div>
-                    <a href="${t.href}" class="w-full py-4 rounded-2xl text-center font-bold bg-slate-900 text-white hover:bg-blue-600 transition-all">도구 사용하기 →</a>
+                    <svg class="w-4 h-4 text-slate-300 group-hover:text-blue-600 transition-all" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M9 5l7 7-7 7"></path>
+                    </svg>
                 `;
-                container.appendChild(card);
+                container.appendChild(item);
             });
         });
     </script>
