@@ -5,7 +5,8 @@ const ParanLabCore = {
         { name: "Pros & Cons", href: "/pros-cons/", category: "결정" },
         { name: "아이젠하워", href: "/eisenhower/", category: "결정" },
         { name: "PMI 아이디어", href: "/pmi/", category: "기획" },
-        { name: "5 Whys 분석", href: "/5whys/", category: "기획" }
+        { name: "5 Whys 분석", href: "/5whys/", category: "기획" },
+        { name: "Payoff 분석", href: "/payoff/", category: "결정" }
     ],
 
     layout: {
