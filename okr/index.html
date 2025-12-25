@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKR 목표 설정 가이드 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="okr-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function OkrApp() {
+            const [step, setStep] = useState(1); // 1: Objective, 2: Key Results, 3: Result
+            const [objective, setObjective] = useState("");
+            const [keyResults, setKeyResults] = useState(["", "", ""]);
+
+            const updateKR = (idx, val) => {
+                const newKRs = [...keyResults];
+                newKRs[idx] = val;
+                setKeyResults(newKRs);
+            };
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>OKR 목표 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.obj{font-size:20px; font-weight:bold; color:#2563eb; margin-bottom:20px; padding:20px; background:#f0f7ff; border-radius:15px;}.kr{padding:15px; border-bottom:1px solid #eee;}</style></head>
+                    <body>
+                        <h1>🎯 OKR 목표 설정 보고서</h1>
+                        <div class="obj">목표(Objective): ${objective}</div>
+                        <h3>핵심 결과(Key Results)</h3>
+                        ${keyResults.map((kr, i) => `<div class="kr">${i+1}. ${kr}</div>`).join('')}
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `okr_goal_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                const text = `[파란랩 OKR 목표 보고서]\n\n목표(O): ${objective}\n\n핵심 결과(KR):\n` + 
+                    keyResults.map((kr, i) => `- ${kr}`).join('\n') +
+                    `\n\n원대한 목표를 숫자로 증명하세요. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4 text-center">가슴 뛰는 목표 세우기</h2>
+                            <p className="text-slate-500 mb-10 text-center font-medium">숫자보다는 '상태'에 집중하여 원대한 목표(Objective)를 적어보세요.</p>
+                            <textarea 
+                                value={objective} onChange={(e)=>setObjective(e.target.value)} 
+                                placeholder="예: 우리 동네에서 가장 친절하고 맛있는 빵집이 된다" 
+                                className="w-full h-40 p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 focus:bg-white rounded-[2rem] outline-none text-xl font-black transition-all resize-none" 
+                            />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">핵심 결과(KR) 정하기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black text-slate-900 mb-2">어떻게 증명하시겠습니까?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">목표 달성을 확인할 수 있는 3가지 핵심 지표(Key Results)를 적으세요. <br/><span className="text-blue-600 font-bold">반드시 '숫자'가 포함되어야 합니다.</span></p>
+                            
+                            <div className="space-y-6 mb-10">
+                                {keyResults.map((kr, i) => (
+                                    <div key={i} className="relative">
+                                        <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-black text-xs">KR{i+1}</span>
+                                        <input 
+                                            value={kr} onChange={(e)=>updateKR(i, e.target.value)}
+                                            placeholder="예: 네이버 평점 4.8점 이상 유지하기"
+                                            className="w-full p-5 pl-8 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl outline-none font-bold transition-all"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">OKR 완성하기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">나의 OKR 리포트</h2>
+                            <p className="text-slate-500 mb-12 font-medium">이 목표를 달성하기 위해 오늘부터 핵심 결과에 집중하세요.</p>
+                            
+                            <div className="text-left mb-12">
+                                <div className="p-8 bg-blue-600 text-white rounded-[2.5rem] shadow-xl mb-8">
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Objective</span>
+                                    <h3 className="text-2xl font-black mt-1">{objective}</h3>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {keyResults.map((kr, i) => (
+                                        <div key={i} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-blue-600 shadow-sm">KR{i+1}</div>
+                                            <p className="text-slate-700 font-bold">{kr || "미작성"}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 설정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('okr-app')).render(<OkrApp />);
+    </script>
+</body>
+</html><!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OKR 목표 설정 가이드 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="okr-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function OkrApp() {
+            const [step, setStep] = useState(1); // 1: Objective, 2: Key Results, 3: Result
+            const [objective, setObjective] = useState("");
+            const [keyResults, setKeyResults] = useState(["", "", ""]);
+
+            const updateKR = (idx, val) => {
+                const newKRs = [...keyResults];
+                newKRs[idx] = val;
+                setKeyResults(newKRs);
+            };
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>OKR 목표 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.obj{font-size:20px; font-weight:bold; color:#2563eb; margin-bottom:20px; padding:20px; background:#f0f7ff; border-radius:15px;}.kr{padding:15px; border-bottom:1px solid #eee;}</style></head>
+                    <body>
+                        <h1>🎯 OKR 목표 설정 보고서</h1>
+                        <div class="obj">목표(Objective): ${objective}</div>
+                        <h3>핵심 결과(Key Results)</h3>
+                        ${keyResults.map((kr, i) => `<div class="kr">${i+1}. ${kr}</div>`).join('')}
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `okr_goal_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                const text = `[파란랩 OKR 목표 보고서]\n\n목표(O): ${objective}\n\n핵심 결과(KR):\n` + 
+                    keyResults.map((kr, i) => `- ${kr}`).join('\n') +
+                    `\n\n원대한 목표를 숫자로 증명하세요. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4 text-center">가슴 뛰는 목표 세우기</h2>
+                            <p className="text-slate-500 mb-10 text-center font-medium">숫자보다는 '상태'에 집중하여 원대한 목표(Objective)를 적어보세요.</p>
+                            <textarea 
+                                value={objective} onChange={(e)=>setObjective(e.target.value)} 
+                                placeholder="예: 우리 동네에서 가장 친절하고 맛있는 빵집이 된다" 
+                                className="w-full h-40 p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 focus:bg-white rounded-[2rem] outline-none text-xl font-black transition-all resize-none" 
+                            />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">핵심 결과(KR) 정하기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black text-slate-900 mb-2">어떻게 증명하시겠습니까?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">목표 달성을 확인할 수 있는 3가지 핵심 지표(Key Results)를 적으세요. <br/><span className="text-blue-600 font-bold">반드시 '숫자'가 포함되어야 합니다.</span></p>
+                            
+                            <div className="space-y-6 mb-10">
+                                {keyResults.map((kr, i) => (
+                                    <div key={i} className="relative">
+                                        <span className="absolute -left-4 top-1/2 -translate-y-1/2 w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center font-black text-xs">KR{i+1}</span>
+                                        <input 
+                                            value={kr} onChange={(e)=>updateKR(i, e.target.value)}
+                                            placeholder="예: 네이버 평점 4.8점 이상 유지하기"
+                                            className="w-full p-5 pl-8 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl outline-none font-bold transition-all"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">OKR 완성하기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">나의 OKR 리포트</h2>
+                            <p className="text-slate-500 mb-12 font-medium">이 목표를 달성하기 위해 오늘부터 핵심 결과에 집중하세요.</p>
+                            
+                            <div className="text-left mb-12">
+                                <div className="p-8 bg-blue-600 text-white rounded-[2.5rem] shadow-xl mb-8">
+                                    <span className="text-[10px] font-black uppercase tracking-widest opacity-70">Objective</span>
+                                    <h3 className="text-2xl font-black mt-1">{objective}</h3>
+                                </div>
+                                
+                                <div className="space-y-4">
+                                    {keyResults.map((kr, i) => (
+                                        <div key={i} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center gap-4">
+                                            <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-blue-600 shadow-sm">KR{i+1}</div>
+                                            <p className="text-slate-700 font-bold">{kr || "미작성"}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 설정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('okr-app')).render(<OkrApp />);
+    </script>
+</body>
+</html>
