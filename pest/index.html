@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PEST 거시환경 분석 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .pest-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
+        @media (max-width: 768px) { .pest-grid { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="pest-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function PestApp() {
+            const [step, setStep] = useState(1); // 1: 주제, 2: 4대 요소 입력, 3: 결과
+            const [subject, setSubject] = useState("");
+            const [data, setData] = useState({
+                p: "", e: "", s: "", t: ""
+            });
+
+            const sections = [
+                { id: 'p', title: 'Political (정치/법규)', desc: '정부 정책, 법규 변화, 세금, 규제', q: '나의 계획에 영향을 줄 정책이나 법적 변화가 있나요?', color: 'bg-blue-50', border: 'border-blue-200', text: 'text-blue-700' },
+                { id: 'e', title: 'Economic (경제)', desc: '금리, 환율, 물가, 고용 상태', q: '현재의 경제 상황이나 소비자의 구매력은 어떤가요?', color: 'bg-emerald-50', border: 'border-emerald-200', text: 'text-emerald-700' },
+                { id: 's', title: 'Social (사회/문화)', desc: '라이프스타일, 인구 변화, 트렌드', q: '사람들의 가치관이나 생활 방식이 어떻게 변하고 있나요?', color: 'bg-rose-50', border: 'border-rose-200', text: 'text-rose-700' },
+                { id: 't', title: 'Technological (기술)', desc: '신기술, AI, 자동화, R&D', q: '나의 분야에 혁신을 가져올 새로운 기술이 등장했나요?', color: 'bg-amber-50', border: 'border-amber-200', text: 'text-amber-700' }
+            ];
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>PEST 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}.box{padding:20px;border-radius:15px;border:1px solid #eee;min-height:150px;}</style></head>
+                    <body>
+                        <h1>🌍 PEST 거시환경 분석 보고서</h1>
+                        <p><strong>분석 주제:</strong> ${subject}</p>
+                        <div class="grid">
+                            <div class="box" style="background:#eff6ff;"><h3>Political (정치)</h3>${data.p || "내용 없음"}</div>
+                            <div class="box" style="background:#ecfdf5;"><h3>Economic (경제)</h3>${data.e || "내용 없음"}</div>
+                            <div class="box" style="background:#fff1f2;"><h3>Social (사회)</h3>${data.s || "내용 없음"}</div>
+                            <div class="box" style="background:#fffbeb;"><h3>Technological (기술)</h3>${data.t || "내용 없음"}</div>
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `pest_analysis_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                const text = `[파란랩 PEST 분석 보고서]\n주제: ${subject}\n\n1. 정치: ${data.p}\n2. 경제: ${data.e}\n3. 사회: ${data.s}\n4. 기술: ${data.t}\n\n세상의 흐름을 읽고 대비하세요. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">무엇을 둘러싼 환경을 분석할까요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">준비 중인 사업, 투자, 혹은 장기적인 계획을 적어주세요.</p>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 2025년 무인 카페 창업, 나의 5년 뒤 커리어" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">환경 분석 시작</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-2">4가지 관점에서 바라보기</h2>
+                                <p className="text-slate-500 mb-10 font-medium">주제: <span className="text-blue-600 font-black">{subject}</span></p>
+                                
+                                <div className="pest-grid">
+                                    {sections.map((s) => (
+                                        <div key={s.id} className={`${s.color} p-6 rounded-[2.5rem] border-2 ${s.border} shadow-sm`}>
+                                            <h3 className={`font-black ${s.text} mb-1`}>{s.title}</h3>
+                                            <p className="text-[10px] text-slate-400 mb-3 uppercase font-bold tracking-widest">{s.desc}</p>
+                                            <p className="text-xs text-slate-600 mb-4 font-bold leading-relaxed">{s.q}</p>
+                                            <textarea 
+                                                value={data[s.id]} 
+                                                onChange={(e)=>setData({...data, [s.id]: e.target.value})}
+                                                placeholder="떠오르는 외부 요인들을 적어보세요..."
+                                                className="w-full h-40 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">분석 결과 보기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">거시환경 리포트</h2>
+                            <p className="text-slate-500 mb-12 font-medium">당신을 둘러싼 외부 환경의 기회와 위협입니다.</p>
+                            
+                            <div className="pest-grid mb-12 text-left">
+                                {sections.map(s => (
+                                    <div key={s.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <h4 className={`font-black ${s.text} mb-2`}>{s.title}</h4>
+                                        <p className="text-slate-700 text-sm font-medium leading-relaxed whitespace-pre-wrap">
+                                            {data[s.id] || <span className="text-slate-300 italic">작성된 내용이 없습니다.</span>}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('pest-app')).render(<PestApp />);
+    </script>
+</body>
+</html>
