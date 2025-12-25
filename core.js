@@ -7,7 +7,7 @@ const ParanLabCore = {
                     <nav class="hidden md:flex gap-6 text-sm font-bold text-slate-500">
                         <a href="/ahp/" class="hover:text-blue-600 transition-colors">AHP 분석</a>
                         <a href="/swot/" class="hover:text-emerald-600 transition-colors">SWOT 전략</a>
-                        <a href="/pros-cons/" class="hover:text-indigo-600 transition-colors">장단점 분석</a>
+                        <a href="/pros-cons/" class="hover:text-indigo-600 transition-colors">Pros & Cons</a>
                     </nav>
                 </div>
             </header>
