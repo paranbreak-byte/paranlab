@@ -1,42 +1,38 @@
 const ParanLabCore = {
     toolsList: [
-        // 결정 카테고리
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", ready: true },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", ready: true },
         { id: "eisenhower", name: "아이젠하워", href: "/eisenhower/", category: "결정", ready: true },
         { id: "payoff", name: "Payoff 분석", href: "/payoff/", category: "결정", ready: true },
-        { id: "weighted", name: "가중치 점수 모델", href: "/weighted/", category: "결정", ready: false },
-        { id: "tree", name: "결정 트리", href: "/tree/", category: "결정", ready: false },
-        { id: "paired", name: "쌍대 비교법", href: "/paired/", category: "결정", ready: false },
-        { id: "cba", name: "비용-편익 분석", href: "/cba/", category: "결정", ready: false },
+        { id: "weighted", name: "가중치 점수 모델", href: "/weighted/", category: "결정", ready: true },
+        { id: "tree", name: "결정 트리", href: "/tree/", category: "결정", ready: true },
+        { id: "paired", name: "쌍대 비교법", href: "/paired/", category: "결정", ready: true },
+        { id: "cba", name: "비용-편익 분석", href: "/cba/", category: "결정", ready: true },
+        { id: "force-field", name: "Force Field 분석", href: "/force-field/", category: "결정", ready: true },
 
-        // 전략 카테고리
         { id: "swot", name: "SWOT 전략", href: "/swot/", category: "전략", ready: true },
-        { id: "pest", name: "PEST 분석", href: "/pest/", category: "전략", ready: false },
-        { id: "3c", name: "3C 분석", href: "/3c/", category: "전략", ready: false },
-        { id: "vrio", name: "VRIO 분석", href: "/vrio/", category: "전략", ready: false },
-        { id: "ansoff", name: "안소프 매트릭스", href: "/ansoff/", category: "전략", ready: false },
-        { id: "bcg", name: "BCG 매트릭스", href: "/bcg/", category: "전략", ready: false },
-        { id: "porter", name: "5 Forces 분석", href: "/porter/", category: "전략", ready: false },
-        { id: "value-chain", name: "가치 사슬 분석", href: "/value-chain/", category: "전략", ready: false },
+        { id: "pest", name: "PEST 분석", href: "/pest/", category: "전략", ready: true },
+        { id: "3c", name: "3C 분석", href: "/3c/", category: "전략", ready: true },
+        { id: "vrio", name: "VRIO 분석", href: "/vrio/", category: "전략", ready: true },
+        { id: "ansoff", name: "안소프 매트릭스", href: "/ansoff/", category: "전략", ready: true },
+        { id: "bcg", name: "BCG 매트릭스", href: "/bcg/", category: "전략", ready: true },
+        { id: "porter", name: "5 Forces 분석", href: "/porter/", category: "전략", ready: true },
 
-        // 기획 카테고리
         { id: "pmi", name: "PMI 아이디어", href: "/pmi/", category: "기획", ready: true },
         { id: "5whys", name: "5 Whys 분석", href: "/5whys/", category: "기획", ready: true },
-        { id: "smart", name: "SMART 목표", href: "/smart/", category: "기획", ready: false },
-        { id: "scamper", name: "SCAMPER 기법", href: "/scamper/", category: "기획", ready: false },
-        { id: "logic-tree", name: "로직 트리", href: "/logic-tree/", category: "기획", ready: false },
-        { id: "6hats", name: "여섯 색깔 모자", href: "/6hats/", category: "기획", ready: false },
-        { id: "affinity", name: "친화도법", href: "/affinity/", category: "기획", ready: false },
-        { id: "mandalart", name: "만다라트", href: "/mandalart/", category: "기획", ready: false },
+        { id: "smart", name: "SMART 목표", href: "/smart/", category: "기획", ready: true },
+        { id: "scamper", name: "SCAMPER 기법", href: "/scamper/", category: "기획", ready: true },
+        { id: "logic-tree", name: "로직 트리", href: "/logic-tree/", category: "기획", ready: true },
+        { id: "6hats", name: "여섯 색깔 모자", href: "/6hats/", category: "기획", ready: true },
+        { id: "affinity", name: "친화도법", href: "/affinity/", category: "기획", ready: true },
+        { id: "mandalart", name: "만다라트", href: "/mandalart/", category: "기획", ready: true },
 
-        // 자기계발 카테고리
-        { id: "wheel", name: "인생의 수레바퀴", href: "/wheel/", category: "자기계발", ready: false },
-        { id: "ikigai", name: "이키가이 찾기", href: "/ikigai/", category: "자기계발", ready: false },
-        { id: "johari", name: "조하리의 창", href: "/johari/", category: "자기계발", ready: false },
-        { id: "okr", name: "OKR 설정", href: "/okr/", category: "자기계발", ready: false },
-        { id: "grow", name: "GROW 모델", href: "/grow/", category: "자기계발", ready: false },
-        { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", ready: false }
+        { id: "wheel", name: "인생의 수레바퀴", href: "/wheel/", category: "자기계발", ready: true },
+        { id: "ikigai", name: "이키가이 찾기", href: "/ikigai/", category: "자기계발", ready: true },
+        { id: "johari", name: "조하리의 창", href: "/johari/", category: "자기계발", ready: true },
+        { id: "okr", name: "OKR 설정", href: "/okr/", category: "자기계발", ready: true },
+        { id: "grow", name: "GROW 모델", href: "/grow/", category: "자기계발", ready: true },
+        { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", ready: true }
     ],
 
     layout: {
@@ -47,13 +43,7 @@ const ParanLabCore = {
                 return `
                     <div class="py-2">
                         <div class="px-4 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">${cat}</div>
-                        ${catTools.map(t => `
-                            <a href="${t.ready ? t.href : '#'}" 
-                               onclick="${t.ready ? '' : "alert('곧 공개될 예정입니다!'); return false;"}"
-                               class="block px-4 py-2 text-sm font-bold ${t.ready ? 'text-slate-700 hover:bg-blue-50 hover:text-blue-600' : 'text-slate-300 cursor-not-allowed'} transition-colors">
-                               ${t.name} ${t.ready ? '' : '🔒'}
-                            </a>
-                        `).join('')}
+                        ${catTools.map(t => `<a href="${t.href}" class="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">${t.name}</a>`).join('')}
                     </div>
                 `;
             }).join('<div class="border-b border-slate-50"></div>');
