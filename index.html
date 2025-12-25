@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파란랩(Paran Lab) | 현명한 의사결정 가이드</title>
+    <title>파란랩(Paran Lab) | 전문 의사결정 도구 플랫폼</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
     <style>
@@ -19,17 +19,17 @@
             <!-- 헤드라인 -->
             <div class="text-center mb-16">
                 <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">어떤 고민을 하고 계신가요?</h2>
-                <p class="text-slate-500 text-lg font-medium">복잡한 생각을 명쾌한 데이터로 정리해 드립니다.</p>
+                <p class="text-slate-500 text-lg font-medium">검증된 경영학 도구로 당신의 의사결정을 데이터화합니다.</p>
             </div>
 
-            <!-- 도구 그리드 (툴이 늘어나도 깔끔하게 유지됨) -->
+            <!-- 도구 그리드 -->
             <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
                 
                 <!-- 1. AHP 카드 -->
                 <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-blue-50 hover:border-blue-100">
                     <div class="w-14 h-14 bg-blue-600 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-blue-200 text-xl">A</div>
                     <h3 class="text-2xl font-black text-slate-800 mb-4">AHP 분석</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">여러 후보 중 최선의 선택지를 수학적으로 도출합니다. 자동차, 집, 이직 고민에 최적입니다.</p>
+                    <p class="text-slate-500 mb-8 leading-relaxed">계층 분석 과정(Analytic Hierarchy Process)을 통해 여러 후보 중 최선의 선택지를 수학적으로 도출합니다.</p>
                     <a href="/ahp/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-blue-600 transition-all">도구 사용하기 →</a>
                 </div>
 
@@ -37,65 +37,62 @@
                 <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-emerald-50 hover:border-emerald-100">
                     <div class="w-14 h-14 bg-emerald-500 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-200 text-xl">S</div>
                     <h3 class="text-2xl font-black text-slate-800 mb-4">SWOT 전략</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">강점, 약점, 기회, 위협을 분석하여 전략을 세웁니다. 사업 계획이나 자기 분석에 유용합니다.</p>
+                    <p class="text-slate-500 mb-8 leading-relaxed">강점, 약점, 기회, 위협 요인을 교차 분석하여 현재 상황에 가장 적합한 비즈니스 전략을 수립합니다.</p>
                     <a href="/swot/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-emerald-600 transition-all">도구 사용하기 →</a>
                 </div>
 
-                <!-- 3. 장단점 분석 카드 -->
+                <!-- 3. Pros & Cons 카드 -->
                 <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-indigo-50 hover:border-indigo-100">
                     <div class="w-14 h-14 bg-indigo-900 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 text-xl">P</div>
-                    <h3 class="text-2xl font-black text-slate-800 mb-4">장단점 분석</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">단일 안건에 대한 확신이 필요할 때 사용하세요. 장단점의 무게를 비교해 결론을 내드립니다.</p>
+                    <h3 class="text-2xl font-black text-slate-800 mb-4">Pros & Cons 분석</h3>
+                    <p class="text-slate-500 mb-8 leading-relaxed">단일 안건에 대한 긍정적(Pros) 요인과 부정적(Cons) 요인에 가중치를 부여하여 객관적인 추진 여부를 결정합니다.</p>
                     <a href="/pros-cons/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-indigo-900 transition-all">도구 사용하기 →</a>
                 </div>
 
                 <!-- 준비 중 카드 -->
                 <div class="p-8 rounded-[2.5rem] border-4 border-dashed border-slate-100 flex flex-col items-center justify-center text-center opacity-50">
-                    <p class="text-slate-400 font-bold">새로운 도구가<br>계속 추가될 예정입니다.</p>
+                    <p class="text-slate-400 font-bold">새로운 의사결정 도구가<br>계속 추가될 예정입니다.</p>
                 </div>
             </div>
 
-            <!-- [확장형] 상황별 도구 가이드 섹션 -->
+            <!-- 상황별 도구 가이드 섹션 -->
             <div class="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-100 shadow-sm">
                 <h3 class="text-3xl font-black mb-12 text-slate-900">상황별 도구 찾기</h3>
                 
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    <!-- 카테고리 1 -->
                     <div>
                         <h4 class="text-blue-600 font-black text-xl mb-6 flex items-center gap-2">
                             <span class="w-2 h-6 bg-blue-600 rounded-full"></span>
                             선택과 결정
                         </h4>
                         <ul class="space-y-4 text-slate-500 font-medium">
-                            <li><a href="/ahp/" class="hover:text-blue-600">• 여러 후보 중 하나 고르기 (AHP)</a></li>
-                            <li><a href="/pros-cons/" class="hover:text-blue-600">• 할지 말지 결정하기 (장단점)</a></li>
-                            <li class="text-slate-300">• 우선순위 정하기 (준비 중)</li>
+                            <li><a href="/ahp/" class="hover:text-blue-600">• 다기준 의사결정 (AHP)</a></li>
+                            <li><a href="/pros-cons/" class="hover:text-blue-600">• 단일 안건 추진 여부 (Pros & Cons)</a></li>
+                            <li class="text-slate-300">• 우선순위 매트릭스 (준비 중)</li>
                         </ul>
                     </div>
 
-                    <!-- 카테고리 2 -->
                     <div>
                         <h4 class="text-emerald-600 font-black text-xl mb-6 flex items-center gap-2">
                             <span class="w-2 h-6 bg-emerald-600 rounded-full"></span>
                             분석과 전략
                         </h4>
                         <ul class="space-y-4 text-slate-500 font-medium">
-                            <li><a href="/swot/" class="hover:text-emerald-600">• 현재 상황 진단 (SWOT)</a></li>
+                            <li><a href="/swot/" class="hover:text-emerald-600">• 환경 분석 및 전략 도출 (SWOT)</a></li>
                             <li class="text-slate-300">• 시장 경쟁력 분석 (준비 중)</li>
-                            <li class="text-slate-300">• 리스크 평가 (준비 중)</li>
+                            <li class="text-slate-300">• 리스크 평가 모델 (준비 중)</li>
                         </ul>
                     </div>
 
-                    <!-- 카테고리 3 -->
                     <div>
                         <h4 class="text-indigo-600 font-black text-xl mb-6 flex items-center gap-2">
                             <span class="w-2 h-6 bg-indigo-600 rounded-full"></span>
-                            아이디어와 기획
+                            아이디어 기획
                         </h4>
                         <ul class="space-y-4 text-slate-500 font-medium">
-                            <li class="text-slate-300">• 아이디어 평가 (준비 중)</li>
-                            <li class="text-slate-300">• 목표 설정 가이드 (준비 중)</li>
-                            <li class="text-slate-300">• 문제 원인 분석 (준비 중)</li>
+                            <li class="text-slate-300">• 아이디어 평가 PMI (준비 중)</li>
+                            <li class="text-slate-300">• 목표 설정 SMART (준비 중)</li>
+                            <li class="text-slate-300">• 로직 트리 분석 (준비 중)</li>
                         </ul>
                     </div>
                 </div>
