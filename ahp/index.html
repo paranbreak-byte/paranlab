@@ -12,34 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; }
-        
-        /* 슬라이더 커스텀 */
         .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 40px; height: 40px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 20px rgba(37, 99, 235, 0.5); position: relative; z-index: 30; }
-
-        /* [중요] 인쇄/PDF 전용 스타일 */
-        @media print {
-            /* 모든 외부 요소 숨김 */
-            header, footer, .no-print, [class*="ad-"], .ad-slot { display: none !important; }
-            
-            /* 배경색 강제 출력 */
-            * { -webkit-print-color-adjust: exact !important; print-color-adjust: exact !important; }
-            
-            /* 페이지 설정 */
-            @page { size: A4; margin: 15mm; }
-            body { background: white !important; margin: 0; padding: 0; }
-            
-            /* 보고서 카드만 화면에 꽉 차게 */
-            #root-container { padding: 0 !important; margin: 0 !important; }
-            .report-card { 
-                border: none !important; 
-                box-shadow: none !important; 
-                width: 100% !important; 
-                max-width: 100% !important;
-                padding: 0 !important;
-                margin: 0 !important;
-            }
-            .result-item { break-inside: avoid; border: 1px solid #eee !important; margin-bottom: 10px !important; }
-        }
     </style>
 </head>
 <body class="bg-slate-50">
@@ -59,7 +32,7 @@
             const [scores, setScores] = useState({});
 
             const ProgressBar = () => (
-                <div className="flex justify-between mb-12 relative px-2 no-print">
+                <div className="flex justify-between mb-12 relative px-2">
                     <div className="absolute top-1/2 left-0 w-full h-1 bg-slate-200 -translate-y-1/2 z-0"></div>
                     {[1, 2, 3, 4, 5, 6].map((s) => (
                         <div key={s} className={`relative z-10 w-10 h-10 rounded-full flex items-center justify-center font-black text-sm transition-all ${step >= s ? 'bg-blue-600 text-white scale-110 shadow-xl shadow-blue-200' : 'bg-white text-slate-300 border-2 border-slate-100'}`}>
@@ -103,6 +76,55 @@
                 }).sort((a, b) => b.score - a.score);
             }, [step]);
 
+            // HTML 파일로 저장하는 함수
+            const saveAsHtml = () => {
+                const reportTitle = goal || "의사결정 분석 결과";
+                const resultList = finalResults.map((res, i) => `
+                    <div style="padding: 20px; border: 2px solid ${i === 0 ? '#2563eb' : '#eee'}; border-radius: 20px; margin-bottom: 15px; background: ${i === 0 ? '#f0f7ff' : '#fff'};">
+                        <div style="font-size: 12px; font-weight: bold; color: ${i === 0 ? '#2563eb' : '#999'};">${i + 1}위 추천</div>
+                        <div style="font-size: 20px; font-weight: 900; margin: 5px 0;">${res.name}</div>
+                        <div style="font-size: 24px; font-weight: 900; color: #2563eb;">${res.score.toFixed(0)}점</div>
+                    </div>
+                `).join('');
+
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head>
+                        <meta charset="UTF-8">
+                        <title>파란랩 분석 보고서</title>
+                        <style>
+                            body { font-family: sans-serif; padding: 40px; line-height: 1.6; color: #333; max-width: 500px; margin: 0 auto; }
+                            h1 { font-size: 24px; border-bottom: 4px solid #2563eb; padding-bottom: 10px; }
+                            .footer { font-size: 12px; color: #999; margin-top: 40px; text-align: center; }
+                        </style>
+                    </head>
+                    <body>
+                        <h1>📊 의사결정 분석 보고서</h1>
+                        <p><strong>주제:</strong> ${reportTitle}</p>
+                        <div style="margin-top: 30px;">${resultList}</div>
+                        <div class="footer">© 2025 Paran Lab. 현명한 선택을 돕습니다.</div>
+                    </body>
+                    </html>
+                `;
+
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `paranlab_report_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            // 텍스트 복사 함수
+            const copyToClipboard = () => {
+                const text = `[파란랩 의사결정 보고서]\n주제: ${goal || "미정"}\n\n` + 
+                    finalResults.map((res, i) => `${i+1}위: ${res.name} (${res.score.toFixed(0)}점)`).join('\n') +
+                    `\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
+                
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다! 카톡이나 메모장에 붙여넣으세요."));
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     <ProgressBar />
@@ -110,9 +132,8 @@
                     {step === 1 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">무엇을 결정할까요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">고민 중인 주제를 입력하면 분석 보고서를 만들어 드립니다.</p>
                             <input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 이번에 살 자동차 고르기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">보고서 작성 시작</button>
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">시작하기</button>
                         </div>
                     )}
 
@@ -126,7 +147,7 @@
                                         <button onClick={()=>setAlternatives(alternatives.filter((_,idx)=>idx!==i))} className="text-slate-300 hover:text-red-500 text-2xl">✕</button>
                                     </div>
                                 ))}
-                                <button onClick={()=>setAlternatives([...alternatives, ""])} className="text-blue-600 font-black text-lg">+ 후보 추가하기</button>
+                                <button onClick={()=>setAlternatives([...alternatives, ""])} className="text-blue-600 font-black text-lg">+ 후보 추가</button>
                             </div>
                             <div className="flex gap-4"><button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-slate-400">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">다음으로</button></div>
                         </div>
@@ -142,13 +163,13 @@
                                         <button onClick={()=>setCriteria(criteria.filter((_,idx)=>idx!==i))} className="text-slate-300 hover:text-red-500 text-2xl">✕</button>
                                     </div>
                                 ))}
-                                <button onClick={()=>setCriteria([...criteria, ""])} className="text-blue-600 font-black text-lg">+ 기준 추가하기</button>
+                                <button onClick={()=>setCriteria([...criteria, ""])} className="text-blue-600 font-black text-lg">+ 기준 추가</button>
                             </div>
                             <div className="flex gap-4"><button onClick={()=>setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-slate-400">이전</button><button onClick={()=>setStep(4)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">다음으로</button></div>
                         </div>
                     )}
 
-                    {/* STEP 4: 개선된 단일 바 (색상 대비 강화) */}
+                    {/* STEP 4: 색상 대비 강화 (진한 파랑 vs 인디고) */}
                     {step === 4 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">중요도 비중 조절</h2>
@@ -163,9 +184,9 @@
                                     return (
                                         <div key={`${i}-${j}`} className="relative">
                                             <div className="relative h-24 bg-slate-100 rounded-[2rem] flex items-center overflow-hidden border-4 border-slate-50 shadow-inner">
-                                                {/* 왼쪽: 진한 파랑 / 오른쪽: 밝은 파랑 (회색 제거) */}
+                                                {/* 왼쪽: 진한 파랑 / 오른쪽: 인디고 (확실한 대비) */}
                                                 <div className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-500 ease-out" style={{ width: `${leftPercent}%` }}></div>
-                                                <div className="absolute right-0 top-0 h-full bg-sky-400 transition-all duration-500 ease-out" style={{ width: `${100 - leftPercent}%` }}></div>
+                                                <div className="absolute right-0 top-0 h-full bg-indigo-900 transition-all duration-500 ease-out" style={{ width: `${100 - leftPercent}%` }}></div>
                                                 
                                                 <div className="absolute inset-0 flex justify-between items-center px-10 z-10 pointer-events-none">
                                                     <span className="text-xl font-black text-white drop-shadow-md">{criteria[i]}</span>
@@ -219,25 +240,18 @@
                                     </div>
                                 ))}
                             </div>
-                            <div className="flex gap-4 mt-12"><button onClick={()=>setStep(4)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-slate-400">이전</button><button onClick={()=>setStep(6)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">결과 보고서 보기</button></div>
+                            <div className="flex gap-4 mt-12"><button onClick={()=>setStep(4)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-slate-400">이전</button><button onClick={()=>setStep(6)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">결과 보기</button></div>
                         </div>
                     )}
 
                     {step === 6 && (
-                        <div className="report-card bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <div className="no-print">
-                                <h2 className="text-4xl font-black text-slate-900 mb-4">분석 보고서 완료!</h2>
-                                <p className="text-slate-500 mb-12 font-medium">당신의 우선순위를 바탕으로 도출된 최적의 선택입니다.</p>
-                            </div>
-
-                            <div className="hidden print-only text-left border-b-4 border-blue-600 pb-6 mb-10">
-                                <h1 className="text-4xl font-black text-slate-900 mb-2">의사결정 분석 보고서</h1>
-                                <p className="text-slate-500 font-bold text-xl">주제: {goal || "미정"}</p>
-                            </div>
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2">분석 완료!</h2>
+                            <p className="text-slate-500 mb-12 font-medium">당신의 우선순위를 100점 만점으로 환산한 결과입니다.</p>
                             
                             <div className="space-y-6 mb-12">
                                 {finalResults.map((res, i) => (
-                                    <div key={i} className={`result-item p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
+                                    <div key={i} className={`p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
                                         <div className="flex justify-between items-center">
                                             <div className="text-left">
                                                 <span className={`text-xs font-black px-4 py-1.5 rounded-full mb-3 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}순위 추천</span>
@@ -245,21 +259,23 @@
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">종합 점수</p>
-                                                <span className="text-6xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span>
+                                                <span className="text-6xl font-black text-blue-600">${res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span>
                                             </div>
-                                        </div>
-                                        <div className="w-full bg-slate-100 h-4 rounded-full mt-8 overflow-hidden">
-                                            <div className="bg-blue-600 h-full transition-all duration-1000" style={{ width: `${res.score}%` }}></div>
                                         </div>
                                     </div>
                                 ))}
                             </div>
 
-                            <div className="flex gap-4 no-print">
-                                <button onClick={() => window.print()} className="flex-1 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl flex items-center justify-center gap-2">
-                                    PDF 보고서 저장
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">
+                                    결과 리포트 다운로드 (.html)
                                 </button>
-                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">
+                                    텍스트 결과 복사하기
+                                </button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">
+                                    다시 하기
+                                </button>
                             </div>
                         </div>
                     )}
