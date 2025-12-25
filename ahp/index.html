@@ -11,17 +11,21 @@
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
+        body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
         .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 24px; height: 24px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
     </style>
 </head>
 <body class="bg-white">
+    <!-- core.js가 이 root 앞뒤로 헤더와 푸터를 붙입니다 -->
     <div id="root">
-        <div id="ahp-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <div id="ahp-app" class="max-w-2xl mx-auto py-10 px-4">
+            <!-- React가 로딩되기 전 잠시 보일 메시지 -->
+            <p class="text-center text-slate-400">도구를 불러오는 중입니다...</p>
+        </div>
     </div>
 
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useMemo } = React;
 
         function AhpApp() {
             const [step, setStep] = useState(1);
@@ -31,7 +35,6 @@
             const [comparisons, setComparisons] = useState({});
             const [scores, setScores] = useState({});
 
-            // 상단 진행 바 컴포넌트
             const ProgressBar = () => (
                 <div className="flex justify-between mb-12 relative">
                     <div className="absolute top-1/2 left-0 w-full h-0.5 bg-slate-100 -translate-y-1/2 z-0"></div>
@@ -43,25 +46,20 @@
                 </div>
             );
 
-            // AHP 가중치 계산 로직
             const calculateWeights = () => {
                 const n = criteria.length;
                 const matrix = Array(n).fill(0).map(() => Array(n).fill(1));
-                
                 for (let i = 0; i < n; i++) {
                     for (let j = i + 1; j < n; j++) {
                         let val = parseFloat(comparisons[`${i}-${j}`] || 0);
                         let actualVal = val === 0 ? 1 : (val > 0 ? val + 1 : 1 / (Math.abs(val) + 1));
-                        matrix[i][j] = actualVal;
-                        matrix[j][i] = 1 / actualVal;
+                        matrix[i][j] = actualVal; matrix[j][i] = 1 / actualVal;
                     }
                 }
-
                 const colSums = Array(n).fill(0);
                 for (let j = 0; j < n; j++) {
                     for (let i = 0; i < n; i++) colSums[j] += matrix[i][j];
                 }
-
                 return criteria.map((_, i) => {
                     let weight = 0;
                     for (let j = 0; j < n; j++) weight += (matrix[i][j] / colSums[j]);
@@ -83,170 +81,87 @@
             }, [step]);
 
             return (
-                <div className="animate-in fade-in duration-500">
+                <div>
                     <ProgressBar />
-
-                    {/* STEP 1: 목표 설정 */}
                     {step === 1 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
                             <h2 className="text-2xl font-black text-slate-800 mb-2">무엇을 결정할까요?</h2>
-                            <p className="text-slate-500 mb-8">고민 중인 주제를 명확하게 적어주세요.</p>
-                            <input 
-                                value={goal} onChange={(e) => setGoal(e.target.value)}
-                                placeholder="예: 이번에 살 자동차 고르기"
-                                className="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-lg font-bold"
-                            />
-                            <button onClick={() => setStep(2)} className="w-full mt-10 py-5 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-200 hover:bg-blue-700 transition-all">시작하기</button>
+                            <input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 이번에 살 자동차 고르기" className="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none text-lg font-bold" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-5 bg-blue-600 text-white rounded-2xl font-bold text-lg">시작하기</button>
                         </div>
                     )}
-
-                    {/* STEP 2: 기준 및 후보 설정 */}
                     {step === 2 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-800 mb-8">기준과 후보를 정해주세요</h2>
-                            
+                            <h2 className="text-2xl font-black text-slate-800 mb-8">기준과 후보 설정</h2>
                             <div className="mb-10">
-                                <label className="block text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">비교 기준 (중요한 조건)</label>
                                 {criteria.map((c, i) => (
                                     <div key={i} className="flex gap-3 mb-3">
-                                        <input value={c} onChange={(e) => {
-                                            const n = [...criteria]; n[i] = e.target.value; setCriteria(n);
-                                        }} className="flex-1 p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 ring-blue-100 font-bold" />
-                                        <button onClick={() => setCriteria(criteria.filter((_, idx) => idx !== i))} className="text-slate-300 hover:text-red-400 transition-colors">✕</button>
+                                        <input value={c} onChange={(e)=>{const n=[...criteria]; n[i]=e.target.value; setCriteria(n);}} className="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold" />
+                                        <button onClick={()=>setCriteria(criteria.filter((_,idx)=>idx!==i))} className="text-slate-300">✕</button>
                                     </div>
                                 ))}
-                                <button onClick={() => setCriteria([...criteria, ""])} className="text-blue-600 font-bold text-sm mt-2">+ 기준 추가</button>
+                                <button onClick={()=>setCriteria([...criteria, ""])} className="text-blue-600 font-bold text-sm">+ 기준 추가</button>
                             </div>
-
                             <div className="mb-10">
-                                <label className="block text-xs font-black text-slate-400 mb-4 uppercase tracking-widest">비교 후보 (선택지)</label>
                                 {alternatives.map((a, i) => (
                                     <div key={i} className="flex gap-3 mb-3">
-                                        <input value={a} onChange={(e) => {
-                                            const n = [...alternatives]; n[i] = e.target.value; setAlternatives(n);
-                                        }} className="flex-1 p-4 bg-slate-50 rounded-xl outline-none focus:ring-2 ring-blue-100 font-bold" />
-                                        <button onClick={() => setAlternatives(alternatives.filter((_, idx) => idx !== i))} className="text-slate-300 hover:text-red-400 transition-colors">✕</button>
+                                        <input value={a} onChange={(e)=>{const n=[...alternatives]; n[i]=e.target.value; setAlternatives(n);}} className="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold" />
+                                        <button onClick={()=>setAlternatives(alternatives.filter((_,idx)=>idx!==i))} className="text-slate-300">✕</button>
                                     </div>
                                 ))}
-                                <button onClick={() => setAlternatives([...alternatives, ""])} className="text-blue-600 font-bold text-sm mt-2">+ 후보 추가</button>
+                                <button onClick={()=>setAlternatives([...alternatives, ""])} className="text-blue-600 font-bold text-sm">+ 후보 추가</button>
                             </div>
-
-                            <div className="flex gap-4">
-                                <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(3)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-100">다음으로</button>
-                            </div>
+                            <div className="flex gap-4"><button onClick={()=>setStep(1)} className="flex-1 py-5 bg-slate-100 rounded-2xl font-bold">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold">다음</button></div>
                         </div>
                     )}
-
-                    {/* STEP 3: 기준 중요도 비교 */}
                     {step === 3 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-800 mb-2">무엇이 더 중요한가요?</h2>
-                            <p className="text-slate-500 mb-12">두 조건 중 더 포기할 수 없는 쪽으로 바를 움직이세요.</p>
-                            
-                            <div className="space-y-16">
-                                {criteriaPairs.map(([i, j]) => {
-                                    const val = comparisons[`${i}-${j}`] || 0;
-                                    return (
-                                        <div key={`${i}-${j}`} className="relative">
-                                            <div className="flex justify-between mb-6 items-center">
-                                                <span className={`text-lg font-black transition-all ${val > 0 ? 'text-blue-600 scale-110' : 'text-slate-300'}`}>{criteria[i]}</span>
-                                                <span className={`text-lg font-black transition-all ${val < 0 ? 'text-blue-600 scale-110' : 'text-slate-300'}`}>{criteria[j]}</span>
-                                            </div>
-                                            <input 
-                                                type="range" min="-8" max="8" step="1" value={val}
-                                                onChange={(e) => setComparisons({...comparisons, [`${i}-${j}`]: parseInt(e.target.value)})}
-                                                className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600 slider-thumb"
-                                            />
-                                            <div className="flex justify-between text-[10px] text-slate-300 mt-4 font-black uppercase tracking-widest">
-                                                <span>매우 중요</span>
-                                                <span>비슷함</span>
-                                                <span>매우 중요</span>
-                                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-12">중요도 비교</h2>
+                            {criteria.map((_, i) => criteria.slice(i+1).map((_, jIdx) => {
+                                const j = i + 1 + jIdx;
+                                const val = comparisons[`${i}-${j}`] || 0;
+                                return (
+                                    <div key={`${i}-${j}`} className="mb-16">
+                                        <div className="flex justify-between mb-6 font-black">
+                                            <span className={val > 0 ? 'text-blue-600' : 'text-slate-300'}>{criteria[i]}</span>
+                                            <span className={val < 0 ? 'text-blue-600' : 'text-slate-300'}>{criteria[j]}</span>
                                         </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="flex gap-4 mt-16">
-                                <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(4)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-100">다음으로</button>
-                            </div>
+                                        <input type="range" min="-8" max="8" value={val} onChange={(e)=>setComparisons({...comparisons, [`${i}-${j}`]: parseInt(e.target.value)})} className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer slider-thumb" />
+                                    </div>
+                                );
+                            }))}
+                            <div className="flex gap-4"><button onClick={()=>setStep(2)} className="flex-1 py-5 bg-slate-100 rounded-2xl font-bold">이전</button><button onClick={()=>setStep(4)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold">다음</button></div>
                         </div>
                     )}
-
-                    {/* STEP 4: 후보별 점수 매기기 */}
                     {step === 4 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-800 mb-2">각 후보의 점수는?</h2>
-                            <p className="text-slate-500 mb-10">각 기준에 대해 후보들이 얼마나 만족스러운지 평가해주세요.</p>
-                            
-                            <div className="space-y-12">
-                                {criteria.map((crit, critIdx) => (
-                                    <div key={critIdx} className="p-6 bg-slate-50 rounded-[2rem]">
-                                        <h3 className="font-black text-blue-900 mb-6 flex items-center">
-                                            <span className="bg-blue-600 text-white w-6 h-6 rounded-lg flex items-center justify-center text-[10px] mr-3">Q</span>
-                                            {crit} 측면에서 각 후보는 어떤가요?
-                                        </h3>
-                                        {alternatives.map((alt, altIdx) => (
-                                            <div key={altIdx} className="mb-6 last:mb-0">
-                                                <div className="flex justify-between text-sm mb-2 font-bold text-slate-600">
-                                                    <span>{alt}</span>
-                                                    <span className="text-blue-600">{scores[`${altIdx}-${critIdx}`] || 5}점</span>
-                                                </div>
-                                                <input 
-                                                    type="range" min="1" max="10" step="1" 
-                                                    value={scores[`${altIdx}-${critIdx}`] || 5}
-                                                    onChange={(e) => setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})}
-                                                    className="w-full h-1.5 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex gap-4 mt-12">
-                                <button onClick={() => setStep(3)} className="flex-1 py-5 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(5)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold shadow-lg shadow-blue-100">결과 보기</button>
-                            </div>
+                            <h2 className="text-2xl font-black text-slate-800 mb-10">후보별 점수</h2>
+                            {criteria.map((crit, critIdx) => (
+                                <div key={critIdx} className="p-6 bg-slate-50 rounded-[2rem] mb-8">
+                                    <h3 className="font-black text-blue-900 mb-6">{crit} 측면 점수</h3>
+                                    {alternatives.map((alt, altIdx) => (
+                                        <div key={altIdx} className="mb-6">
+                                            <div className="flex justify-between text-sm mb-2 font-bold"><span>{alt}</span><span className="text-blue-600">{scores[`${altIdx}-${critIdx}`] || 5}점</span></div>
+                                            <input type="range" min="1" max="10" value={scores[`${altIdx}-${critIdx}`] || 5} onChange={(e)=>setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})} className="w-full h-1.5 accent-blue-600" />
+                                        </div>
+                                    ))}
+                                </div>
+                            ))}
+                            <div className="flex gap-4"><button onClick={()=>setStep(3)} className="flex-1 py-5 bg-slate-100 rounded-2xl font-bold">이전</button><button onClick={()=>setStep(5)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-bold">결과 보기</button></div>
                         </div>
                     )}
-
-                    {/* STEP 5: 최종 결과 리포트 */}
                     {step === 5 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 text-center">
-                            <div className="inline-block p-5 bg-blue-50 rounded-full mb-6">
-                                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <h2 className="text-3xl font-black text-slate-800 mb-2">최적의 선택은?</h2>
-                            <p className="text-slate-500 mb-12">당신의 우선순위를 분석한 결과입니다.</p>
-                            
-                            <div className="space-y-6 mb-12">
-                                {finalResults.map((res, i) => (
-                                    <div key={i} className={`p-8 rounded-[2rem] border-2 transition-all ${i === 0 ? 'border-blue-500 bg-blue-50/50 scale-105' : 'border-slate-50 bg-white'}`}>
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-left">
-                                                <span className={`text-[10px] font-black px-3 py-1 rounded-full mb-2 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                                                    {i + 1}st Choice
-                                                </span>
-                                                <h3 className="text-2xl font-black text-slate-800">{res.name}</h3>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-4xl font-black text-blue-600">{res.score.toFixed(1)}</span>
-                                                <span className="text-slate-400 text-sm ml-1 font-bold">pts</span>
-                                            </div>
-                                        </div>
-                                        {/* 시각적 바 차트 */}
-                                        <div className="w-full bg-slate-100 h-2 rounded-full mt-6 overflow-hidden">
-                                            <div className="bg-blue-600 h-full transition-all duration-1000" style={{ width: `${(res.score / finalResults[0].score) * 100}%` }}></div>
-                                        </div>
+                            <h2 className="text-3xl font-black text-slate-800 mb-12">최적의 선택은?</h2>
+                            {finalResults.map((res, i) => (
+                                <div key={i} className={`p-8 rounded-[2rem] border-2 mb-6 ${i === 0 ? 'border-blue-500 bg-blue-50/50 scale-105' : 'border-slate-50 bg-white'}`}>
+                                    <div className="flex justify-between items-center">
+                                        <div className="text-left"><h3 className="text-2xl font-black">{res.name}</h3></div>
+                                        <div className="text-right"><span className="text-4xl font-black text-blue-600">{res.score.toFixed(1)}</span></div>
                                     </div>
-                                ))}
-                            </div>
-
-                            <div className="flex gap-4">
-                                <button onClick={() => window.print()} className="flex-1 py-5 bg-slate-900 text-white rounded-2xl font-bold shadow-lg">PDF로 저장</button>
-                                <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-500 rounded-2xl font-bold">다시 하기</button>
-                            </div>
+                                </div>
+                            ))}
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-900 text-white rounded-2xl font-bold">다시 하기</button>
                         </div>
                     )}
                 </div>
