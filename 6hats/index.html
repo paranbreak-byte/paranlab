@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>여섯 색깔 모자 사고법 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .hat-card { transition: all 0.3s ease; }
+        .hat-active { transform: scale(1.05); z-index: 10; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="hats-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function HatsApp() {
+            const [step, setStep] = useState(1); // 1: 주제, 2: 모자별 입력, 3: 결과
+            const [subject, setSubject] = useState("");
+            const [data, setData] = useState({
+                white: "", red: "", black: "", yellow: "", green: "", blue: ""
+            });
+
+            const hats = [
+                { id: 'white', name: '하얀 모자', role: '객관적 사실', q: '현재 알고 있는 정보와 데이터는 무엇인가요?', color: 'bg-white', border: 'border-slate-200', text: 'text-slate-600', icon: '⚪' },
+                { id: 'red', name: '빨간 모자', role: '직관과 감정', q: '이 주제에 대해 느끼는 솔직한 기분은 어떤가요?', color: 'bg-red-500', border: 'border-red-600', text: 'text-white', icon: '🔴' },
+                { id: 'black', name: '검은 모자', role: '비판과 위험', q: '발생할 수 있는 문제점이나 리스크는 무엇인가요?', color: 'bg-slate-800', border: 'border-slate-900', text: 'text-white', icon: '⚫' },
+                { id: 'yellow', name: '노란 모자', role: '낙관과 이익', q: '이 일을 했을 때 얻게 되는 긍정적인 효과는?', color: 'bg-amber-400', border: 'border-amber-500', text: 'text-slate-900', icon: '🟡' },
+                { id: 'green', name: '초록 모자', role: '창의와 대안', q: '새로운 아이디어나 해결책이 있을까요?', color: 'bg-emerald-500', border: 'border-emerald-600', text: 'text-white', icon: '🟢' },
+                { id: 'blue', name: '파란 모자', role: '조절과 결론', q: '전체적인 생각을 정리하고 다음 행동을 정한다면?', color: 'bg-blue-600', border: 'border-blue-700', text: 'text-white', icon: '🔵' }
+            ];
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>여섯 색깔 모자 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:10px;border:1px solid #eee;}</style></head>
+                    <body>
+                        <h1>🎩 여섯 색깔 모자 사고 보고서</h1>
+                        <p><strong>주제:</strong> ${subject}</p>
+                        <div style="margin-top:20px;">
+                            ${hats.map(h => `<div class="box"><strong>${h.name} (${h.role}):</strong><br>${data[h.id] || "의견 없음"}</div>`).join('')}
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `6hats_report_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                const text = `[파란랩 여섯 색깔 모자 보고서]\n주제: ${subject}\n\n` +
+                    hats.map(h => `${h.name}: ${data[h.id]}`).join('\n') +
+                    `\n\n다각도로 생각하고 결정하세요. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {/* STEP 1: 주제 설정 */}
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 고민을 다각도로 분석할까요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">해결하고 싶은 문제나 검토가 필요한 아이디어를 적어주세요.</p>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 이번 여름 휴가 계획, 새로운 부업 시작하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">분석 시작하기</button>
+                        </div>
+                    )}
+
+                    {/* STEP 2: 모자별 입력 */}
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-2">모자를 바꿔가며 생각해보세요</h2>
+                                <p className="text-slate-500 mb-10 font-medium">주제: <span className="text-blue-600 font-black">{subject}</span></p>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {hats.map((h) => (
+                                        <div key={h.id} className={`p-6 rounded-[2.5rem] border-2 ${h.color} ${h.border} ${h.text} shadow-sm hat-card`}>
+                                            <div className="flex items-center gap-2 mb-4">
+                                                <span className="text-2xl">{h.icon}</span>
+                                                <div>
+                                                    <h3 className="font-black leading-tight">{h.name}</h3>
+                                                    <p className="text-[10px] opacity-80 font-bold uppercase tracking-widest">{h.role}</p>
+                                                </div>
+                                            </div>
+                                            <p className="text-xs mb-4 font-bold opacity-90">{h.q}</p>
+                                            <textarea 
+                                                value={data[h.id]} 
+                                                onChange={(e)=>setData({...data, [h.id]: e.target.value})}
+                                                placeholder="여기에 적어보세요..."
+                                                className="w-full h-32 bg-white/20 rounded-2xl p-4 outline-none focus:ring-4 ring-white/30 resize-none text-sm font-medium placeholder:text-current placeholder:opacity-50"
+                                            />
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">결과 보고서 보기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 3: 결과 리포트 */}
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">사고 분석 리포트</h2>
+                            <p className="text-slate-500 mb-12 font-medium">6가지 관점에서 정리된 당신의 생각입니다.</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 text-left">
+                                {hats.map((h) => (
+                                    <div key={h.id} className={`p-6 rounded-3xl border-2 ${h.border} bg-slate-50`}>
+                                        <div className="flex items-center gap-2 mb-3">
+                                            <span>{h.icon}</span>
+                                            <h4 className="font-black text-slate-800">{h.name}</h4>
+                                        </div>
+                                        <p className="text-slate-600 text-sm font-medium leading-relaxed">
+                                            {data[h.id] || <span className="text-slate-300 italic">작성된 내용이 없습니다.</span>}
+                                        </p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('hats-app')).render(<HatsApp />);
+    </script>
+</body>
+</html>
