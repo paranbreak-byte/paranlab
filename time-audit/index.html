@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>시간 기록 분석 (Time Audit) | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="time-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function TimeApp() {
+            const [step, setStep] = useState(1); // 1: 활동 입력, 2: 결과 리포트
+            const [activities, setActivities] = useState([
+                { id: 1, name: "수면", hours: 7, category: "essential" },
+                { id: 2, name: "업무/공부", hours: 8, category: "productive" },
+                { id: 3, name: "스마트폰/SNS", hours: 2, category: "waste" }
+            ]);
+
+            const categories = {
+                productive: { label: "생산적 활동", color: "bg-blue-500", text: "text-blue-600" },
+                growth: { label: "자기계발", color: "bg-emerald-500", text: "text-emerald-600" },
+                essential: { label: "필수 생활", color: "bg-slate-400", text: "text-slate-500" },
+                rest: { label: "휴식/여가", color: "bg-amber-500", text: "text-amber-600" },
+                waste: { label: "의미 없는 시간", color: "bg-rose-500", text: "text-rose-600" }
+            };
+
+            const addActivity = () => setActivities([...activities, { id: Date.now(), name: "", hours: 1, category: "productive" }]);
+            const updateActivity = (id, field, val) => {
+                setActivities(activities.map(a => a.id === id ? { ...a, [field]: field === 'hours' ? parseFloat(val) || 0 : val } : a));
+            };
+            const removeActivity = (id) => setActivities(activities.filter(a => a.id !== id));
+
+            const totalHours = useMemo(() => activities.reduce((acc, a) => acc + a.hours, 0), [activities]);
+            
+            const stats = useMemo(() => {
+                const s = {};
+                Object.keys(categories).forEach(cat => {
+                    const sum = activities.filter(a => a.category === cat).reduce((acc, a) => acc + a.hours, 0);
+                    s[cat] = { sum, percent: totalHours > 0 ? (sum / totalHours * 100).toFixed(1) : 0 };
+                });
+                return s;
+            }, [activities, totalHours]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>시간 기록 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.stat-box{padding:15px; margin-bottom:10px; border-radius:10px; background:#f8fafc; border:1px solid #eee;}</style></head>
+                    <body>
+                        <h1>⏳ 시간 기록 분석 보고서</h1>
+                        <p>총 기록 시간: ${totalHours}시간</p>
+                        <div style="margin-top:30px;">
+                            ${Object.keys(categories).map(cat => `
+                                <div class="stat-box">
+                                    <strong>${categories[cat].label}:</strong> ${stats[cat].sum}시간 (${stats[cat].percent}%)
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `time_audit_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">나의 하루는 어떻게 흐르나요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">평소 하루 일과를 적고 시간을 배분해보세요. (총합 24시간 권장)</p>
+                            
+                            <div className="space-y-4 mb-10">
+                                {activities.map((a) => (
+                                    <div key={a.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
+                                        <input value={a.name} onChange={(e)=>updateActivity(a.id, 'name', e.target.value)} placeholder="활동 내용" className="flex-[2] p-4 bg-white rounded-xl outline-none font-bold border border-slate-200" />
+                                        <div className="flex items-center gap-2 flex-1">
+                                            <input type="number" value={a.hours} onChange={(e)=>updateActivity(a.id, 'hours', e.target.value)} className="w-20 p-4 bg-white rounded-xl font-black text-center border border-slate-200" />
+                                            <span className="font-bold text-slate-400">시간</span>
+                                        </div>
+                                        <select value={a.category} onChange={(e)=>updateActivity(a.id, 'category', e.target.value)} className="flex-1 p-4 bg-white rounded-xl font-bold border border-slate-200 outline-none text-sm">
+                                            {Object.keys(categories).map(cat => <option key={cat} value={cat}>{categories[cat].label}</option>)}
+                                        </select>
+                                        <button onClick={()=>removeActivity(a.id)} className="text-slate-300 hover:text-red-500">✕</button>
+                                    </div>
+                                ))}
+                                <button onClick={addActivity} className="text-blue-600 font-black">+ 활동 추가</button>
+                            </div>
+
+                            <div className="flex justify-between items-center p-6 bg-blue-50 rounded-2xl mb-10">
+                                <span className="font-bold text-blue-700">현재 기록된 총 시간</span>
+                                <span className={`text-2xl font-black ${totalHours > 24 ? 'text-rose-600' : 'text-blue-600'}`}>{totalHours} / 24 시간</span>
+                            </div>
+
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">분석 결과 보기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">시간 사용 리포트</h2>
+                            <p className="text-slate-500 mb-12 font-medium">당신의 소중한 시간이 이렇게 사용되고 있습니다.</p>
+                            
+                            <div className="space-y-6 mb-12">
+                                {Object.keys(categories).map(cat => (
+                                    <div key={cat} className="text-left">
+                                        <div className="flex justify-between items-end mb-2">
+                                            <span className={`font-black ${categories[cat].text}`}>{categories[cat].label}</span>
+                                            <span className="text-slate-400 font-bold text-sm">{stats[cat].sum}시간 (${stats[cat].percent}%)</span>
+                                        </div>
+                                        <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden">
+                                            <div className={`${categories[cat].color} h-full transition-all duration-1000`} style={{ width: `${stats[cat].percent}%` }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="p-8 bg-slate-50 rounded-[2.5rem] mb-10 text-left border border-slate-100">
+                                <h3 className="font-black text-slate-800 mb-4">💡 시간 관리 조언</h3>
+                                <p className="text-slate-600 font-medium leading-relaxed">
+                                    {stats.waste.sum > 3 ? "의미 없이 흘려보내는 시간이 다소 많습니다. 이 시간을 '자기계발'이나 '진정한 휴식'으로 전환해보면 어떨까요?" : 
+                                     stats.growth.sum < 1 ? "자기계발 시간이 부족합니다. 하루 30분이라도 나를 위한 투자 시간을 확보해보세요." :
+                                     "시간을 매우 균형 있게 사용하고 계시군요! 현재의 리듬을 유지하며 목표를 향해 나아가세요."}
+                                </p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('time-app')).render(<TimeApp />);
+    </script>
+</body>
+</html>
