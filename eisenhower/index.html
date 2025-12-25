@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>아이젠하워 매트릭스 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="eisen-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function EisenApp() {
+            const [step, setStep] = useState(1);
+            const [tasks, setTasks] = useState([{ id: 1, text: "예시 업무", urgent: 5, important: 5 }]);
+
+            const addTask = () => setTasks([...tasks, { id: Date.now(), text: "", urgent: 5, important: 5 }]);
+            const updateTask = (id, field, value) => {
+                setTasks(tasks.map(t => t.id === id ? { ...t, [field]: value } : t));
+            };
+            const removeTask = (id) => setTasks(tasks.filter(t => t.id !== id));
+
+            const quadrants = useMemo(() => {
+                const q = { q1: [], q2: [], q3: [], q4: [] };
+                tasks.forEach(t => {
+                    if (t.important >= 5 && t.urgent >= 5) q.q1.push(t);
+                    else if (t.important >= 5 && t.urgent < 5) q.q2.push(t);
+                    else if (t.important < 5 && t.urgent >= 5) q.q3.push(t);
+                    else q.q4.push(t);
+                });
+                return q;
+            }, [tasks]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>아이젠하워 매트릭스 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;}h1{border-bottom:4px solid #e11d48;padding-bottom:10px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}.box{padding:20px;border-radius:20px;border:1px solid #eee;min-height:150px;}</style></head>
+                    <body>
+                        <h1>🚀 우선순위 분석 보고서 (아이젠하워)</h1>
+                        <div class="grid">
+                            <div class="box" style="background:#fff1f2;"><h3>1. 즉시 실행 (Do)</h3>${quadrants.q1.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#f0f9ff;"><h3>2. 계획 수립 (Schedule)</h3>${quadrants.q2.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#f0fdf4;"><h3>3. 권한 위임 (Delegate)</h3>${quadrants.q3.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#f8fafc;"><h3>4. 삭제/보류 (Eliminate)</h3>${quadrants.q4.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `eisenhower_report_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">할 일 목록 정리</h2>
+                            <p className="text-slate-500 mb-10 font-medium">현재 고민 중인 업무나 할 일들을 적고 긴급도와 중요도를 체크하세요.</p>
+                            <div className="space-y-6 mb-10">
+                                {tasks.map((t) => (
+                                    <div key={t.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <div className="flex gap-3 mb-4">
+                                            <input value={t.text} onChange={(e)=>updateTask(t.id, 'text', e.target.value)} placeholder="할 일을 입력하세요" className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" />
+                                            <button onClick={()=>removeTask(t.id)} className="text-slate-300">✕</button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-rose-500 uppercase mb-2">긴급도: {t.urgent}점</label>
+                                                <input type="range" min="1" max="10" value={t.urgent} onChange={(e)=>updateTask(t.id, 'urgent', parseInt(e.target.value))} className="w-full accent-rose-500" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-blue-500 uppercase mb-2">중요도: {t.important}점</label>
+                                                <input type="range" min="1" max="10" value={t.important} onChange={(e)=>updateTask(t.id, 'important', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button onClick={addTask} className="text-rose-600 font-black">+ 할 일 추가</button>
+                            </div>
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-rose-200">우선순위 매트릭스 보기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">아이젠하워 매트릭스 결과</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100">
+                                        <h3 className="text-rose-700 font-black mb-4 flex items-center gap-2"><span>🔴</span> 1. 즉시 실행 (Do)</h3>
+                                        <ul className="space-y-2 text-rose-900 font-bold text-sm">
+                                            {quadrants.q1.map(t => <li key={t.id}>• {t.text}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100">
+                                        <h3 className="text-blue-700 font-black mb-4 flex items-center gap-2"><span>🔵</span> 2. 계획 수립 (Schedule)</h3>
+                                        <ul className="space-y-2 text-blue-900 font-bold text-sm">
+                                            {quadrants.q2.map(t => <li key={t.id}>• {t.text}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100">
+                                        <h3 className="text-emerald-700 font-black mb-4 flex items-center gap-2"><span>🟢</span> 3. 권한 위임 (Delegate)</h3>
+                                        <ul className="space-y-2 text-emerald-900 font-bold text-sm">
+                                            {quadrants.q3.map(t => <li key={t.id}>• {t.text}</li>)}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100">
+                                        <h3 className="text-slate-700 font-black mb-4 flex items-center gap-2"><span>⚪</span> 4. 삭제/보류 (Eliminate)</h3>
+                                        <ul className="space-y-2 text-slate-900 font-bold text-sm">
+                                            {quadrants.q4.map(t => <li key={t.id}>• {t.text}</li>)}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('eisen-app')).render(<EisenApp />);
+    </script>
+</body>
+</html>
