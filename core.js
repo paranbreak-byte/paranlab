@@ -1,15 +1,14 @@
 const ParanLabCore = {
-    // 1. 도구 데이터베이스 (여기에 추가만 하면 모든 메뉴에 자동 반영됩니다)
     toolsList: [
         { name: "AHP 분석", href: "/ahp/", category: "결정" },
         { name: "SWOT 전략", href: "/swot/", category: "전략" },
         { name: "Pros & Cons", href: "/pros-cons/", category: "결정" },
-        { name: "아이젠하워", href: "/eisenhower/", category: "결정" }
+        { name: "아이젠하워", href: "/eisenhower/", category: "결정" },
+        { name: "PMI 아이디어", href: "/pmi/", category: "기획" }
     ],
 
     layout: {
         header: function(tools) {
-            // 카테고리별로 도구 그룹화
             const categories = ["결정", "전략", "기획"];
             const menuHtml = categories.map(cat => {
                 const catTools = tools.filter(t => t.category === cat);
@@ -26,15 +25,12 @@ const ParanLabCore = {
                 <header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
                     <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
                         <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a>
-                        
                         <div class="relative group">
                             <button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">
                                 전체 도구
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path></svg>
                             </button>
-                            
-                            <!-- 드롭다운 메뉴 (툴이 많아져도 감당 가능) -->
-                            <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                            <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden z-50">
                                 ${menuHtml}
                             </div>
                         </div>
