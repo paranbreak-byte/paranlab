@@ -1,4 +1,10 @@
+/**
+ * Paran Lab Core Framework v2.0
+ * 30개 도구 관리, 자동 저장 알림, 이메일 푸터 통합 버전
+ */
+
 const ParanLabCore = {
+    // 도구 데이터베이스
     toolsList: [
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
@@ -62,7 +68,6 @@ const ParanLabCore = {
                 </header>
             `;
         },
-        // 도구 페이지 전용 가이드 헤더
         toolHeader: function(tool) {
             if (!tool) return '';
             return `
@@ -70,12 +75,15 @@ const ParanLabCore = {
                     <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl shadow-blue-900/20 relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-10 opacity-10 text-8xl">${tool.icon}</div>
                         <div class="relative z-10">
-                            <span class="inline-block px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest mb-4">${tool.category} Tool</span>
+                            <div class="flex justify-between items-start mb-4">
+                                <span class="inline-block px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">${tool.category} Tool</span>
+                                <span class="text-[10px] font-bold text-emerald-400 flex items-center gap-1">
+                                    <span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>
+                                    자동 저장 활성화됨
+                                </span>
+                            </div>
                             <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1>
                             <p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p>
-                            <div class="flex flex-wrap gap-2">
-                                ${tool.tags.map(tag => `<span class="text-xs font-bold text-slate-500 bg-white/5 px-3 py-1 rounded-lg">#${tag}</span>`).join('')}
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -83,6 +91,19 @@ const ParanLabCore = {
         },
         footer: `
             <footer class="max-w-6xl mx-auto px-6 py-12 mt-12 border-t border-slate-100 text-center no-print">
+                <div class="mb-8">
+                    <h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4>
+                    <p class="text-slate-500 text-sm mb-4">새로운 도구 제안이나 불편한 점은 아래 메일로 연락주세요.</p>
+                    <a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                        paranbreak@gmail.com
+                    </a>
+                </div>
+                <div class="mb-6">
+                    <button onclick="if(confirm('입력하신 모든 데이터가 삭제됩니다. 계속할까요?')){localStorage.clear(); location.reload();}" class="text-[10px] font-bold text-slate-300 hover:text-rose-500 transition-colors uppercase tracking-widest">
+                        [ 모든 데이터 초기화 ]
+                    </button>
+                </div>
                 <p class="text-slate-400 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p>
             </footer>
         `
@@ -99,24 +120,16 @@ const ParanLabCore = {
         this.injectFavicon();
         const root = document.getElementById('root');
         if (!root) return;
-
-        // 현재 페이지가 어떤 도구인지 확인
         const currentPath = window.location.pathname;
         const currentTool = this.toolsList.find(t => currentPath.includes(t.href));
-
-        // 헤더 삽입
         const headerElem = document.createElement('div');
         headerElem.innerHTML = this.layout.header(this.toolsList);
         document.body.insertBefore(headerElem, document.body.firstChild);
-
-        // 도구 가이드 헤더 삽입 (메인 페이지가 아닐 때만)
         if (currentTool && currentPath !== "/" && currentPath !== "/index.html") {
             const toolHeaderElem = document.createElement('div');
             toolHeaderElem.innerHTML = this.layout.toolHeader(currentTool);
             root.parentNode.insertBefore(toolHeaderElem, root);
         }
-
-        // 푸터 삽입
         const footerElem = document.createElement('div');
         footerElem.innerHTML = this.layout.footer;
         document.body.appendChild(footerElem);
