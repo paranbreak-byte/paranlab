@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payoff 효과성 분석 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="payoff-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function PayoffApp() {
+            const [step, setStep] = useState(1);
+            const [tasks, setTasks] = useState([{ id: 1, text: "예시 항목", effort: 5, impact: 5 }]);
+
+            const addTask = () => setTasks([...tasks, { id: Date.now(), text: "", effort: 5, impact: 5 }]);
+            const updateTask = (id, field, value) => {
+                setTasks(tasks.map(t => t.id === id ? { ...t, [field]: value } : t));
+            };
+            const removeTask = (id) => setTasks(tasks.filter(t => t.id !== id));
+
+            const quadrants = useMemo(() => {
+                const q = { wins: [], projects: [], fillins: [], thankless: [] };
+                tasks.forEach(t => {
+                    if (t.impact >= 5 && t.effort < 5) q.wins.push(t);
+                    else if (t.impact >= 5 && t.effort >= 5) q.projects.push(t);
+                    else if (t.impact < 5 && t.effort < 5) q.fillins.push(t);
+                    else q.thankless.push(t);
+                });
+                return q;
+            }, [tasks]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>Payoff 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;}h1{border-bottom:4px solid #f97316;padding-bottom:10px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}.box{padding:20px;border-radius:20px;border:1px solid #eee;min-height:150px;}</style></head>
+                    <body>
+                        <h1>📊 Payoff 효과성 분석 보고서</h1>
+                        <div class="grid">
+                            <div class="box" style="background:#f0fdf4;"><h3>1. Quick Wins (가성비 최고)</h3>${quadrants.wins.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#eff6ff;"><h3>2. Major Projects (핵심 과제)</h3>${quadrants.projects.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#f8fafc;"><h3>3. Fill-ins (틈새 작업)</h3>${quadrants.fillins.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                            <div class="box" style="background:#fef2f2;"><h3>4. Thankless Tasks (비효율)</h3>${quadrants.thankless.map(t=>`<div>• ${t.text}</div>`).join('')}</div>
+                        </div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `payoff_report_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">가성비 분석하기</h2>
+                            <p className="text-slate-500 mb-10 font-medium">고민 중인 일들을 적고, 얼마나 힘든지(노력)와 얼마나 이득인지(결과)를 체크하세요.</p>
+                            <div className="space-y-6 mb-10">
+                                {tasks.map((t) => (
+                                    <div key={t.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <div className="flex gap-3 mb-4">
+                                            <input value={t.text} onChange={(e)=>updateTask(t.id, 'text', e.target.value)} placeholder="무엇을 할까요?" className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" />
+                                            <button onClick={()=>removeTask(t.id)} className="text-slate-300">✕</button>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-6">
+                                            <div>
+                                                <label className="block text-[10px] font-black text-orange-500 uppercase mb-2">노력(힘든 정도): {t.effort}점</label>
+                                                <input type="range" min="1" max="10" value={t.effort} onChange={(e)=>updateTask(t.id, 'effort', parseInt(e.target.value))} className="w-full accent-orange-500" />
+                                            </div>
+                                            <div>
+                                                <label className="block text-[10px] font-black text-blue-500 uppercase mb-2">결과(이득 정도): {t.impact}점</label>
+                                                <input type="range" min="1" max="10" value={t.impact} onChange={(e)=>updateTask(t.id, 'impact', parseInt(e.target.value))} className="w-full accent-blue-500" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))}
+                                <button onClick={addTask} className="text-orange-600 font-black">+ 항목 추가</button>
+                            </div>
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-orange-500 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-orange-200">분석 결과 보기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">Payoff 분석 결과</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100">
+                                        <h3 className="text-emerald-700 font-black mb-2 flex items-center gap-2">🌟 Quick Wins</h3>
+                                        <p className="text-[10px] text-emerald-400 font-bold mb-4 uppercase">적은 노력으로 큰 결과를 얻는 일</p>
+                                        <ul className="space-y-2 text-emerald-900 font-bold text-sm">
+                                            {quadrants.wins.length > 0 ? quadrants.wins.map(t => <li key={t.id}>• {t.text}</li>) : <li className="text-emerald-200 italic">해당 없음</li>}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100">
+                                        <h3 className="text-blue-700 font-black mb-2 flex items-center gap-2">🚀 Major Projects</h3>
+                                        <p className="text-[10px] text-blue-400 font-bold mb-4 uppercase">노력은 들지만 결과가 확실한 일</p>
+                                        <ul className="space-y-2 text-blue-900 font-bold text-sm">
+                                            {quadrants.projects.length > 0 ? quadrants.projects.map(t => <li key={t.id}>• {t.text}</li>) : <li className="text-blue-200 italic">해당 없음</li>}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100">
+                                        <h3 className="text-slate-700 font-black mb-2 flex items-center gap-2">⏳ Fill-ins</h3>
+                                        <p className="text-[10px] text-slate-400 font-bold mb-4 uppercase">노력도 적고 결과도 소소한 일</p>
+                                        <ul className="space-y-2 text-slate-900 font-bold text-sm">
+                                            {quadrants.fillins.length > 0 ? quadrants.fillins.map(t => <li key={t.id}>• {t.text}</li>) : <li className="text-slate-200 italic">해당 없음</li>}
+                                        </ul>
+                                    </div>
+                                    <div className="p-8 bg-red-50 rounded-[2.5rem] border-2 border-red-100">
+                                        <h3 className="text-red-700 font-black mb-2 flex items-center gap-2">⚠️ Thankless Tasks</h3>
+                                        <p className="text-[10px] text-red-400 font-bold mb-4 uppercase">노력만 많이 들고 결과는 적은 일</p>
+                                        <ul className="space-y-2 text-red-900 font-bold text-sm">
+                                            {quadrants.thankless.length > 0 ? quadrants.thankless.map(t => <li key={t.id}>• {t.text}</li>) : <li className="text-red-200 italic">해당 없음</li>}
+                                        </ul>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('payoff-app')).render(<PayoffApp />);
+    </script>
+</body>
+</html>
