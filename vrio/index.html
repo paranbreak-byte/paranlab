@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>VRIO 핵심역량 분석 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .vrio-step { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="vrio-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function VrioApp() {
+            const [step, setStep] = useState(1); // 1: 역량 정의, 2: 4단계 질문, 3: 결과
+            const [resource, setResource] = useState("");
+            const [answers, setAnswers] = useState({
+                v: null, r: null, i: null, o: null
+            });
+
+            const questions = [
+                { id: 'v', label: 'Value (가치)', q: '이 역량이 기회를 포착하거나 위협을 방어하는 데 도움이 되나요?', desc: '쉽게 말해, 돈이 되거나 문제를 해결해 주나요?' },
+                { id: 'r', label: 'Rarity (희소성)', q: '이 역량을 가진 경쟁자가 거의 없나요?', desc: '나만 가지고 있거나, 아주 소수만 가진 것인가요?' },
+                { id: 'i', label: 'Inimitability (모방 불가능성)', q: '다른 사람들이 이것을 복제하거나 대체하기가 매우 어렵나요?', desc: '돈이나 시간을 들여도 따라 하기 힘든 것인가요?' },
+                { id: 'o', label: 'Organization (조직)', q: '당신은 이 역량을 충분히 활용할 준비와 시스템이 되어 있나요?', desc: '가진 보물을 제대로 쓸 수 있는 상태인가요?' }
+            ];
+
+            const result = useMemo(() => {
+                if (answers.v === false) return { status: "경쟁 열위", desc: "이 역량은 현재 가치가 낮습니다. 개선하거나 다른 강점을 찾아야 합니다.", color: "bg-red-500" };
+                if (answers.r === false) return { status: "경쟁 동등", desc: "가치는 있지만 누구나 가졌습니다. 생존을 위한 필수 요건일 뿐입니다.", color: "bg-slate-500" };
+                if (answers.i === false) return { status: "일시적 경쟁 우위", desc: "지금은 앞서 있지만 곧 경쟁자가 따라올 것입니다. 속도가 중요합니다.", color: "bg-blue-500" };
+                if (answers.o === false) return { status: "미활용된 경쟁 우위", desc: "엄청난 무기를 가졌지만 제대로 못 쓰고 있습니다. 시스템을 정비하세요.", color: "bg-amber-500" };
+                return { status: "지속적인 경쟁 우위", desc: "당신만의 독보적인 필살기입니다! 이것을 중심으로 전략을 짜세요.", color: "bg-emerald-600" };
+            }, [answers]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>VRIO 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:500px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.status{font-size:24px; font-weight:bold; color:#2563eb;}</style></head>
+                    <body>
+                        <h1>💎 VRIO 핵심역량 분석 보고서</h1>
+                        <p><strong>분석 대상:</strong> ${resource}</p>
+                        <div class="box">
+                            <div class="status">결과: ${result.status}</div>
+                            <p>${result.desc}</p>
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `vrio_analysis_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 능력을 검증해볼까요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">당신이 가진 기술, 자산, 혹은 아이디어를 하나만 적어주세요.</p>
+                            <input value={resource} onChange={(e)=>setResource(e.target.value)} placeholder="예: 10년 경력의 로스팅 기술, 독자적인 데이터 알고리즘" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">검증 시작하기</button>
+                        </div>
+                    )}
+
+                    {step === 2 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-2">냉정한 4단계 필터링</h2>
+                                <p className="text-slate-500 mb-10 font-medium">대상: <span className="text-blue-600 font-black">{resource}</span></p>
+                                
+                                <div className="space-y-10">
+                                    {questions.map((q, i) => (
+                                        <div key={q.id} className={`vrio-step ${answers[q.id] !== null ? 'opacity-50' : ''}`}>
+                                            <h3 className="text-lg font-black text-slate-800 mb-1">{i+1}. {q.label}</h3>
+                                            <p className="text-sm text-slate-600 font-bold mb-4">{q.q}</p>
+                                            <div className="flex gap-4">
+                                                <button 
+                                                    onClick={() => setAnswers({...answers, [q.id]: true})}
+                                                    className={`flex-1 py-4 rounded-2xl font-black transition-all ${answers[q.id] === true ? 'bg-blue-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
+                                                >예 (Yes)</button>
+                                                <button 
+                                                    onClick={() => setAnswers({...answers, [q.id]: false})}
+                                                    className={`flex-1 py-4 rounded-2xl font-black transition-all ${answers[q.id] === false ? 'bg-rose-600 text-white shadow-lg' : 'bg-slate-100 text-slate-400'}`}
+                                                >아니오 (No)</button>
+                                            </div>
+                                            <p className="text-[10px] text-slate-400 mt-2 italic">{q.desc}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <button 
+                                    disabled={Object.values(answers).includes(null)}
+                                    onClick={()=>setStep(3)} 
+                                    className={`w-full mt-12 py-6 rounded-[2rem] font-black text-xl shadow-xl transition-all ${Object.values(answers).includes(null) ? 'bg-slate-100 text-slate-300' : 'bg-slate-900 text-white shadow-slate-200'}`}
+                                >최종 경쟁력 확인</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2">분석 결과</h2>
+                            <p className="text-slate-500 mb-12 font-medium">당신의 역량이 가진 진짜 가치입니다.</p>
+                            
+                            <div className={`p-10 rounded-[2.5rem] mb-10 text-white shadow-2xl ${result.color}`}>
+                                <p className="text-white/70 font-bold mb-2 uppercase tracking-widest">현재 경쟁 상태</p>
+                                <h3 className="text-5xl font-black mb-6">{result.status}</h3>
+                                <p className="text-lg font-medium leading-relaxed">{result.desc}</p>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다른 역량 분석하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('vrio-app')).render(<VrioApp />);
+    </script>
+</body>
+</html>
