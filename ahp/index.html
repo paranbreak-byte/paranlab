@@ -12,9 +12,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; margin: 0; padding: 0; }
-        /* 슬라이더 디자인 커스텀 */
-        .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: all 0.2s; position: relative; z-index: 10; }
-        .slider-thumb:active::-webkit-slider-thumb { transform: scale(1.1); }
+        .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); transition: all 0.2s; position: relative; z-index: 20; }
     </style>
 </head>
 <body class="bg-white">
@@ -85,7 +83,8 @@
                         const score = scores[`${altIdx}-${critIdx}`] || 5;
                         totalScore += score * weights[critIdx];
                     });
-                    return { name: alt, score: totalScore };
+                    // 10점 만점을 100점 만점으로 환산
+                    return { name: alt, score: totalScore * 10 };
                 }).sort((a, b) => b.score - a.score);
             }, [step]);
 
@@ -136,54 +135,43 @@
                         </div>
                     )}
 
-                    {/* STEP 4: 중요도 비교 (비중 시각화 대폭 강화) */}
+                    {/* STEP 4: 중요도 비교 (단일 저울 UI) */}
                     {step === 4 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
                             <h2 className="text-2xl font-black text-slate-800 mb-2">어느 쪽이 더 중요한가요?</h2>
-                            <p className="text-slate-500 mb-12 text-sm font-medium">판단 기준들의 우선순위를 정합니다.</p>
+                            <p className="text-slate-500 mb-12 text-sm font-medium">두 기준 중 더 포기할 수 없는 가치 쪽으로 바를 움직이세요.</p>
                             
                             <div className="space-y-24">
                                 {criteria.map((_, i) => criteria.slice(i+1).map((_, jIdx) => {
                                     const j = i + 1 + jIdx;
                                     const val = comparisons[`${i}-${j}`] || 0;
                                     
-                                    // 비중 계산 (0~100%)
-                                    const leftWeight = val > 0 ? (val / 8) * 100 : 0;
-                                    const rightWeight = val < 0 ? (Math.abs(val) / 8) * 100 : 0;
-
                                     return (
                                         <div key={`${i}-${j}`} className="relative">
-                                            {/* 비중 시각화 박스 */}
-                                            <div className="flex items-center justify-between gap-4 mb-8">
-                                                {/* 왼쪽 항목 박스 */}
-                                                <div className={`relative flex-1 h-24 rounded-3xl border-2 transition-all duration-300 flex items-center justify-center overflow-hidden ${val > 0 ? 'border-blue-500 shadow-lg shadow-blue-50' : 'border-slate-100'}`}>
-                                                    <div className="absolute inset-0 bg-blue-500 transition-all duration-300 opacity-10" style={{ width: `${leftWeight}%` }}></div>
-                                                    <div className="absolute bottom-0 left-0 h-1.5 bg-blue-500 transition-all duration-300" style={{ width: `${leftWeight}%` }}></div>
-                                                    <span className={`relative z-10 text-lg font-black transition-all ${val > 0 ? 'text-blue-700 scale-110' : 'text-slate-300'}`}>{criteria[i]}</span>
-                                                </div>
-
-                                                <div className="text-slate-200 font-black text-xl italic">VS</div>
-
-                                                {/* 오른쪽 항목 박스 */}
-                                                <div className={`relative flex-1 h-24 rounded-3xl border-2 transition-all duration-300 flex items-center justify-center overflow-hidden ${val < 0 ? 'border-blue-500 shadow-lg shadow-blue-50' : 'border-slate-100'}`}>
-                                                    <div className="absolute inset-0 bg-blue-500 transition-all duration-300 opacity-10 right-0 left-auto" style={{ width: `${rightWeight}%` }}></div>
-                                                    <div className="absolute bottom-0 right-0 h-1.5 bg-blue-500 transition-all duration-300" style={{ width: `${rightWeight}%` }}></div>
-                                                    <span className={`relative z-10 text-lg font-black transition-all ${val < 0 ? 'text-blue-700 scale-110' : 'text-slate-300'}`}>{criteria[j]}</span>
-                                                </div>
+                                            {/* 단일 저울 바 */}
+                                            <div className="flex items-center justify-between mb-6 px-2">
+                                                <span className={`text-xl font-black transition-all duration-300 ${val > 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{criteria[i]}</span>
+                                                <span className={`text-xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{criteria[j]}</span>
                                             </div>
 
-                                            {/* 슬라이더 */}
-                                            <div className="px-2">
+                                            <div className="relative h-12 bg-slate-100 rounded-2xl flex items-center px-1 overflow-hidden border border-slate-200">
+                                                {/* 왼쪽 비중 게이지 */}
+                                                <div className="absolute left-0 top-0 h-full bg-blue-600 opacity-10 transition-all duration-300" style={{ width: val > 0 ? `${50 + (val/16)*100}%` : '50%' }}></div>
+                                                {/* 오른쪽 비중 게이지 */}
+                                                <div className="absolute right-0 top-0 h-full bg-blue-600 opacity-10 transition-all duration-300" style={{ width: val < 0 ? `${50 + (Math.abs(val)/16)*100}%` : '50%' }}></div>
+                                                
+                                                {/* 중앙 표시선 */}
+                                                <div className="absolute left-1/2 top-0 w-0.5 h-full bg-white z-10"></div>
+
                                                 <input 
                                                     type="range" min="-8" max="8" step="1" value={val} 
                                                     onChange={(e)=>setComparisons({...comparisons, [`${i}-${j}`]: parseInt(e.target.value)})} 
-                                                    className="w-full h-3 bg-slate-100 rounded-full appearance-none cursor-pointer slider-thumb" 
+                                                    className="relative w-full h-full bg-transparent appearance-none cursor-pointer slider-thumb z-20" 
                                                 />
                                             </div>
 
-                                            {/* 설명 문구 */}
-                                            <div className="mt-8 text-center">
-                                                <div className="inline-block px-6 py-3 bg-slate-50 rounded-2xl border border-slate-100">
+                                            <div className="mt-6 text-center">
+                                                <div className="inline-block px-6 py-3 bg-blue-50 rounded-2xl border border-blue-100">
                                                     <p className="text-sm">{getImportanceText(val, criteria[i], criteria[j])}</p>
                                                 </div>
                                             </div>
@@ -195,23 +183,41 @@
                         </div>
                     )}
 
+                    {/* STEP 5: 후보별 점수 (직관적 가이드 추가) */}
                     {step === 5 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100">
                             <h2 className="text-2xl font-black text-slate-800 mb-2">후보별 점수 매기기</h2>
-                            <p className="text-slate-500 mb-10 text-sm font-medium">각 기준에 대해 후보들이 얼마나 만족스러운지 평가합니다.</p>
+                            <p className="text-slate-500 mb-10 text-sm font-medium">각 기준에 대해 후보들이 얼마나 만족스러운지 평가합니다. <br/><span className="text-blue-600 font-bold">점수가 높을수록 해당 기준에서 우수하다는 뜻입니다.</span></p>
                             <div className="space-y-12">
                                 {criteria.map((crit, critIdx) => (
-                                    <div key={critIdx} className="p-6 bg-slate-50 rounded-[2rem]">
-                                        <h3 className="font-black text-blue-900 mb-6 flex items-center">
+                                    <div key={critIdx} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <h3 className="font-black text-blue-900 mb-8 flex items-center text-lg">
                                             <span className="bg-blue-600 text-white w-6 h-6 rounded-lg flex items-center justify-center text-[10px] mr-3 font-black">Q</span>
                                             {crit} 측면에서 각 후보는 어떤가요?
                                         </h3>
-                                        {alternatives.map((alt, altIdx) => (
-                                            <div key={altIdx} className="mb-6 last:mb-0">
-                                                <div className="flex justify-between text-sm mb-2 font-bold text-slate-600"><span>{alt}</span><span className="text-blue-600">{scores[`${altIdx}-${critIdx}`] || 5}점</span></div>
-                                                <input type="range" min="1" max="10" step="1" value={scores[`${altIdx}-${critIdx}`] || 5} onChange={(e)=>setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})} className="w-full h-1.5 accent-blue-600" />
-                                            </div>
-                                        ))}
+                                        {alternatives.map((alt, altIdx) => {
+                                            const score = scores[`${altIdx}-${critIdx}`] || 5;
+                                            return (
+                                                <div key={altIdx} className="mb-10 last:mb-0">
+                                                    <div className="flex justify-between text-sm mb-3 font-bold text-slate-600 items-end">
+                                                        <span className="text-lg">{alt}</span>
+                                                        <div className="text-right">
+                                                            <span className="text-xs text-slate-400 block mb-1">{score <= 3 ? '😞 별로예요' : score <= 7 ? '😐 보통이에요' : '🤩 아주 좋아요'}</span>
+                                                            <span className="text-2xl text-blue-600 font-black">{score}</span><span className="text-slate-400 ml-1">/ 10점</span>
+                                                        </div>
+                                                    </div>
+                                                    <input 
+                                                        type="range" min="1" max="10" step="1" value={score} 
+                                                        onChange={(e)=>setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})} 
+                                                        className="w-full h-3 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600" 
+                                                    />
+                                                    <div className="flex justify-between text-[10px] text-slate-400 mt-2 font-bold">
+                                                        <span>매우 불만족 (1점)</span>
+                                                        <span>매우 만족 (10점)</span>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
                                     </div>
                                 ))}
                             </div>
@@ -219,17 +225,25 @@
                         </div>
                     )}
 
+                    {/* STEP 6: 최종 결과 (100점 만점 환산) */}
                     {step === 6 && (
                         <div className="bg-white p-8 rounded-[2.5rem] shadow-2xl shadow-slate-200/50 border border-slate-100 text-center">
-                            <h2 className="text-3xl font-black text-slate-800 mb-12">최적의 선택은?</h2>
+                            <h2 className="text-3xl font-black text-slate-800 mb-2">최적의 선택은?</h2>
+                            <p className="text-slate-500 mb-12 text-sm font-medium">당신의 우선순위를 100점 만점으로 환산한 결과입니다.</p>
                             {finalResults.map((res, i) => (
-                                <div key={i} className={`p-8 rounded-[2rem] border-2 mb-6 transition-all ${i === 0 ? 'border-blue-500 bg-blue-50/50 scale-105' : 'border-slate-50 bg-white'}`}>
+                                <div key={i} className={`p-8 rounded-[2rem] border-2 mb-6 transition-all ${i === 0 ? 'border-blue-500 bg-blue-50/50 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
                                     <div className="flex justify-between items-center">
                                         <div className="text-left">
-                                            <span className={`text-[10px] font-black px-3 py-1 rounded-full mb-2 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}st Choice</span>
+                                            <span className={`text-[10px] font-black px-3 py-1 rounded-full mb-2 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}위 추천</span>
                                             <h3 className="text-2xl font-black text-slate-800">{res.name}</h3>
                                         </div>
-                                        <div className="text-right"><span className="text-4xl font-black text-blue-600">{res.score.toFixed(1)}</span><span className="text-slate-400 text-sm ml-1 font-bold">pts</span></div>
+                                        <div className="text-right">
+                                            <span className="text-xs text-slate-400 font-bold block mb-1">종합 점수</span>
+                                            <span className="text-5xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-400 text-lg ml-1 font-bold">점</span>
+                                        </div>
+                                    </div>
+                                    <div className="w-full bg-slate-100 h-3 rounded-full mt-6 overflow-hidden">
+                                        <div className="bg-blue-600 h-full transition-all duration-1000" style={{ width: `${res.score}%` }}></div>
                                     </div>
                                 </div>
                             ))}
