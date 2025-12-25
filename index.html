@@ -10,80 +10,93 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
         .tool-card { transition: all 0.3s ease; }
-        .tool-card:hover { transform: translateY(-8px); }
+        .tool-card:hover:not(.locked) { transform: translateY(-8px); }
     </style>
 </head>
 <body>
     <div id="root">
         <section class="max-w-4xl mx-auto px-6 py-12">
-            <div class="text-center mb-16">
-                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">어떤 고민을 하고 계신가요?</h2>
-                <p class="text-slate-500 text-lg font-medium">검증된 경영학 도구로 당신의 의사결정을 데이터화합니다.</p>
+            <div class="text-center mb-20">
+                <h2 class="text-4xl md:text-6xl font-black text-slate-900 mb-6 tracking-tight">현명한 선택을 위한<br>30가지 도구</h2>
+                <p class="text-slate-500 text-lg font-medium">복잡한 고민을 데이터로 해결하는 당신만의 의사결정 연구소</p>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-20">
-                <!-- AHP -->
-                <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-blue-50 hover:border-blue-100">
-                    <div class="w-14 h-14 bg-blue-600 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-blue-200 text-xl">A</div>
-                    <h3 class="text-2xl font-black text-slate-800 mb-4">AHP 분석</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">여러 후보 중 최선의 선택지를 수학적으로 도출합니다. 자동차, 집, 이직 고민에 최적입니다.</p>
-                    <a href="/ahp/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-blue-600 transition-all">도구 사용하기 →</a>
-                </div>
-
-                <!-- SWOT -->
-                <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-emerald-50 hover:border-emerald-100">
-                    <div class="w-14 h-14 bg-emerald-500 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-emerald-200 text-xl">S</div>
-                    <h3 class="text-2xl font-black text-slate-800 mb-4">SWOT 전략</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">강점, 약점, 기회, 위협을 분석하여 전략을 세웁니다. 사업 계획이나 자기 분석에 유용합니다.</p>
-                    <a href="/swot/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-emerald-600 transition-all">도구 사용하기 →</a>
-                </div>
-
-                <!-- Pros & Cons -->
-                <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-indigo-50 hover:border-indigo-100">
-                    <div class="w-14 h-14 bg-indigo-900 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-indigo-200 text-xl">P</div>
-                    <h3 class="text-2xl font-black text-slate-800 mb-4">Pros & Cons</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">단일 안건에 대한 긍정적 요인과 부정적 요인을 비교하여 추진 여부를 결정합니다.</p>
-                    <a href="/pros-cons/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-indigo-900 transition-all">도구 사용하기 →</a>
-                </div>
-
-                <!-- Payoff -->
-                <div class="tool-card group p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 hover:bg-orange-50 hover:border-orange-100">
-                    <div class="w-14 h-14 bg-orange-500 rounded-2xl mb-6 flex items-center justify-center text-white font-black shadow-lg shadow-orange-200 text-xl">M</div>
-                    <h3 class="text-2xl font-black text-slate-800 mb-4">Payoff 분석</h3>
-                    <p class="text-slate-500 mb-8 leading-relaxed">노력 대비 결과가 큰 '가성비' 높은 일을 찾아냅니다. 업무 우선순위나 아이디어 실행 여부 결정에 좋습니다.</p>
-                    <a href="/payoff/" class="inline-block px-8 py-4 bg-slate-900 text-white rounded-2xl font-bold group-hover:bg-orange-600 transition-all">도구 사용하기 →</a>
-                </div>
-            </div>
-
-            <!-- 상황별 도구 가이드 -->
-            <div class="bg-white rounded-[3rem] p-10 md:p-16 border border-slate-100 shadow-sm">
-                <h3 class="text-3xl font-black mb-12 text-slate-900">상황별 도구 찾기</h3>
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                    <div>
-                        <h4 class="text-blue-600 font-black text-xl mb-6 flex items-center gap-2">결정</h4>
-                        <ul class="space-y-4 text-slate-500 font-medium">
-                            <li><a href="/ahp/" class="hover:text-blue-600">• 다기준 의사결정 (AHP)</a></li>
-                            <li><a href="/pros-cons/" class="hover:text-blue-600">• 추진 여부 결정 (Pros & Cons)</a></li>
-                            <li><a href="/payoff/" class="hover:text-blue-600">• 가성비 높은 일 찾기 (Payoff)</a></li>
-                        </ul>
+            <!-- 카테고리별 섹션 반복 -->
+            <div class="space-y-24">
+                <!-- 1. 결정 섹션 -->
+                <div>
+                    <h3 class="text-2xl font-black text-blue-600 mb-8 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm">01</span>
+                        선택과 결정 (Decision)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-decision">
+                        <!-- 툴 카드는 스크립트로 자동 생성하거나 아래처럼 수동 배치 가능 -->
                     </div>
-                    <div>
-                        <h4 class="text-emerald-600 font-black text-xl mb-6 flex items-center gap-2">전략</h4>
-                        <ul class="space-y-4 text-slate-500 font-medium">
-                            <li><a href="/swot/" class="hover:text-emerald-600">• 환경 분석 및 전략 (SWOT)</a></li>
-                            <li><a href="/eisenhower/" class="hover:text-emerald-600">• 업무 우선순위 (아이젠하워)</a></li>
-                        </ul>
-                    </div>
-                    <div>
-                        <h4 class="text-indigo-600 font-black text-xl mb-6 flex items-center gap-2">기획</h4>
-                        <ul class="space-y-4 text-slate-500 font-medium">
-                            <li><a href="/pmi/" class="hover:text-indigo-600">• 아이디어 평가 (PMI)</a></li>
-                            <li><a href="/5whys/" class="hover:text-indigo-600">• 근본 원인 분석 (5 Whys)</a></li>
-                        </ul>
-                    </div>
+                </div>
+
+                <!-- 2. 전략 섹션 -->
+                <div>
+                    <h3 class="text-2xl font-black text-emerald-600 mb-8 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-sm">02</span>
+                        분석과 전략 (Strategy)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-strategy"></div>
+                </div>
+
+                <!-- 3. 기획 섹션 -->
+                <div>
+                    <h3 class="text-2xl font-black text-indigo-600 mb-8 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm">03</span>
+                        아이디어 기획 (Planning)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-planning"></div>
+                </div>
+
+                <!-- 4. 자기계발 섹션 -->
+                <div>
+                    <h3 class="text-2xl font-black text-rose-600 mb-8 flex items-center gap-3">
+                        <span class="w-8 h-8 bg-rose-600 text-white rounded-lg flex items-center justify-center text-sm">04</span>
+                        자기계발 (Self-Dev)
+                    </h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-selfdev"></div>
                 </div>
             </div>
         </section>
     </div>
+
+    <script>
+        // core.js가 로드된 후 실행
+        window.addEventListener('load', () => {
+            const tools = ParanLabCore.toolsList;
+            const containers = {
+                "결정": document.getElementById('cat-decision'),
+                "전략": document.getElementById('cat-strategy'),
+                "기획": document.getElementById('cat-planning'),
+                "자기계발": document.getElementById('cat-selfdev')
+            };
+
+            tools.forEach(t => {
+                const card = document.createElement('div');
+                card.className = `tool-card p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between ${t.ready ? '' : 'locked opacity-50'}`;
+                
+                card.innerHTML = `
+                    <div>
+                        <div class="flex justify-between items-start mb-6">
+                            <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-slate-400">${t.name[0]}</div>
+                            ${t.ready ? '<span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase">Active</span>' : '<span class="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-md uppercase">Coming Soon</span>'}
+                        </div>
+                        <h4 class="text-xl font-black text-slate-800 mb-2">${t.name}</h4>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-8">${t.ready ? '지금 바로 분석을 시작하고 명쾌한 보고서를 받아보세요.' : '더 나은 의사결정을 위해 도구를 준비하고 있습니다.'}</p>
+                    </div>
+                    <a href="${t.ready ? t.href : '#'}" 
+                       onclick="${t.ready ? '' : "alert('곧 공개됩니다!'); return false;"}"
+                       class="w-full py-4 rounded-2xl text-center font-bold transition-all ${t.ready ? 'bg-slate-900 text-white hover:bg-blue-600' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}">
+                       ${t.ready ? '도구 사용하기 →' : '준비 중'}
+                    </a>
+                `;
+                containers[t.category].appendChild(card);
+            });
+        });
+    </script>
 </body>
 </html>
