@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GROW 모델 셀프 코칭 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="grow-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function GrowApp() {
+            const [step, setStep] = useState(1); // 1: Goal, 2: Reality, 3: Options, 4: Will, 5: Result
+            const [data, setData] = useState({
+                goal: "", reality: "", options: "", will: ""
+            });
+
+            const steps = [
+                { 
+                    id: 'goal', 
+                    title: 'Goal (목표)', 
+                    q: '당신이 진정으로 이루고 싶은 결과는 무엇인가요?', 
+                    desc: '구체적이고 긍정적인 문장으로 적어보세요.',
+                    placeholder: '예: 3개월 안에 영어 회화 초급 탈출하기',
+                    color: 'bg-blue-50', text: 'text-blue-600'
+                },
+                { 
+                    id: 'reality', 
+                    title: 'Reality (현실)', 
+                    q: '현재 상황은 어떤가요? 무엇이 걸림돌인가요?', 
+                    desc: '객관적인 사실과 현재의 느낌을 솔직하게 적으세요.',
+                    placeholder: '예: 단어는 조금 알지만 문장으로 말이 안 나옴, 공부 시간이 불규칙함',
+                    color: 'bg-emerald-50', text: 'text-emerald-600'
+                },
+                { 
+                    id: 'options', 
+                    title: 'Options (대안)', 
+                    q: '목표를 달성하기 위해 무엇을 할 수 있을까요?', 
+                    desc: '제약 없이 가능한 모든 방법을 나열해보세요.',
+                    placeholder: '예: 전화영어 신청, 매일 미드 1편 보기, 출퇴근길 팟캐스트 듣기',
+                    color: 'bg-amber-50', text: 'text-amber-600'
+                },
+                { 
+                    id: 'will', 
+                    title: 'Will (의지)', 
+                    q: '이제 무엇을, 언제부터 시작하시겠습니까?', 
+                    desc: '가장 먼저 실행할 구체적인 첫 단계를 정하세요.',
+                    placeholder: '예: 오늘 퇴근 후 전화영어 레벨테스트 예약하기',
+                    color: 'bg-rose-50', text: 'text-rose-600'
+                }
+            ];
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>GROW 코칭 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.label{font-weight:bold;color:#2563eb;display:block;margin-bottom:5px;}</style></head>
+                    <body>
+                        <h1>🌱 GROW 셀프 코칭 보고서</h1>
+                        <div class="box"><span class="label">Goal (목표):</span>${data.goal}</div>
+                        <div class="box"><span class="label">Reality (현실):</span>${data.reality}</div>
+                        <div class="box"><span class="label">Options (대안):</span>${data.options}</div>
+                        <div class="box"><span class="label">Will (실행의지):</span>${data.will}</div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `grow_coaching_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                const text = `[파란랩 GROW 셀프 코칭 보고서]\n\n1. Goal: ${data.goal}\n2. Reality: ${data.reality}\n3. Options: ${data.options}\n4. Will: ${data.will}\n\n생각을 행동으로 바꾸는 힘. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {step <= 4 ? (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <div className="flex items-center gap-4 mb-6">
+                                <span className={`w-12 h-12 ${steps[step-1].color} ${steps[step-1].text} rounded-2xl flex items-center justify-center font-black text-xl`}>{step}</span>
+                                <h2 className="text-2xl font-black text-slate-900">{steps[step-1].title}</h2>
+                            </div>
+                            <p className="text-slate-600 mb-2 font-bold text-lg leading-relaxed">{steps[step-1].q}</p>
+                            <p className="text-slate-400 text-sm mb-8">{steps[step-1].desc}</p>
+                            
+                            <textarea 
+                                value={data[steps[step-1].id]} 
+                                onChange={(e)=>setData({...data, [steps[step-1].id]: e.target.value})}
+                                placeholder={steps[step-1].placeholder}
+                                className="w-full h-48 p-6 bg-slate-50 border-2 border-transparent focus:border-blue-500 focus:bg-white rounded-[2rem] outline-none text-lg font-medium resize-none transition-all"
+                            />
+
+                            <div className="flex gap-4 mt-10">
+                                {step > 1 && <button onClick={()=>setStep(step-1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>}
+                                <button 
+                                    onClick={()=>setStep(step+1)} 
+                                    className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200"
+                                >
+                                    {step === 4 ? "코칭 완료" : "다음 단계"}
+                                </button>
+                            </div>
+                        </div>
+                    ) : (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">코칭 리포트 완료</h2>
+                            <p className="text-slate-500 mb-12 font-medium">당신의 생각을 행동으로 옮길 준비가 되었습니다.</p>
+                            
+                            <div className="space-y-4 mb-12 text-left">
+                                {steps.map((s) => (
+                                    <div key={s.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                        <span className={`text-[10px] font-black ${s.text} uppercase tracking-widest`}>{s.title}</span>
+                                        <p className="text-slate-800 font-bold mt-1 whitespace-pre-wrap">{data[s.id] || "미작성"}</p>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('grow-app')).render(<GrowApp />);
+    </script>
+</body>
+</html>
