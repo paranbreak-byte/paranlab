@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>쌍대 비교 우선순위 결정 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="paired-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function PairedApp() {
+            const [step, setStep] = useState(1); // 1: 항목입력, 2: 비교진행, 3: 결과
+            const [subject, setSubject] = useState("");
+            const [items, setItems] = useState(["항목 1", "항목 2", "항목 3"]);
+            const [matchIndex, setMatchIndex] = useState(0);
+            const [scores, setScores] = useState({}); // { itemIndex: winCount }
+
+            // 비교해야 할 모든 쌍 생성
+            const pairs = useMemo(() => {
+                const p = [];
+                for (let i = 0; i < items.length; i++) {
+                    for (let j = i + 1; j < items.length; j++) {
+                        p.push([i, j]);
+                    }
+                }
+                return p;
+            }, [items]);
+
+            const handleVote = (winnerIdx) => {
+                const newScores = { ...scores };
+                newScores[winnerIdx] = (newScores[winnerIdx] || 0) + 1;
+                setScores(newScores);
+
+                if (matchIndex < pairs.length - 1) {
+                    setMatchIndex(matchIndex + 1);
+                } else {
+                    setStep(3);
+                }
+            };
+
+            const finalResults = useMemo(() => {
+                return items.map((item, idx) => ({
+                    name: item,
+                    win: scores[idx] || 0,
+                    percent: ((scores[idx] || 0) / pairs.length * 100) || 0
+                })).sort((a, b) => b.win - a.win);
+            }, [scores, items, pairs]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>우선순위 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:500px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}</style></head>
+                    <body>
+                        <h1>🏆 쌍대 비교 우선순위 보고서</h1>
+                        <p><strong>분석 주제:</strong> ${subject}</p>
+                        <div style="margin-top:30px;">
+                            ${finalResults.map((res, i) => `<div class="box"><strong>${i+1}위: ${res.name}</strong> (승리 횟수: ${res.win}회)</div>`).join('')}
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `paired_comparison_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {/* STEP 1: 항목 입력 */}
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">무엇의 순위를 정할까요?</h2>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 이번 달에 꼭 해야 할 일들" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black mb-10 transition-all" />
+                            
+                            <div className="space-y-4 mb-10">
+                                <label className="block text-xs font-black text-slate-400 uppercase tracking-widest">비교할 항목들 (최소 3개)</label>
+                                {items.map((item, i) => (
+                                    <div key={i} className="flex gap-4">
+                                        <input value={item} onChange={(e)=>{const n=[...items]; n[i]=e.target.value; setItems(n);}} className="flex-1 p-4 bg-slate-50 rounded-2xl font-bold focus:ring-4 ring-blue-100 outline-none" />
+                                        <button onClick={()=>setItems(items.filter((_,idx)=>idx!==i))} className="text-slate-300 hover:text-red-500 text-2xl">✕</button>
+                                    </div>
+                                ))}
+                                <button onClick={()=>setItems([...items, ""])} className="text-blue-600 font-black">+ 항목 추가</button>
+                            </div>
+                            
+                            <button 
+                                disabled={items.length < 2}
+                                onClick={()=>{setScores({}); setMatchIndex(0); setStep(2);}} 
+                                className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200 disabled:bg-slate-100"
+                            >토너먼트 시작</button>
+                        </div>
+                    )}
+
+                    {/* STEP 2: 1:1 비교 진행 */}
+                    {step === 2 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <div className="mb-8">
+                                <span className="px-4 py-1 bg-blue-50 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest">Match {matchIndex + 1} / {pairs.length}</span>
+                                <h2 className="text-2xl font-black text-slate-900 mt-4">둘 중 더 중요한 것은?</h2>
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-6 mb-10">
+                                <button 
+                                    onClick={() => handleVote(pairs[matchIndex][0])}
+                                    className="p-10 bg-slate-50 hover:bg-blue-600 hover:text-white rounded-[2.5rem] border-2 border-slate-100 transition-all text-2xl font-black shadow-sm"
+                                >
+                                    {items[pairs[matchIndex][0]]}
+                                </button>
+                                <div className="text-slate-300 font-black italic text-xl">VS</div>
+                                <button 
+                                    onClick={() => handleVote(pairs[matchIndex][1])}
+                                    className="p-10 bg-slate-50 hover:bg-blue-600 hover:text-white rounded-[2.5rem] border-2 border-slate-100 transition-all text-2xl font-black shadow-sm"
+                                >
+                                    {items[pairs[matchIndex][1]]}
+                                </button>
+                            </div>
+
+                            <button onClick={()=>setStep(1)} className="text-slate-400 font-bold text-sm underline">처음부터 다시 설정</button>
+                        </div>
+                    )}
+
+                    {/* STEP 3: 결과 리포트 */}
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">우선순위 결과</h2>
+                            <p className="text-slate-500 mb-12 font-medium">1:1 대결을 통해 도출된 당신의 진짜 우선순위입니다.</p>
+                            
+                            <div className="space-y-6 mb-12">
+                                {finalResults.map((res, i) => (
+                                    <div key={i} className={`p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
+                                        <div className="flex justify-between items-center">
+                                            <div className="text-left">
+                                                <span className={`text-xs font-black px-4 py-1.5 rounded-full mb-3 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}순위</span>
+                                                <h3 className="text-2xl font-black text-slate-900">{res.name}</h3>
+                                            </div>
+                                            <div className="text-right">
+                                                <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">승리 횟수</p>
+                                                <span className="text-5xl font-black text-blue-600">{res.win}</span><span className="text-slate-300 text-xl font-black ml-1">회</span>
+                                            </div>
+                                        </div>
+                                        <div className="w-full bg-slate-100 h-3 rounded-full mt-6 overflow-hidden">
+                                            <div className="bg-blue-600 h-full transition-all duration-1000" style={{ width: `${res.percent}%` }}></div>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">새로운 분석 시작</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('paired-app')).render(<PairedApp />);
+    </script>
+</body>
+</html>
