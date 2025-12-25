@@ -76,7 +76,6 @@
                 }).sort((a, b) => b.score - a.score);
             }, [step]);
 
-            // HTML 파일로 저장하는 함수
             const saveAsHtml = () => {
                 const reportTitle = goal || "의사결정 분석 결과";
                 const resultList = finalResults.map((res, i) => `
@@ -116,13 +115,12 @@
                 a.click();
             };
 
-            // 텍스트 복사 함수
             const copyToClipboard = () => {
                 const text = `[파란랩 의사결정 보고서]\n주제: ${goal || "미정"}\n\n` + 
                     finalResults.map((res, i) => `${i+1}위: ${res.name} (${res.score.toFixed(0)}점)`).join('\n') +
                     `\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
                 
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다! 카톡이나 메모장에 붙여넣으세요."));
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
             };
 
             return (
@@ -169,7 +167,6 @@
                         </div>
                     )}
 
-                    {/* STEP 4: 색상 대비 강화 (진한 파랑 vs 인디고) */}
                     {step === 4 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">중요도 비중 조절</h2>
@@ -184,7 +181,6 @@
                                     return (
                                         <div key={`${i}-${j}`} className="relative">
                                             <div className="relative h-24 bg-slate-100 rounded-[2rem] flex items-center overflow-hidden border-4 border-slate-50 shadow-inner">
-                                                {/* 왼쪽: 진한 파랑 / 오른쪽: 인디고 (확실한 대비) */}
                                                 <div className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-500 ease-out" style={{ width: `${leftPercent}%` }}></div>
                                                 <div className="absolute right-0 top-0 h-full bg-indigo-900 transition-all duration-500 ease-out" style={{ width: `${100 - leftPercent}%` }}></div>
                                                 
@@ -259,7 +255,7 @@
                                             </div>
                                             <div className="text-right">
                                                 <p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">종합 점수</p>
-                                                <span className="text-6xl font-black text-blue-600">${res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span>
+                                                <span className="text-6xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span>
                                             </div>
                                         </div>
                                     </div>
