@@ -10,7 +10,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
         .tool-card { transition: all 0.3s ease; }
-        .tool-card:hover:not(.locked) { transform: translateY(-8px); }
+        .tool-card:hover { transform: translateY(-8px); }
     </style>
 </head>
 <body>
@@ -21,80 +21,44 @@
                 <p class="text-slate-500 text-lg font-medium">복잡한 고민을 데이터로 해결하는 당신만의 의사결정 연구소</p>
             </div>
 
-            <!-- 카테고리별 섹션 반복 -->
             <div class="space-y-24">
-                <!-- 1. 결정 섹션 -->
                 <div>
-                    <h3 class="text-2xl font-black text-blue-600 mb-8 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center text-sm">01</span>
-                        선택과 결정 (Decision)
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-decision">
-                        <!-- 툴 카드는 스크립트로 자동 생성하거나 아래처럼 수동 배치 가능 -->
-                    </div>
+                    <h3 class="text-2xl font-black text-blue-600 mb-8 flex items-center gap-3">선택과 결정 (Decision)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-결정"></div>
                 </div>
-
-                <!-- 2. 전략 섹션 -->
                 <div>
-                    <h3 class="text-2xl font-black text-emerald-600 mb-8 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-emerald-600 text-white rounded-lg flex items-center justify-center text-sm">02</span>
-                        분석과 전략 (Strategy)
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-strategy"></div>
+                    <h3 class="text-2xl font-black text-emerald-600 mb-8 flex items-center gap-3">분석과 전략 (Strategy)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-전략"></div>
                 </div>
-
-                <!-- 3. 기획 섹션 -->
                 <div>
-                    <h3 class="text-2xl font-black text-indigo-600 mb-8 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-indigo-600 text-white rounded-lg flex items-center justify-center text-sm">03</span>
-                        아이디어 기획 (Planning)
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-planning"></div>
+                    <h3 class="text-2xl font-black text-indigo-600 mb-8 flex items-center gap-3">아이디어 기획 (Planning)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-기획"></div>
                 </div>
-
-                <!-- 4. 자기계발 섹션 -->
                 <div>
-                    <h3 class="text-2xl font-black text-rose-600 mb-8 flex items-center gap-3">
-                        <span class="w-8 h-8 bg-rose-600 text-white rounded-lg flex items-center justify-center text-sm">04</span>
-                        자기계발 (Self-Dev)
-                    </h3>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-selfdev"></div>
+                    <h3 class="text-2xl font-black text-rose-600 mb-8 flex items-center gap-3">자기계발 (Self-Dev)</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="cat-자기계발"></div>
                 </div>
             </div>
         </section>
     </div>
 
     <script>
-        // core.js가 로드된 후 실행
         window.addEventListener('load', () => {
             const tools = ParanLabCore.toolsList;
-            const containers = {
-                "결정": document.getElementById('cat-decision'),
-                "전략": document.getElementById('cat-strategy'),
-                "기획": document.getElementById('cat-planning'),
-                "자기계발": document.getElementById('cat-selfdev')
-            };
-
             tools.forEach(t => {
+                const container = document.getElementById(`cat-${t.category}`);
+                if (!container) return;
                 const card = document.createElement('div');
-                card.className = `tool-card p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between ${t.ready ? '' : 'locked opacity-50'}`;
-                
+                card.className = `tool-card p-8 rounded-[2.5rem] bg-white border border-slate-100 shadow-xl shadow-slate-200/50 flex flex-col justify-between`;
                 card.innerHTML = `
                     <div>
-                        <div class="flex justify-between items-start mb-6">
-                            <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-slate-400">${t.name[0]}</div>
-                            ${t.ready ? '<span class="text-[10px] font-black text-blue-600 bg-blue-50 px-2 py-1 rounded-md uppercase">Active</span>' : '<span class="text-[10px] font-black text-slate-400 bg-slate-100 px-2 py-1 rounded-md uppercase">Coming Soon</span>'}
-                        </div>
+                        <div class="w-12 h-12 rounded-2xl bg-slate-50 flex items-center justify-center font-black text-slate-400 mb-6">${t.name[0]}</div>
                         <h4 class="text-xl font-black text-slate-800 mb-2">${t.name}</h4>
-                        <p class="text-slate-400 text-sm leading-relaxed mb-8">${t.ready ? '지금 바로 분석을 시작하고 명쾌한 보고서를 받아보세요.' : '더 나은 의사결정을 위해 도구를 준비하고 있습니다.'}</p>
+                        <p class="text-slate-400 text-sm leading-relaxed mb-8">전문적인 프레임워크를 통해 당신의 고민을 명쾌하게 정리해 드립니다.</p>
                     </div>
-                    <a href="${t.ready ? t.href : '#'}" 
-                       onclick="${t.ready ? '' : "alert('곧 공개됩니다!'); return false;"}"
-                       class="w-full py-4 rounded-2xl text-center font-bold transition-all ${t.ready ? 'bg-slate-900 text-white hover:bg-blue-600' : 'bg-slate-100 text-slate-300 cursor-not-allowed'}">
-                       ${t.ready ? '도구 사용하기 →' : '준비 중'}
-                    </a>
+                    <a href="${t.href}" class="w-full py-4 rounded-2xl text-center font-bold bg-slate-900 text-white hover:bg-blue-600 transition-all">도구 사용하기 →</a>
                 `;
-                containers[t.category].appendChild(card);
+                container.appendChild(card);
             });
         });
     </script>
