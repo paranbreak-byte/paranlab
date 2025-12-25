@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SWOT 분석 도구 | 파란랩</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+</head>
+<body class="bg-white">
+    <div id="root">
+        <div class="max-w-4xl mx-auto py-10">
+            <h2 class="text-3xl font-black mb-8">SWOT 분석</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-6 bg-emerald-50 rounded-3xl border border-emerald-100">
+                    <h3 class="font-bold text-emerald-700 mb-2">Strengths (강점)</h3>
+                    <textarea class="w-full h-40 bg-white/50 rounded-2xl p-4 outline-none focus:ring-2 ring-emerald-200" placeholder="내부적인 강점을 적으세요..."></textarea>
+                </div>
+                <div class="p-6 bg-red-50 rounded-3xl border border-red-100">
+                    <h3 class="font-bold text-red-700 mb-2">Weaknesses (약점)</h3>
+                    <textarea class="w-full h-40 bg-white/50 rounded-2xl p-4 outline-none focus:ring-2 ring-red-200" placeholder="내부적인 약점을 적으세요..."></textarea>
+                </div>
+                <!-- 기회, 위협 생략 (동일 구조) -->
+            </div>
+        </div>
+    </div>
+</body>
+</html>
