@@ -1,17 +1,47 @@
 const ParanLabCore = {
+    // 1. 도구 데이터베이스 (여기에 추가만 하면 모든 메뉴에 자동 반영됩니다)
+    toolsList: [
+        { name: "AHP 분석", href: "/ahp/", category: "결정" },
+        { name: "SWOT 전략", href: "/swot/", category: "전략" },
+        { name: "Pros & Cons", href: "/pros-cons/", category: "결정" },
+        { name: "아이젠하워", href: "/eisenhower/", category: "결정" }
+    ],
+
     layout: {
-        header: `
-            <header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
-                <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
-                    <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a>
-                    <nav class="hidden md:flex gap-6 text-sm font-bold text-slate-500">
-                        <a href="/ahp/" class="hover:text-blue-600 transition-colors">AHP 분석</a>
-                        <a href="/swot/" class="hover:text-emerald-600 transition-colors">SWOT 전략</a>
-                        <a href="/pros-cons/" class="hover:text-indigo-600 transition-colors">Pros & Cons</a>
-                    </nav>
-                </div>
-            </header>
-        `,
+        header: function(tools) {
+            // 카테고리별로 도구 그룹화
+            const categories = ["결정", "전략", "기획"];
+            const menuHtml = categories.map(cat => {
+                const catTools = tools.filter(t => t.category === cat);
+                if (catTools.length === 0) return '';
+                return `
+                    <div class="py-2">
+                        <div class="px-4 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">${cat}</div>
+                        ${catTools.map(t => `<a href="${t.href}" class="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">${t.name}</a>`).join('')}
+                    </div>
+                `;
+            }).join('<div class="border-b border-slate-50"></div>');
+
+            return `
+                <header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50">
+                    <div class="max-w-4xl mx-auto px-6 py-4 flex justify-between items-center">
+                        <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a>
+                        
+                        <div class="relative group">
+                            <button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">
+                                전체 도구
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path></svg>
+                            </button>
+                            
+                            <!-- 드롭다운 메뉴 (툴이 많아져도 감당 가능) -->
+                            <div class="absolute right-0 mt-2 w-56 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-hidden">
+                                ${menuHtml}
+                            </div>
+                        </div>
+                    </div>
+                </header>
+            `;
+        },
         adTop: `
             <div class="max-w-4xl mx-auto px-6 py-6">
                 <div class="w-full h-24 bg-slate-50 border border-dashed border-slate-200 rounded-2xl flex items-center justify-center text-slate-400 text-[10px] tracking-widest uppercase font-bold">
@@ -49,7 +79,7 @@ const ParanLabCore = {
         if (!root) return;
 
         const headerElem = document.createElement('div');
-        headerElem.innerHTML = this.layout.header;
+        headerElem.innerHTML = this.layout.header(this.toolsList);
         document.body.insertBefore(headerElem, document.body.firstChild);
 
         const adTopElem = document.createElement('div');
