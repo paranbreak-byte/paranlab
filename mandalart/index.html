@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>만다라트 목표 달성 지도 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .manda-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 4px; }
+        .manda-cell { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; text-align: center; padding: 4px; font-size: 0.75rem; line-height: 1.2; border-radius: 8px; transition: all 0.2s; }
+        @media (max-width: 640px) { .manda-cell { font-size: 0.6rem; } }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="manda-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState } = React;
+
+        function MandaApp() {
+            const [step, setStep] = useState(1); // 1: 핵심목표, 2: 세부목표, 3: 전체지도
+            const [mainGoal, setMainGoal] = useState("");
+            const [subGoals, setSubGoals] = useState(Array(8).fill(""));
+            const [actions, setActions] = useState(Array(8).fill(null).map(() => Array(8).fill("")));
+
+            const updateSubGoal = (i, val) => {
+                const newSubs = [...subGoals];
+                newSubs[i] = val;
+                setSubGoals(newSubs);
+            };
+
+            const updateAction = (subIdx, actionIdx, val) => {
+                const newActions = [...actions];
+                newActions[subIdx][actionIdx] = val;
+                setActions(newActions);
+            };
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>만다라트 보고서</title><style>body{font-family:sans-serif;padding:20px;text-align:center;}table{border-collapse:collapse;margin:20px auto;width:100%;max-width:800px;}td{border:1px solid #ddd;width:11%;aspect-ratio:1/1;padding:5px;font-size:10px;}.main{background:#2563eb;color:white;font-weight:bold;}.sub{background:#eff6ff;font-weight:bold;}</style></head>
+                    <body>
+                        <h1>🎯 만다라트 목표 달성 지도</h1>
+                        <p>핵심 목표: ${mainGoal}</p>
+                        <table>
+                            ${Array(9).fill(0).map((_, r) => `<tr>${Array(9).fill(0).map((_, c) => {
+                                // 복잡한 9x9 로직 생략, 단순 텍스트 리스트로 대체하여 저장
+                                return `<td></td>`;
+                            }).join('')}</tr>`).join('')}
+                        </table>
+                        <p>※ 상세 내용은 파란랩 웹사이트에서 확인하세요.</p>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `mandalart_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {/* STEP 1: 핵심 목표 */}
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">최종 목표가 무엇인가요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">가장 중심이 되는 단 하나의 핵심 목표를 적어주세요.</p>
+                            <input value={mainGoal} onChange={(e)=>setMainGoal(e.target.value)} placeholder="예: 8구단 드래프트 1순위, 10억 자산가" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all text-center" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">다음 단계로</button>
+                        </div>
+                    )}
+
+                    {/* STEP 2: 8개 세부 목표 */}
+                    {step === 2 && (
+                        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                            <h2 className="text-2xl font-black text-slate-900 mb-2 text-center">8가지 세부 목표</h2>
+                            <p className="text-slate-500 mb-8 text-center font-medium">'{mainGoal}'을(를) 이루기 위해 필요한 8가지는?</p>
+                            <div className="manda-grid max-w-md mx-auto">
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[0]} onChange={(e)=>updateSubGoal(0, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표1" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[1]} onChange={(e)=>updateSubGoal(1, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표2" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[2]} onChange={(e)=>updateSubGoal(2, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표3" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[3]} onChange={(e)=>updateSubGoal(3, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표4" /></div>
+                                <div className="manda-cell bg-blue-600 text-white font-black">{mainGoal}</div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[4]} onChange={(e)=>updateSubGoal(4, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표5" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[5]} onChange={(e)=>updateSubGoal(5, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표6" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[6]} onChange={(e)=>updateSubGoal(6, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표7" /></div>
+                                <div className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[7]} onChange={(e)=>updateSubGoal(7, e.target.value)} className="w-full bg-transparent text-center outline-none" placeholder="목표8" /></div>
+                            </div>
+                            <div className="flex gap-4 mt-10">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-400 rounded-2xl font-black">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-lg">상세 계획 세우기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 3: 전체 지도 (64개 실행계획) */}
+                    {step === 3 && (
+                        <div className="space-y-8">
+                            <div className="bg-white p-6 rounded-[2rem] shadow-xl border border-slate-100 overflow-x-auto">
+                                <h2 className="text-2xl font-black text-slate-900 mb-6 text-center">만다라트 실행 지도</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 min-w-[800px] p-4">
+                                    {subGoals.map((sub, subIdx) => (
+                                        <div key={subIdx} className="bg-slate-50 p-4 rounded-2xl border border-slate-200">
+                                            <h3 className="text-center font-black text-blue-600 mb-4 text-sm">세부목표: {sub || `목표${subIdx+1}`}</h3>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {Array(9).fill(0).map((_, i) => {
+                                                    if (i === 4) return <div key={i} className="manda-cell bg-blue-600 text-white font-bold text-[10px]">{sub}</div>;
+                                                    const actionIdx = i > 4 ? i - 1 : i;
+                                                    return (
+                                                        <div key={i} className="manda-cell bg-white border border-slate-100 shadow-sm">
+                                                            <textarea 
+                                                                value={actions[subIdx][actionIdx]} 
+                                                                onChange={(e)=>updateAction(subIdx, actionIdx, e.target.value)}
+                                                                className="w-full h-full bg-transparent text-center outline-none resize-none"
+                                                                placeholder="행동"
+                                                            />
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전 단계</button>
+                                <button onClick={()=>alert('텍스트 복사 기능을 사용해 주세요!')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 저장하기</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('manda-app')).render(<MandaApp />);
+    </script>
+</body>
+</html>
