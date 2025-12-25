@@ -3,246 +3,37 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파란랩(Paran Lab) | 맞춤형 의사결정 도구</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>파란랩(Paran Lab) | 의사결정 도구 가이드</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
-        .slider { -webkit-appearance: none; width: 100%; height: 12px; background: #e2e8f0; border-radius: 10px; outline: none; }
-        .slider::-webkit-slider-thumb { -webkit-appearance: none; width: 28px; height: 28px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 2px 6px rgba(0,0,0,0.2); }
-        .animate-slideIn { animation: slideIn 0.4s ease-out forwards; }
-        @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
-    </style>
+    <script src="/core.js" defer></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
-<body>
-    <div id="root"></div>
+<body class="bg-white">
+    <div id="root">
+        <section class="max-w-4xl mx-auto px-6 py-12">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">어떤 도구가 필요하신가요?</h2>
+                <p class="text-slate-500 text-lg">상황에 맞는 의사결정 도구를 선택하면 복잡한 고민이 데이터로 정리됩니다.</p>
+            </div>
 
-    <script type="text/babel">
-        const { useState, useMemo } = React;
-
-        function App() {
-            const [step, setStep] = useState(1);
-            const [goal, setGoal] = useState("");
-            const [criteria, setCriteria] = useState(["가격", "디자인", "성능"]);
-            const [alternatives, setAlternatives] = useState(["후보 1", "후보 2"]);
-            const [comparisons, setComparisons] = useState({}); // 기준 간 비교
-            const [scores, setScores] = useState({}); // 대안별 점수
-
-            // --- 로직 함수들 ---
-            const criteriaPairs = useMemo(() => {
-                const pairs = [];
-                for (let i = 0; i < criteria.length; i++) {
-                    for (let j = i + 1; j < criteria.length; j++) pairs.push([i, j]);
-                }
-                return pairs;
-            }, [criteria]);
-
-            const calculateWeights = () => {
-                const n = criteria.length;
-                const matrix = Array(n).fill(0).map(() => Array(n).fill(1));
-                criteriaPairs.forEach(([i, j]) => {
-                    let val = parseFloat(comparisons[`${i}-${j}`] || 0);
-                    let actualVal = val === 0 ? 1 : (val > 0 ? val + 1 : 1 / (Math.abs(val) + 1));
-                    matrix[i][j] = actualVal;
-                    matrix[j][i] = 1 / actualVal;
-                });
-                const colSums = Array(n).fill(0);
-                for (let j = 0; j < n; j++) {
-                    for (let i = 0; i < n; i++) colSums[j] += matrix[i][j];
-                }
-                return criteria.map((_, i) => {
-                    let weight = 0;
-                    for (let j = 0; j < n; j++) weight += (matrix[i][j] / colSums[j]);
-                    return weight / n;
-                });
-            };
-
-            const finalResults = useMemo(() => {
-                if (step !== 5) return null;
-                const weights = calculateWeights();
-                return alternatives.map((alt, altIdx) => {
-                    let totalScore = 0;
-                    criteria.forEach((crit, critIdx) => {
-                        const score = scores[`${altIdx}-${critIdx}`] || 5;
-                        totalScore += score * weights[critIdx];
-                    });
-                    return { name: alt, score: totalScore };
-                }).sort((a, b) => b.score - a.score);
-            }, [step]);
-
-            // --- UI 컴포넌트 ---
-            return (
-                <div className="max-w-xl mx-auto min-h-screen flex flex-col py-10 px-5">
-                    <header className="text-center mb-10">
-                        <h1 className="text-3xl font-black text-blue-600 tracking-tight">PARAN LAB</h1>
-                        <p className="text-slate-500 text-sm mt-1 font-medium">Step {step} of 5</p>
-                    </header>
-
-                    {/* STEP 1: 목표 설정 */}
-                    {step === 1 && (
-                        <div className="animate-slideIn bg-white p-8 rounded-3xl shadow-xl shadow-slate-200/50 border border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">무엇을 결정할까요?</h2>
-                            <p className="text-slate-500 mb-6">고민 중인 주제를 적어주세요.</p>
-                            <input 
-                                value={goal} onChange={(e) => setGoal(e.target.value)}
-                                placeholder="예: 이번에 살 자동차 고르기"
-                                className="w-full p-4 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none transition-all text-lg"
-                            />
-                            <button onClick={() => setStep(2)} className="w-full mt-8 py-4 bg-blue-600 text-white rounded-2xl font-bold text-lg shadow-lg shadow-blue-200">다음으로</button>
-                        </div>
-                    )}
-
-                    {/* STEP 2: 기준 및 후보 설정 */}
-                    {step === 2 && (
-                        <div className="animate-slideIn bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-6">기준과 후보 입력</h2>
-                            
-                            <div className="mb-8">
-                                <label className="block text-sm font-bold text-slate-400 mb-3 uppercase">비교 기준 (중요한 조건)</label>
-                                {criteria.map((c, i) => (
-                                    <div key={i} className="flex gap-2 mb-2">
-                                        <input value={c} onChange={(e) => {
-                                            const n = [...criteria]; n[i] = e.target.value; setCriteria(n);
-                                        }} className="flex-1 p-3 bg-slate-50 rounded-xl outline-none focus:ring-2 ring-blue-100" />
-                                        <button onClick={() => setCriteria(criteria.filter((_, idx) => idx !== i))} className="text-slate-300 px-2">✕</button>
-                                    </div>
-                                ))}
-                                <button onClick={() => setCriteria([...criteria, ""])} className="text-blue-600 font-bold text-sm mt-2">+ 기준 추가</button>
-                            </div>
-
-                            <div className="mb-8">
-                                <label className="block text-sm font-bold text-slate-400 mb-3 uppercase">비교 후보 (자동차 이름 등)</label>
-                                {alternatives.map((a, i) => (
-                                    <div key={i} className="flex gap-2 mb-2">
-                                        <input value={a} onChange={(e) => {
-                                            const n = [...alternatives]; n[i] = e.target.value; setAlternatives(n);
-                                        }} className="flex-1 p-3 bg-slate-50 rounded-xl outline-none focus:ring-2 ring-blue-100" />
-                                        <button onClick={() => setAlternatives(alternatives.filter((_, idx) => idx !== i))} className="text-slate-300 px-2">✕</button>
-                                    </div>
-                                ))}
-                                <button onClick={() => setAlternatives([...alternatives, ""])} className="text-blue-600 font-bold text-sm mt-2">+ 후보 추가</button>
-                            </div>
-
-                            <div className="flex gap-3">
-                                <button onClick={() => setStep(1)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(3)} className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold">다음으로</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 3: 기준 중요도 비교 (UX 개선) */}
-                    {step === 3 && (
-                        <div className="animate-slideIn bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">어느 쪽이 더 중요한가요?</h2>
-                            <p className="text-slate-500 mb-10">더 중요하다고 생각하는 쪽으로 바를 움직이세요.</p>
-                            
-                            <div className="space-y-14">
-                                {criteriaPairs.map(([i, j]) => {
-                                    const val = comparisons[`${i}-${j}`] || 0;
-                                    return (
-                                        <div key={`${i}-${j}`} className="relative">
-                                            <div className="flex justify-between mb-4 items-center">
-                                                <span className={`text-lg font-bold transition-all ${val > 0 ? 'text-blue-600 scale-110' : 'text-slate-400'}`}>{criteria[i]}</span>
-                                                <span className={`text-lg font-bold transition-all ${val < 0 ? 'text-blue-600 scale-110' : 'text-slate-400'}`}>{criteria[j]}</span>
-                                            </div>
-                                            <input 
-                                                type="range" min="-8" max="8" step="1" value={val}
-                                                onChange={(e) => setComparisons({...comparisons, [`${i}-${j}`]: parseInt(e.target.value)})}
-                                                className="slider"
-                                            />
-                                            <div className="flex justify-between text-[10px] text-slate-300 mt-2 font-bold uppercase tracking-widest">
-                                                <span>매우 중요</span>
-                                                <span>비슷함</span>
-                                                <span>매우 중요</span>
-                                            </div>
-                                        </div>
-                                    );
-                                })}
-                            </div>
-                            <div className="flex gap-3 mt-12">
-                                <button onClick={() => setStep(2)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(4)} className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold">다음으로</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 4: 후보별 점수 매기기 (새로 추가됨) */}
-                    {step === 4 && (
-                        <div className="animate-slideIn bg-white p-8 rounded-3xl shadow-xl border border-slate-100">
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">각 후보의 점수는?</h2>
-                            <p className="text-slate-500 mb-8">각 기준에 대해 후보들이 얼마나 만족스러운지 점수를 주세요 (1~10점).</p>
-                            
-                            <div className="space-y-10">
-                                {criteria.map((crit, critIdx) => (
-                                    <div key={critIdx} className="p-5 bg-slate-50 rounded-2xl">
-                                        <h3 className="font-black text-blue-900 mb-4 flex items-center">
-                                            <span className="bg-blue-600 text-white w-6 h-6 rounded-lg flex items-center justify-center text-xs mr-2">Q</span>
-                                            {crit} 측면에서 각 후보는 어떤가요?
-                                        </h3>
-                                        {alternatives.map((alt, altIdx) => (
-                                            <div key={altIdx} className="mb-4 last:mb-0">
-                                                <div className="flex justify-between text-sm mb-1 font-bold text-slate-600">
-                                                    <span>{alt}</span>
-                                                    <span className="text-blue-600">{scores[`${altIdx}-${critIdx}`] || 5}점</span>
-                                                </div>
-                                                <input 
-                                                    type="range" min="1" max="10" step="1" 
-                                                    value={scores[`${altIdx}-${critIdx}`] || 5}
-                                                    onChange={(e) => setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})}
-                                                    className="w-full h-2 bg-slate-200 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex gap-3 mt-10">
-                                <button onClick={() => setStep(3)} className="flex-1 py-4 bg-slate-100 text-slate-500 rounded-2xl font-bold">이전</button>
-                                <button onClick={() => setStep(5)} className="flex-1 py-4 bg-blue-600 text-white rounded-2xl font-bold">최종 결과 보기</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 5: 최종 결과 */}
-                    {step === 5 && (
-                        <div className="animate-slideIn bg-white p-8 rounded-3xl shadow-xl border border-slate-100 text-center">
-                            <div className="inline-block p-4 bg-blue-50 rounded-full mb-6">
-                                <svg className="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                            </div>
-                            <h2 className="text-2xl font-bold text-slate-800 mb-2">최적의 선택은?</h2>
-                            <p className="text-slate-500 mb-10">당신의 가치관을 분석한 결과입니다.</p>
-                            
-                            <div className="space-y-6 mb-10">
-                                {finalResults.map((res, i) => (
-                                    <div key={i} className={`p-6 rounded-2xl border-2 transition-all ${i === 0 ? 'border-blue-500 bg-blue-50 scale-105' : 'border-slate-100 bg-white'}`}>
-                                        <div className="flex justify-between items-center">
-                                            <div className="text-left">
-                                                <span className={`text-xs font-bold px-2 py-1 rounded-md mb-1 inline-block ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>
-                                                    {i + 1}위
-                                                </span>
-                                                <h3 className="text-xl font-black text-slate-800">{res.name}</h3>
-                                            </div>
-                                            <div className="text-right">
-                                                <span className="text-2xl font-black text-blue-600">{res.score.toFixed(1)}</span>
-                                                <span className="text-slate-400 text-sm ml-1">점</span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <button onClick={() => setStep(1)} className="w-full py-4 bg-slate-900 text-white rounded-2xl font-bold">다시 테스트하기</button>
-                        </div>
-                    )}
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- AHP 카드 -->
+                <div class="group p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-blue-50 hover:border-blue-100 transition-all duration-300">
+                    <div class="w-12 h-12 bg-blue-600 rounded-2xl mb-6 flex items-center justify-center text-white font-bold shadow-lg shadow-blue-200">A</div>
+                    <h3 class="text-2xl font-black text-slate-800 mb-4">AHP 분석</h3>
+                    <p class="text-slate-500 mb-8 leading-relaxed">"여러 후보 중 하나를 골라야 할 때" 사용하세요. 가격, 성능, 디자인 등 다양한 기준을 수학적으로 계산해 최적의 대안을 찾아줍니다.</p>
+                    <a href="/ahp/" class="inline-block px-8 py-4 bg-white text-blue-600 rounded-2xl font-bold shadow-sm group-hover:bg-blue-600 group-hover:text-white transition-all">도구 사용하기 →</a>
                 </div>
-            );
-        }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<App />);
-    </script>
+                <!-- SWOT 카드 -->
+                <div class="group p-8 rounded-[2.5rem] bg-slate-50 border border-slate-100 hover:bg-emerald-50 hover:border-emerald-100 transition-all duration-300">
+                    <div class="w-12 h-12 bg-emerald-500 rounded-2xl mb-6 flex items-center justify-center text-white font-bold shadow-lg shadow-emerald-200">S</div>
+                    <h3 class="text-2xl font-black text-slate-800 mb-4">SWOT 분석</h3>
+                    <p class="text-slate-500 mb-8 leading-relaxed">"현재 상황이나 사업의 방향을 정할 때" 사용하세요. 나의 강점과 약점, 외부의 기회와 위협을 한눈에 정리해 전략을 세워줍니다.</p>
+                    <a href="/swot/" class="inline-block px-8 py-4 bg-white text-emerald-600 rounded-2xl font-bold shadow-sm group-hover:bg-emerald-600 group-hover:text-white transition-all">도구 사용하기 →</a>
+                </div>
+            </div>
+        </section>
+    </div>
 </body>
 </html>
