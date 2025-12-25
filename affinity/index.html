@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>친화도법 아이디어 정리 | 파란랩</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+    </style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="affinity-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+    </div>
+
+    <script type="text/babel">
+        const { useState, useMemo } = React;
+
+        function AffinityApp() {
+            const [step, setStep] = useState(1); // 1: 주제, 2: 아이디어 나열, 3: 그룹화, 4: 결과
+            const [subject, setSubject] = useState("");
+            const [ideas, setIdeas] = useState(["", "", ""]);
+            const [groups, setGroups] = useState({}); // { ideaIndex: groupName }
+
+            const updateIdea = (idx, val) => {
+                const newIdeas = [...ideas];
+                newIdeas[idx] = val;
+                setIdeas(newIdeas);
+            };
+
+            const addIdea = () => setIdeas([...ideas, ""]);
+            const removeIdea = (idx) => setIdeas(ideas.filter((_, i) => i !== idx));
+
+            const groupedData = useMemo(() => {
+                const result = {};
+                ideas.forEach((idea, idx) => {
+                    const groupName = groups[idx] || "미분류";
+                    if (!result[groupName]) result[groupName] = [];
+                    result[groupName].push(idea);
+                });
+                return result;
+            }, [ideas, groups]);
+
+            const saveAsHtml = () => {
+                const htmlContent = `
+                    <!DOCTYPE html>
+                    <html>
+                    <head><meta charset="UTF-8"><title>친화도법 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.group-box{padding:20px;border-radius:15px;margin-bottom:20px;background:#f8fafc;border:1px solid #eee;}.group-title{font-weight:bold;color:#2563eb;font-size:18px;margin-bottom:10px;}</style></head>
+                    <body>
+                        <h1>📋 친화도법 아이디어 정리 보고서</h1>
+                        <p><strong>분석 주제:</strong> ${subject}</p>
+                        <div style="margin-top:30px;">
+                            ${Object.keys(groupedData).map(group => `
+                                <div class="group-box">
+                                    <div class="group-title">● ${group}</div>
+                                    ${groupedData[group].map(item => `<div>- ${item}</div>`).join('')}
+                                </div>
+                            `).join('')}
+                        </div>
+                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
+                    </body>
+                    </html>
+                `;
+                const blob = new Blob([htmlContent], { type: 'text/html' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `affinity_diagram_${new Date().getTime()}.html`;
+                a.click();
+            };
+
+            const copyToClipboard = () => {
+                let text = `[파란랩 친화도법 보고서]\n주제: ${subject}\n\n`;
+                Object.keys(groupedData).forEach(group => {
+                    text += `[${group}]\n`;
+                    groupedData[group].forEach(item => { text += `- ${item}\n`; });
+                    text += `\n`;
+                });
+                text += `생각을 묶으면 핵심이 보입니다. 파란랩(paranlab.com)`;
+                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+            };
+
+            return (
+                <div className="animate-in fade-in duration-500">
+                    {/* STEP 1: 주제 설정 */}
+                    {step === 1 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 아이디어를 정리할까요?</h2>
+                            <p className="text-slate-500 mb-10 font-medium">정리가 필요한 복잡한 고민이나 브레인스토밍 주제를 적어주세요.</p>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 우리 팀의 업무 효율 저하 원인, 신제품 아이디어" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">아이디어 나열하기</button>
+                        </div>
+                    )}
+
+                    {/* STEP 2: 아이디어 나열 */}
+                    {step === 2 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black text-slate-900 mb-6">떠오르는 모든 생각을 적어보세요</h2>
+                            <div className="space-y-3 mb-10">
+                                {ideas.map((idea, i) => (
+                                    <div key={i} className="flex gap-3">
+                                        <input value={idea} onChange={(e)=>updateIdea(i, e.target.value)} placeholder="아이디어를 입력하세요" className="flex-1 p-4 bg-slate-50 rounded-xl outline-none font-bold focus:ring-2 ring-blue-100" />
+                                        <button onClick={()=>removeIdea(i)} className="text-slate-300 hover:text-red-500">✕</button>
+                                    </div>
+                                ))}
+                                <button onClick={addIdea} className="text-blue-600 font-black">+ 아이디어 추가</button>
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">그룹화 단계로</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 3: 그룹화 */}
+                    {step === 3 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black text-slate-900 mb-2">비슷한 것끼리 묶어주세요</h2>
+                            <p className="text-slate-500 mb-10 font-medium">각 아이디어에 어울리는 그룹 이름을 입력하세요.</p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+                                {ideas.map((idea, i) => (
+                                    <div key={i} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <p className="font-bold text-slate-700 mb-4">"{idea}"</p>
+                                        <input 
+                                            value={groups[i] || ""} 
+                                            onChange={(e)=>setGroups({...groups, [i]: e.target.value})}
+                                            placeholder="그룹명 (예: 비용문제, 기술적한계)" 
+                                            className="w-full p-3 bg-white rounded-xl outline-none border border-slate-200 focus:border-blue-500 font-black text-sm"
+                                        />
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="flex gap-4">
+                                <button onClick={()=>setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
+                                <button onClick={()=>setStep(4)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">최종 정리 보기</button>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* STEP 4: 결과 리포트 */}
+                    {step === 4 && (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">아이디어 지도</h2>
+                            <p className="text-slate-500 mb-12 font-medium">비슷한 생각들을 묶어 도출한 핵심 카테고리입니다.</p>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12 text-left">
+                                {Object.keys(groupedData).map((group, i) => (
+                                    <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-white shadow-sm">
+                                        <h3 className="text-xl font-black text-blue-600 mb-4 flex items-center gap-2">
+                                            <span className="w-2 h-6 bg-blue-600 rounded-full"></span>
+                                            {group}
+                                        </h3>
+                                        <ul className="space-y-2">
+                                            {groupedData[group].map((item, j) => (
+                                                <li key={j} className="text-slate-600 font-bold text-sm">• {item}</li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                ))}
+                            </div>
+
+                            <div className="grid grid-cols-1 gap-4">
+                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
+                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        ReactDOM.createRoot(document.getElementById('affinity-app')).render(<AffinityApp />);
+    </script>
+</body>
+</html>
