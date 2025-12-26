@@ -1,9 +1,10 @@
 /**
- * Paran Lab Core Framework v4.0
- * [Zero-Touch Privacy] 30개 도구 수정 없이 자동저장 제어 기능 통합
+ * Paran Lab Core Framework v5.0
+ * [Privacy & Network] 문구 정제 및 패밀리 사이트 연동 버전
  */
 
 const ParanLabCore = {
+    // 1. 도구 데이터베이스 (기존 30개 유지)
     toolsList: [
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
@@ -37,21 +38,19 @@ const ParanLabCore = {
         { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", desc: "하루 시간 사용의 효율성 및 낭비 점검", tags: ["시간관리", "갓생", "효율"], icon: "⏳", guide: "나의 24시간이 생산적인지, 소모적인지 시각화하여 시간 사용의 우선순위를 조정합니다." }
     ],
 
-    // [핵심 로직] 자동저장 차단기
+    // 2. 패밀리 사이트 리스트 (여기에 추가하면 푸터에 자동 반영)
+    familySites: [
+        { name: "FactBomber", href: "https://factbomber.kr" }
+    ],
+
+    // 자동저장 차단 로직
     initPrivacyGuard: function() {
         const isAutoSaveOff = localStorage.getItem('paranlab-autosave') === 'false';
-        
         if (isAutoSaveOff) {
-            // 브라우저의 저장 기능을 가짜로 교체하여 저장을 막음
             const originalSetItem = localStorage.setItem;
             localStorage.setItem = function(key, value) {
-                // 설정값 자체는 저장해야 하므로 예외 처리
-                if (key === 'paranlab-autosave') {
-                    originalSetItem.apply(this, arguments);
-                }
-                // 그 외 모든 도구의 데이터 저장은 무시됨
+                if (key === 'paranlab-autosave') originalSetItem.apply(this, arguments);
             };
-            console.log("Privacy Mode: Auto-save blocked.");
         }
     },
 
@@ -62,7 +61,7 @@ const ParanLabCore = {
     toggleAutoSave: function() {
         const current = this.isAutoSaveEnabled();
         if (current) {
-            if(confirm('자동저장을 끄시겠습니까? 기존에 저장된 모든 데이터도 함께 삭제됩니다.')) {
+            if(confirm('자동저장을 끄시겠습니까? 현재 브라우저에 임시 저장된 내용도 모두 삭제됩니다.')) {
                 localStorage.clear();
                 localStorage.setItem('paranlab-autosave', 'false');
                 location.reload();
@@ -121,24 +120,47 @@ const ParanLabCore = {
                                 }
                             </div>
                             <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1>
-                            <p class="text-slate-400 font-medium leading-relaxed text-sm md:text-base">${tool.guide}</p>
+                            <p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p>
                         </div>
                     </div>
                 </div>
             `;
         },
-        footer: `
-            <footer class="max-w-6xl mx-auto px-6 py-12 mt-12 border-t border-slate-100 text-center no-print">
-                <div class="mb-8">
-                    <h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4>
-                    <a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">paranbreak@gmail.com</a>
-                </div>
-                <button onclick="if(confirm('모든 도구의 데이터가 즉시 삭제됩니다.')){localStorage.clear(); location.reload();}" class="px-4 py-2 bg-rose-50 text-rose-600 rounded-xl text-[10px] font-black hover:bg-rose-600 hover:text-white transition-all uppercase tracking-widest border border-rose-100">
-                    [ 모든 데이터 즉시 파기 ]
-                </button>
-                <p class="text-slate-400 text-[10px] font-medium uppercase tracking-[0.2em] mt-8">© 2025 Paran Lab. All rights reserved.</p>
-            </footer>
-        `
+        footer: function(familySites) {
+            const sitesHtml = familySites.map(s => `
+                <a href="${s.href}" target="_blank" class="hover:text-blue-600 transition-colors">${s.name}</a>
+            `).join('<span class="text-slate-200">|</span>');
+
+            return `
+                <footer class="max-w-6xl mx-auto px-6 py-16 mt-12 border-t border-slate-100 text-center no-print">
+                    <!-- 패밀리 사이트 -->
+                    <div class="mb-12">
+                        <h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4>
+                        <div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">
+                            ${sitesHtml}
+                        </div>
+                    </div>
+
+                    <!-- 피드백 및 연락처 -->
+                    <div class="mb-12">
+                        <h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4>
+                        <a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            paranbreak@gmail.com
+                        </a>
+                    </div>
+
+                    <!-- 데이터 초기화 버튼 (문구 수정) -->
+                    <div class="mb-10">
+                        <button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다. 공용 PC라면 반드시 실행하세요.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">
+                            입력 데이터 초기화 (개인정보 보호)
+                        </button>
+                    </div>
+
+                    <p class="text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p>
+                </footer>
+            `;
+        }
     },
 
     injectFavicon: function() {
@@ -149,7 +171,7 @@ const ParanLabCore = {
     },
 
     render: function() {
-        this.initPrivacyGuard(); // 저장 차단기 먼저 실행
+        this.initPrivacyGuard();
         this.injectFavicon();
         const root = document.getElementById('root');
         if (!root) return;
@@ -168,7 +190,7 @@ const ParanLabCore = {
         }
 
         const footerElem = document.createElement('div');
-        footerElem.innerHTML = this.layout.footer;
+        footerElem.innerHTML = this.layout.footer(this.familySites);
         document.body.appendChild(footerElem);
     }
 };
