@@ -3,26 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Force Field 분석 | 변화를 이끄는 힘과 방해하는 힘 진단 도구 | 파란랩</title>
+    <title>Force Field 분석 | 변화 동력 진단 도구 | 파란랩</title>
     <meta name="description" content="새로운 변화를 시도하시나요? Force Field 분석을 통해 나를 밀어주는 추진력과 가로막는 저항력을 시각화하고, 성공적인 변화를 위한 전략을 세워보세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="force-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">Force Field 분석이란?</h2>
-            <p>사회심리학자 커트 레빈이 개발한 <strong>Force Field 분석</strong>은 변화를 시도할 때 작용하는 두 가지 상반된 힘을 분석하는 도구입니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>추진력 (Driving Forces):</strong> 변화를 긍정적으로 이끄는 동기나 이득</li>
-                <li><strong>저항력 (Restraining Forces):</strong> 변화를 방해하는 두려움, 비용, 습관</li>
-            </ul>
-            <p>변화에 성공하려면 추진력을 높이는 것보다 저항력을 줄이는 것이 더 효과적일 때가 많습니다. 파란랩과 함께 당신의 변화 동력을 점검해 보세요.</p>
+            <p>커트 레빈의 <strong>Force Field 분석</strong>은 변화를 이끄는 힘과 방해하는 힘의 균형을 분석하여 변화의 성공 가능성을 높이는 도구입니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -33,34 +29,45 @@
             const [goal, setGoal] = useState(saved.goal || "");
             const [driving, setDriving] = useState(saved.driving || [{ id: 1, text: "필요성", power: 3 }]);
             const [restraining, setRestraining] = useState(saved.restraining || [{ id: 1, text: "두려움", power: 3 }]);
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-force', JSON.stringify({ step, goal, driving, restraining })); }, [step, goal, driving, restraining]);
+
             const totalD = useMemo(() => driving.reduce((a,b)=>a+b.power,0), [driving]);
             const totalR = useMemo(() => restraining.reduce((a,b)=>a+b.power,0), [restraining]);
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 변화를 원하시나요?</h2>
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-3xl font-black mb-4">어떤 변화를 원하시나요?</h2>
                             <input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 매일 새벽 5시 기상하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
                             <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-3xl font-black text-slate-900 mb-10">변화의 줄다리기</h2>
-                            <div className="flex gap-4 mb-10">
-                                <div className="flex-1 p-6 bg-blue-50 rounded-3xl border border-blue-100"><p className="text-xs font-black text-blue-400 uppercase mb-1">추진력</p><span className="text-3xl font-black text-blue-600">{totalD}</span></div>
-                                <div className="flex-1 p-6 bg-rose-50 rounded-3xl border border-rose-100"><p className="text-xs font-black text-rose-400 uppercase mb-1">저항력</p><span className="text-3xl font-black text-rose-600">{totalR}</span></div>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10">변화의 줄다리기 결과</h2>
+                                <div className="flex gap-4 mb-10">
+                                    <div className="flex-1 p-6 bg-blue-50 rounded-3xl border border-blue-100"><p className="text-xs font-black text-blue-400 uppercase mb-1">추진력</p><span className="text-3xl font-black text-blue-600">{totalD}</span></div>
+                                    <div className="flex-1 p-6 bg-rose-50 rounded-3xl border border-rose-100"><p className="text-xs font-black text-rose-400 uppercase mb-1">저항력</p><span className="text-3xl font-black text-rose-600">{totalR}</span></div>
+                                </div>
+                                <div className={`p-8 rounded-[2.5rem] border-4 ${totalD > totalR ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50'}`}>
+                                    <h3 className="text-2xl font-black">{totalD > totalR ? '변화 추진 가능!' : '저항 제거 필요!'}</h3>
+                                </div>
+                                <p className="text-center mt-10 text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className={`p-8 rounded-[2.5rem] border-4 ${totalD > totalR ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50'}`}>
-                                <h3 className="text-2xl font-black">{totalD > totalR ? '변화 추진 가능!' : '저항 제거 필요!'}</h3>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'force-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`Force Field 결과`, `<div class='box'>추진력: ${totalD}, 저항력: ${totalR}</div>`, 'force-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 Force Field 결과]\n추진력: ${totalD}\n저항력: ${totalR}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
                             </div>
-                            <button onClick={()=>setStep(1)} className="mt-10 w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('force-app')).render(<ForceApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<ForceApp />);
     </script>
 </body>
 </html>
