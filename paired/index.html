@@ -9,16 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="paired-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">쌍대 비교법(Paired Comparison)이란?</h2>
-            <p><strong>쌍대 비교법</strong>은 여러 대안 중에서 우선순위를 정할 때, 모든 항목을 두 개씩 짝지어 1:1로 비교하는 기법입니다. 한꺼번에 순위를 매기려 할 때 발생하는 혼란을 방지하고, 직관적인 선택을 통해 논리적인 순위를 도출합니다.</p>
-            <p>비교 횟수는 항목이 많아질수록 늘어나지만, 그만큼 내 마음속의 잠재적 선호도를 가장 정확하게 반영할 수 있는 도구입니다.</p>
+        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">쌍대 비교법이란?</h2>
+            <p><strong>쌍대 비교법(Paired Comparison)</strong>은 여러 대안을 한꺼번에 비교하기 어려울 때, 두 개씩 짝을 지어 1:1로 비교함으로써 절대적인 우선순위를 도출하는 기법입니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -50,11 +50,16 @@
 
             const results = useMemo(() => items.map((name, i) => ({ name, win: scores[i] || 0 })).sort((a,b)=>b.win-a.win), [items, scores]);
 
+            const handleSaveHtml = () => {
+                const content = results.map((res, i) => `<div class="box"><strong>${i+1}위: ${res.name}</strong> (승리: ${res.win}회)</div>`).join('');
+                ParanLabCore.saveAsHtml(`쌍대 비교 결과`, content, 'paired-report');
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-8">비교할 항목 입력</h2>
+                            <h2 className="text-3xl font-black mb-8">비교할 항목 입력</h2>
                             {items.map((item, i) => (
                                 <div key={i} className="flex gap-3 mb-3">
                                     <input value={item} onChange={(e)=>{const n=[...items]; n[i]=e.target.value; setItems(n);}} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold outline-none" />
@@ -67,7 +72,7 @@
                     ) : step === 2 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
                             <span className="text-xs font-black text-blue-400 uppercase tracking-widest">Match {matchIdx+1} / {pairs.length}</span>
-                            <h2 className="text-2xl font-black text-slate-900 mt-4 mb-10">둘 중 더 중요한 것은?</h2>
+                            <h2 className="text-2xl font-black mt-4 mb-10">둘 중 더 중요한 것은?</h2>
                             <div className="grid grid-cols-1 gap-4">
                                 <button onClick={()=>handleVote(pairs[matchIdx][0])} className="p-8 bg-slate-50 hover:bg-blue-600 hover:text-white rounded-[2rem] font-black text-xl transition-all">{items[pairs[matchIdx][0]]}</button>
                                 <div className="text-slate-300 italic font-black">VS</div>
@@ -75,22 +80,30 @@
                             </div>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">우선순위 결과</h2>
-                            <div className="space-y-4 mb-10">
-                                {results.map((res, i) => (
-                                    <div key={i} className={`p-6 rounded-2xl border-2 ${i===0?'border-blue-500 bg-blue-50':'border-slate-100'}`}>
-                                        <div className="flex justify-between font-black"><span>{i+1}위. {res.name}</span><span>{res.win}회 승리</span></div>
-                                    </div>
-                                ))}
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">우선순위 결과</h2>
+                                <div className="space-y-4 mb-10">
+                                    {results.map((res, i) => (
+                                        <div key={i} className={`p-6 rounded-2xl border-2 ${i===0?'border-blue-500 bg-blue-50':'border-slate-100'}`}>
+                                            <div className="flex justify-between font-black"><span>{i+1}위. {res.name}</span><span>{res.win}회 승리</span></div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'paired-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 쌍대비교 결과]\n` + results.map((res, i) => `${i+1}위: ${res.name}`).join('\n'))} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('paired-app')).render(<PairedApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<PairedApp />);
     </script>
 </body>
 </html>
