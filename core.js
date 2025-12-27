@@ -1,4 +1,10 @@
+/**
+ * Paran Lab Core Framework v7.0 (Master System)
+ * 모든 도구의 공통 기능(이미지/HTML저장, 복사, 프라이버시) 통합 관리
+ */
+
 const ParanLabCore = {
+    // 1. 도구 데이터베이스 (31개 전체)
     toolsList: [
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
@@ -37,6 +43,43 @@ const ParanLabCore = {
         { name: "FactBomber", href: "https://factbomber.kr" }
     ],
 
+    // [공통 기능] 이미지 저장 (html2canvas 활용)
+    saveAsImage: function(elementId, fileName) {
+        const element = document.getElementById(elementId);
+        if (!element) return;
+        html2canvas(element, { backgroundColor: '#ffffff', scale: 2 }).then(canvas => {
+            const link = document.createElement('a');
+            link.download = `${fileName || 'paranlab-report'}.png`;
+            link.href = canvas.toDataURL();
+            link.click();
+        });
+    },
+
+    // [공통 기능] HTML 저장
+    saveAsHtml: function(title, contentHtml, fileName) {
+        const htmlContent = `
+            <!DOCTYPE html>
+            <html>
+            <head><meta charset="UTF-8"><title>${title}</title>
+            <style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;line-height:1.6;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.footer{font-size:12px;color:#999;text-align:center;margin-top:40px;}</style>
+            </head>
+            <body><h1>📊 ${title}</h1>${contentHtml}<div class="footer">© 2025 Paran Lab.</div></body>
+            </html>
+        `;
+        const blob = new Blob([htmlContent], { type: 'text/html' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${fileName || 'report'}.html`;
+        a.click();
+    },
+
+    // [공통 기능] 텍스트 복사
+    copyToClipboard: function(text) {
+        navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
+    },
+
+    // 프라이버시 모드 로직
     initPrivacyGuard: function() {
         const isAutoSaveOff = localStorage.getItem('paranlab-autosave') === 'false';
         if (isAutoSaveOff) {
@@ -120,30 +163,12 @@ const ParanLabCore = {
             `;
         },
         footer: function(familySites) {
-            const sitesHtml = familySites.map(s => `
-                <a href="${s.href}" target="_blank" class="hover:text-blue-600 transition-colors">${s.name}</a>
-            `).join('<span class="text-slate-200">|</span>');
-
+            const sitesHtml = familySites.map(s => `<a href="${s.href}" target="_blank" class="hover:text-blue-600 transition-colors">${s.name}</a>`).join('<span class="text-slate-200">|</span>');
             return `
                 <footer class="max-w-6xl mx-auto px-6 py-16 mt-12 border-t border-slate-100 text-center no-print">
-                    <div class="mb-12">
-                        <h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4>
-                        <div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">
-                            ${sitesHtml}
-                        </div>
-                    </div>
-                    <div class="mb-12">
-                        <h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4>
-                        <a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">
-                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
-                            paranbreak@gmail.com
-                        </a>
-                    </div>
-                    <div class="mb-10">
-                        <button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다. 공용 PC라면 반드시 실행하세요.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">
-                            입력 데이터 초기화 (개인정보 보호)
-                        </button>
-                    </div>
+                    <div class="mb-12"><h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4><div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">${sitesHtml}</div></div>
+                    <div class="mb-12"><h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4><a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">paranbreak@gmail.com</a></div>
+                    <div class="mb-10"><button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">입력 데이터 초기화 (개인정보 보호)</button></div>
                     <p class="text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p>
                 </footer>
             `;
@@ -165,17 +190,14 @@ const ParanLabCore = {
         const currentPath = window.location.pathname;
         const currentTool = this.toolsList.find(t => currentPath.includes(t.href));
         const isAutoSaveOn = this.isAutoSaveEnabled();
-
         const headerElem = document.createElement('div');
         headerElem.innerHTML = this.layout.header(this.toolsList, isAutoSaveOn);
         document.body.insertBefore(headerElem, document.body.firstChild);
-
         if (currentTool && currentPath !== "/" && currentPath !== "/index.html") {
             const toolHeaderElem = document.createElement('div');
             toolHeaderElem.innerHTML = this.layout.toolHeader(currentTool, isAutoSaveOn);
             root.parentNode.insertBefore(toolHeaderElem, root);
         }
-
         const footerElem = document.createElement('div');
         footerElem.innerHTML = this.layout.footer(this.familySites);
         document.body.appendChild(footerElem);
