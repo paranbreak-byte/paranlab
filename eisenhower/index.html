@@ -16,17 +16,9 @@
 <body class="bg-slate-50">
     <div id="root">
         <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">아이젠하워 매트릭스 활용법</h2>
-            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-                <p>미국의 제34대 대통령 드와이트 아이젠하워가 사용한 것으로 유명한 이 도구는 모든 업무를 4가지 영역으로 나눕니다.</p>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong>1영역 (긴급함 & 중요함):</strong> 지금 당장 처리해야 할 핵심 과제</li>
-                    <li><strong>2영역 (긴급하지 않음 & 중요함):</strong> 장기적인 성장을 위해 계획하고 투자해야 할 일</li>
-                    <li><strong>3영역 (긴급함 & 중요하지 않음):</strong> 타인에게 위임하거나 최소화해야 할 잡무</li>
-                    <li><strong>4영역 (긴급하지 않음 & 중요하지 않음):</strong> 과감히 삭제하거나 뒤로 미뤄야 할 시간 낭비 요인</li>
-                </ul>
-            </div>
+            <p>미국의 제34대 대통령 드와이트 아이젠하워가 사용한 것으로 유명한 이 도구는 모든 업무를 4가지 영역으로 나눕니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -52,6 +44,16 @@
                 });
                 return q;
             }, [tasks]);
+
+            const handleSaveHtml = () => {
+                const content = `<div class="box"><strong>1. 즉시실행:</strong> ${quadrants.q1.map(t=>t.text).join(', ')}</div>`;
+                ParanLabCore.saveAsHtml(`아이젠하워 우선순위 보고서`, content, 'eisenhower-report');
+            };
+
+            const handleCopyText = () => {
+                const text = `[파란랩 아이젠하워 보고서]\n1. 즉시실행: ${quadrants.q1.map(t=>t.text).join(', ')}\n2. 계획수립: ${quadrants.q2.map(t=>t.text).join(', ')}\n\n파란랩(paranlab.com)`;
+                ParanLabCore.copyToClipboard(text);
+            };
 
             return (
                 <div className="animate-in fade-in duration-500">
@@ -81,10 +83,12 @@
                                     <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100"><h3 className="text-slate-700 font-black mb-4">4. 삭제/보류 (Eliminate)</h3><ul className="space-y-2 text-slate-900 font-bold text-sm">{quadrants.q4.map(t => <li key={t.id}>• {t.text}</li>)}</ul></div>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'eisenhower-report')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 이미지로 저장 (PNG)</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'eisenhower-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
                             </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 수정하기</button>
                         </div>
                     )}
                 </div>
