@@ -3,137 +3,70 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5 Forces 산업 매력도 분석 | 파란랩</title>
+    <title>5 Forces 산업 매력도 분석 | 시장 경쟁 강도 및 수익성 진단 | 파란랩</title>
+    <meta name="description" content="진입하려는 시장이 레드오션인가요? 마이클 포터의 5 Forces 모델을 통해 경쟁자, 공급자, 구매자, 대체재, 신규 진입자의 위협을 분석하고 시장의 매력도를 측정해 보세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="porter-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">5 Forces 분석이란?</h2>
+            <p>하버드 경영대학원의 마이클 포터 교수가 제안한 이 모델은 산업의 구조와 경쟁 강도를 결정하는 5가지 핵심 요인을 분석합니다. 이를 통해 해당 산업에서 장기적으로 수익을 낼 수 있는지 판단합니다.</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>기존 경쟁:</strong> 현재 시장 내 업체들 간의 경쟁 정도</li>
+                <li><strong>신규 진입:</strong> 새로운 경쟁자가 들어오기 쉬운 정도(진입 장벽)</li>
+                <li><strong>대체재:</strong> 내 제품을 대신할 다른 서비스의 존재 여부</li>
+                <li><strong>공급자 협상력:</strong> 원재료나 서비스를 공급하는 업체의 힘</li>
+                <li><strong>구매자 협상력:</strong> 고객이 가격이나 품질을 요구할 수 있는 힘</li>
+            </ul>
+        </section>
     </div>
-
     <script type="text/babel">
-        const { useState, useMemo } = React;
-
+        const { useState, useEffect, useMemo } = React;
         function PorterApp() {
-            const [step, setStep] = useState(1); // 1: 주제, 2: 5가지 요인 입력, 3: 결과
-            const [subject, setSubject] = useState("");
-            const [scores, setScores] = useState({
-                rivalry: 5, // 기존 경쟁
-                entrants: 5, // 신규 진입
-                substitutes: 5, // 대체재
-                suppliers: 5, // 공급자 협상력
-                buyers: 5 // 구매자 협상력
-            });
-
+            const saved = JSON.parse(localStorage.getItem('paranlab-porter') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [scores, setScores] = useState(saved.scores || { rivalry:5, entrants:5, substitutes:5, suppliers:5, buyers:5 });
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-porter', JSON.stringify({ step, scores })); }, [step, scores]);
+            const totalRisk = useMemo(() => (Object.values(scores).reduce((a,b)=>a+b,0)/50)*100, [scores]);
             const forces = [
-                { id: 'rivalry', title: '기존 경쟁자', q: '현재 시장 내 경쟁이 얼마나 치열한가요?', desc: '경쟁자가 많고 가격 싸움이 심할수록 점수를 높게(위험) 주세요.', color: 'bg-rose-50', text: 'text-rose-700', accent: 'accent-rose-600' },
-                { id: 'entrants', title: '신규 진입자', q: '새로운 경쟁자가 들어오기 쉬운가요?', desc: '누구나 쉽게 시작할 수 있는 사업일수록 점수를 높게 주세요.', color: 'bg-orange-50', text: 'text-orange-700', accent: 'accent-orange-600' },
-                { id: 'substitutes', title: '대체재의 위협', q: '내 제품 대신 쓸 수 있는 다른 서비스가 많나요?', desc: '고객이 다른 대안으로 갈아타기 쉬울수록 점수를 높게 주세요.', color: 'bg-amber-50', text: 'text-amber-700', accent: 'accent-amber-600' },
-                { id: 'suppliers', title: '공급자의 힘', q: '원재료나 서비스를 제공하는 업체가 강력한가요?', desc: '공급업체가 가격을 마음대로 올릴 수 있는 구조라면 점수를 높게 주세요.', color: 'bg-blue-50', text: 'text-blue-700', accent: 'accent-blue-600' },
-                { id: 'buyers', title: '구매자의 힘', q: '고객(소비자)이 가격 깎기를 요구하기 쉬운가요?', desc: '고객이 정보를 많이 갖고 있고 선택권이 넓을수록 점수를 높게 주세요.', color: 'bg-indigo-50', text: 'text-indigo-700', accent: 'accent-indigo-600' }
+                { id: 'rivalry', title: '기존 경쟁자', color: 'bg-rose-50', text: 'text-rose-700' },
+                { id: 'entrants', title: '신규 진입자', color: 'bg-orange-50', text: 'text-orange-700' },
+                { id: 'substitutes', title: '대체재 위협', color: 'bg-amber-50', text: 'text-amber-700' },
+                { id: 'suppliers', title: '공급자의 힘', color: 'bg-blue-50', text: 'text-blue-700' },
+                { id: 'buyers', title: '구매자의 힘', color: 'bg-indigo-50', text: 'text-indigo-700' }
             ];
-
-            const totalRisk = useMemo(() => {
-                const sum = Object.values(scores).reduce((a, b) => a + b, 0);
-                return (sum / 50) * 100;
-            }, [scores]);
-
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>5 Forces 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:15px;border-radius:10px;margin-bottom:10px;background:#f8fafc;border:1px solid #eee;}</style></head>
-                    <body>
-                        <h1>📊 5 Forces 시장 매력도 보고서</h1>
-                        <p><strong>분석 시장:</strong> ${subject}</p>
-                        <div class="box"><strong>시장 위험도:</strong> ${totalRisk.toFixed(0)}%</div>
-                        <p>※ 점수가 높을수록 경쟁이 치열하고 수익을 내기 어려운 시장입니다.</p>
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `5forces_analysis_${new Date().getTime()}.html`;
-                a.click();
-            };
-
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 시장을 분석할까요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">진입하려는 산업이나 현재 운영 중인 사업 분야를 적어주세요.</p>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 배달 앱 시장, 프리미엄 독서실 사업" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">분석 시작하기</button>
-                        </div>
-                    )}
-
-                    {step === 2 && (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-2">5가지 위협 요소 체크</h2>
-                                <p className="text-slate-500 mb-10 font-medium">각 항목의 위협 정도를 10점 만점으로 표시하세요. (높을수록 위험)</p>
-                                
-                                <div className="space-y-10">
-                                    {forces.map((f) => (
-                                        <div key={f.id} className={`${f.color} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
-                                            <div className="flex justify-between items-center mb-4">
-                                                <h3 className={`text-lg font-black ${f.text}`}>{f.title}</h3>
-                                                <span className={`${f.text} font-black text-xl`}>{scores[f.id]}점</span>
-                                            </div>
-                                            <p className="text-sm text-slate-600 font-bold mb-2">{f.q}</p>
-                                            <p className="text-[10px] text-slate-400 mb-4 uppercase font-bold tracking-widest">{f.desc}</p>
-                                            <input 
-                                                type="range" min="1" max="10" value={scores[f.id]} 
-                                                onChange={(e)=>setScores({...scores, [f.id]: parseInt(e.target.value)})}
-                                                className={`w-full h-2 bg-white/50 rounded-lg appearance-none cursor-pointer ${f.accent}`}
-                                            />
-                                        </div>
-                                    ))}
-                                </div>
+                    {step === 1 ? (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black text-slate-900 mb-10">5가지 위협 요소 체크 (높을수록 위험)</h2>
+                            <div className="space-y-8 mb-10">
+                                {forces.map(f => (
+                                    <div key={f.id} className={`${f.color} p-6 rounded-[2rem] border-2 border-white shadow-sm`}>
+                                        <div className="flex justify-between font-black ${f.text} mb-4"><span>{f.title}</span><span>{scores[f.id]}점</span></div>
+                                        <input type="range" min="1" max="10" value={scores[f.id]} onChange={(e)=>setScores({...scores, [f.id]:parseInt(e.target.value)})} className="w-full h-2 bg-white/50 rounded-lg appearance-none cursor-pointer" />
+                                    </div>
+                                ))}
                             </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">최종 리포트 보기</button>
-                            </div>
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
                         </div>
-                    )}
-
-                    {step === 3 && (
+                    ) : (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">시장 매력도 리포트</h2>
-                            <p className="text-slate-500 mb-12 font-medium">분석 결과, 이 시장의 종합 위험도는 <span className="text-rose-500 font-black">{totalRisk.toFixed(0)}%</span>입니다.</p>
-                            
-                            <div className="p-10 rounded-[2.5rem] mb-10 border-4 border-slate-100 bg-slate-50">
-                                <h3 className="text-xl font-black text-slate-800 mb-6">💡 전문가의 조언</h3>
-                                <p className="text-lg font-medium leading-relaxed text-slate-600">
-                                    {totalRisk >= 70 ? "경쟁이 매우 치열하고 수익을 내기 힘든 '레드오션'입니다. 독보적인 차별화 전략 없이는 진입을 재고해야 합니다." :
-                                     totalRisk >= 40 ? "적당한 경쟁이 존재하는 시장입니다. 특정 타겟을 공략하는 니치 마켓 전략이 유효할 수 있습니다." :
-                                     "매우 매력적인 시장입니다! 경쟁자가 적거나 내가 주도권을 쥐기 쉬운 환경이니 빠르게 선점하세요."}
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
-                            </div>
+                            <h2 className="text-4xl font-black text-slate-900 mb-2">시장 위험도: <span className="text-rose-600">{totalRisk.toFixed(0)}%</span></h2>
+                            <p className="text-slate-500 mb-10 font-medium">{totalRisk >= 70 ? "경쟁이 매우 치열한 레드오션입니다." : totalRisk >= 40 ? "적절한 경쟁이 있는 시장입니다." : "매우 매력적인 블루오션입니다!"}</p>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('porter-app')).render(<PorterApp />);
     </script>
 </body>
