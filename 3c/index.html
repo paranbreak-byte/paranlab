@@ -9,20 +9,22 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="three-c-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">3C 분석이란?</h2>
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">3C 분석이란 무엇인가요?</h2>
             <p><strong>3C 분석</strong>은 일본의 전략가 오마에 겐이치가 제안한 시장 환경 분석 도구입니다. 성공적인 전략을 수립하기 위해 반드시 고려해야 할 세 가지 핵심 축을 분석합니다.</p>
             <ul class="list-disc list-inside space-y-2">
                 <li><strong>Customer (고객):</strong> 시장의 니즈와 트렌드 파악</li>
                 <li><strong>Competitor (경쟁사):</strong> 경쟁자의 강점과 약점 분석</li>
                 <li><strong>Company (자사):</strong> 나의 핵심 역량과 차별화 포인트</li>
             </ul>
+            <p>이 세 가지 요소의 교집합을 찾는 과정에서 지속 가능한 경쟁 우위가 탄생합니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -32,12 +34,14 @@
             const [step, setStep] = useState(saved.step || 1);
             const [subject, setSubject] = useState(saved.subject || "");
             const [data, setData] = useState(saved.data || { customer:"", competitor:"", company:"" });
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-3c', JSON.stringify({ step, subject, data })); }, [step, subject, data]);
-            const sections = [
-                { id: 'customer', title: 'Customer (고객)', color: 'bg-blue-50', text: 'text-blue-700', icon: '👥' },
-                { id: 'competitor', title: 'Competitor (경쟁사)', color: 'bg-rose-50', text: 'text-rose-700', icon: '⚔️' },
-                { id: 'company', title: 'Company (자사)', color: 'bg-emerald-50', text: 'text-emerald-700', icon: '🏠' }
-            ];
+
+            const handleSaveHtml = () => {
+                const content = `<div class="box"><strong>고객:</strong> ${data.customer}</div><div class="box"><strong>경쟁사:</strong> ${data.competitor}</div><div class="box"><strong>자사:</strong> ${data.company}</div>`;
+                ParanLabCore.saveAsHtml(`3C 분석 보고서: ${subject}`, content, '3c-report');
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
@@ -47,24 +51,37 @@
                             <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    {sections.map(s => (
-                                        <div key={s.id} className={`${s.color} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
-                                            <div className="flex items-center gap-2 mb-4"><span className="text-2xl">{s.icon}</span><h3 className={`font-black ${s.text}`}>{s.title}</h3></div>
-                                            <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} className="w-full h-64 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="내용을 입력하세요..." />
-                                        </div>
-                                    ))}
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-8 text-center">3C 시장 환경 리포트</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                                    <div className="p-6 bg-blue-50 rounded-[2.5rem] border-2 border-white shadow-sm">
+                                        <h3 className="font-black text-blue-700 mb-4">Customer</h3>
+                                        <textarea value={data.customer} onChange={(e)=>setData({...data, customer:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="고객의 니즈는?" />
+                                    </div>
+                                    <div className="p-6 bg-rose-50 rounded-[2.5rem] border-2 border-white shadow-sm">
+                                        <h3 className="font-black text-rose-700 mb-4">Competitor</h3>
+                                        <textarea value={data.competitor} onChange={(e)=>setData({...data, competitor:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="경쟁사의 전략은?" />
+                                    </div>
+                                    <div className="p-6 bg-emerald-50 rounded-[2.5rem] border-2 border-white shadow-sm">
+                                        <h3 className="font-black text-emerald-700 mb-4">Company</h3>
+                                        <textarea value={data.company} onChange={(e)=>setData({...data, company:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="나의 강점은?" />
+                                    </div>
                                 </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', '3c-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[3C 분석 결과]\n주제: ${subject}\n고객: ${data.customer}\n경쟁사: ${data.competitor}\n자사: ${data.company}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">처음부터 다시</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('three-c-app')).render(<ThreeCApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<ThreeCApp />);
     </script>
 </body>
 </html>
