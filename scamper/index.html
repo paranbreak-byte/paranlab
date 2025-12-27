@@ -3,146 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCAMPER 아이디어 확장 | 파란랩</title>
+    <title>SCAMPER 아이디어 확장 기법 | 창의적 사고 도구 | 파란랩</title>
+    <meta name="description" content="기존의 아이디어를 뒤집고, 합치고, 바꿔보세요. 7가지 질문을 통해 새로운 혁신을 만드는 SCAMPER 기법으로 창의적인 해결책을 도출할 수 있습니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="scamper-app" class="max-w-3xl mx-auto py-10 px-4"></div>
+        <div id="scamper-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">SCAMPER 기법이란?</h2>
+            <p><strong>SCAMPER</strong>는 브레인스토밍의 대가 알렉스 오스본이 제안하고 밥 에벌이 발전시킨 창의적 사고 도구입니다. 기존의 제품이나 서비스를 7가지 다른 관점에서 질문하여 새로운 아이디어를 강제로 이끌어내는 방식입니다.</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>Substitute:</strong> 다른 것으로 대체하면?</li>
+                <li><strong>Combine:</strong> 결합하거나 섞으면?</li>
+                <li><strong>Adapt:</strong> 다른 분야를 응용하면?</li>
+                <li><strong>Modify:</strong> 모양이나 성질을 바꾸면?</li>
+                <li><strong>Put to another use:</strong> 다른 용도로 쓰면?</li>
+                <li><strong>Eliminate:</strong> 제거하거나 줄이면?</li>
+                <li><strong>Reverse:</strong> 거꾸로 하거나 뒤집으면?</li>
+            </ul>
+        </section>
     </div>
-
     <script type="text/babel">
-        const { useState } = React;
-
+        const { useState, useEffect } = React;
         function ScamperApp() {
-            const [step, setStep] = useState(1); // 1: 주제, 2: 7단계 입력, 3: 결과
-            const [subject, setSubject] = useState("");
-            const [data, setData] = useState({
-                s: "", c: "", a: "", m: "", p: "", e: "", r: ""
-            });
-
+            const saved = JSON.parse(localStorage.getItem('paranlab-scamper') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [subject, setSubject] = useState(saved.subject || "");
+            const [data, setData] = useState(saved.data || { s:"", c:"", a:"", m:"", p:"", e:"", r:"" });
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-scamper', JSON.stringify({ step, subject, data })); }, [step, subject, data]);
             const questions = [
-                { id: 's', title: 'Substitute (대체)', q: '다른 것으로 바꿀 수 있는 부분은 무엇인가요?', desc: '재료, 사람, 장소, 방법 등을 바꿔보세요.', color: 'bg-red-50', text: 'text-red-700' },
-                { id: 'c', title: 'Combine (결합)', q: '두 가지 이상의 기능을 합치면 어떨까요?', desc: '비슷한 것끼리 혹은 전혀 다른 것끼리 섞어보세요.', color: 'bg-orange-50', text: 'text-orange-700' },
-                { id: 'a', title: 'Adapt (응용)', q: '다른 분야의 아이디어를 빌려올 수 있나요?', desc: '과거의 사례나 다른 제품의 특징을 적용해보세요.', color: 'bg-amber-50', text: 'text-amber-700' },
-                { id: 'm', title: 'Modify (수정/확대/축소)', q: '모양, 색깔, 크기를 바꾸면 어떨까요?', desc: '더 크게 만들거나, 아주 작게 줄여보세요.', color: 'bg-emerald-50', text: 'text-emerald-700' },
-                { id: 'p', title: 'Put to another use (용도변경)', q: '전혀 다른 목적으로 사용할 수 있나요?', desc: '원래 용도가 아닌 새로운 시장이나 상황을 생각해보세요.', color: 'bg-blue-50', text: 'text-blue-700' },
-                { id: 'e', title: 'Eliminate (제거)', q: '불필요한 부분을 없애면 어떨까요?', desc: '핵심만 남기고 다 빼보세요. 단순함이 힘이 됩니다.', color: 'bg-indigo-50', text: 'text-indigo-700' },
-                { id: 'r', title: 'Reverse (역발상/재배치)', q: '순서를 바꾸거나 거꾸로 생각하면 어떨까요?', desc: '안과 밖을 뒤집거나, 역할을 바꿔보세요.', color: 'bg-rose-50', text: 'text-rose-700' }
+                { id: 's', title: 'Substitute (대체)', q: '재료, 사람, 장소 등을 다른 것으로 바꿀 수 있나요?', color: 'bg-red-50', text: 'text-red-700' },
+                { id: 'c', title: 'Combine (결합)', q: '두 가지 이상의 기능을 합치면 어떨까요?', color: 'bg-orange-50', text: 'text-orange-700' },
+                { id: 'a', title: 'Adapt (응용)', q: '다른 분야의 아이디어를 빌려올 수 있나요?', color: 'bg-amber-50', text: 'text-amber-700' },
+                { id: 'm', title: 'Modify (수정)', q: '모양, 색깔, 크기를 바꾸면 어떨까요?', color: 'bg-emerald-50', text: 'text-emerald-700' },
+                { id: 'p', title: 'Put to use (용도변경)', q: '전혀 다른 목적으로 사용할 수 있나요?', color: 'bg-blue-50', text: 'text-blue-700' },
+                { id: 'e', title: 'Eliminate (제거)', q: '불필요한 부분을 없애면 어떨까요?', color: 'bg-indigo-50', text: 'text-indigo-700' },
+                { id: 'r', title: 'Reverse (역발상)', q: '순서를 바꾸거나 거꾸로 생각하면 어떨까요?', color: 'bg-rose-50', text: 'text-rose-700' }
             ];
-
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>SCAMPER 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:700px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:15px;border-radius:10px;margin-bottom:10px;background:#f8fafc;border:1px solid #eee;}.title{font-weight:bold;color:#2563eb;}</style></head>
-                    <body>
-                        <h1>💡 SCAMPER 아이디어 확장 보고서</h1>
-                        <p><strong>분석 주제:</strong> ${subject}</p>
-                        <div style="margin-top:20px;">
-                            ${questions.map(item => `<div class="box"><span class="title">${item.title}:</span><br>${data[item.id] || "의견 없음"}</div>`).join('')}
-                        </div>
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `scamper_report_${new Date().getTime()}.html`;
-                a.click();
-            };
-
-            const copyToClipboard = () => {
-                const text = `[파란랩 SCAMPER 아이디어 보고서]\n주제: ${subject}\n\n` +
-                    questions.map(item => `${item.title}: ${data[item.id]}`).join('\n') +
-                    `\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            };
-
             return (
                 <div className="animate-in fade-in duration-500">
-                    {/* STEP 1: 주제 설정 */}
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">무엇을 개선해볼까요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">아이디어가 필요한 제품, 서비스, 혹은 일상의 문제를 적어주세요.</p>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 우리 동네 카페 메뉴, 나의 유튜브 채널" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">아이디어 확장 시작</button>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 우리 동네 카페 메뉴, 나의 유튜브 채널" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">아이디어 확장 시작</button>
                         </div>
-                    )}
-
-                    {/* STEP 2: 7단계 질문 */}
-                    {step === 2 && (
+                    ) : (
                         <div className="space-y-8">
                             <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-2">7가지 질문으로 생각 뒤집기</h2>
-                                <p className="text-slate-500 mb-10 font-medium">주제: <span className="text-blue-600 font-black">{subject}</span></p>
-                                
+                                <h2 className="text-2xl font-black text-slate-900 mb-10">7가지 질문으로 생각 뒤집기</h2>
                                 <div className="space-y-6">
-                                    {questions.map((item) => (
-                                        <div key={item.id} className={`${item.color} p-6 rounded-[2rem] border border-white shadow-sm`}>
-                                            <div className="flex justify-between items-start mb-4">
-                                                <div>
-                                                    <h3 className={`text-lg font-black ${item.text}`}>{item.title}</h3>
-                                                    <p className="text-slate-500 text-sm font-bold">{item.q}</p>
-                                                </div>
-                                                <span className="text-[10px] font-black text-slate-300 uppercase tracking-widest">{item.desc}</span>
-                                            </div>
-                                            <textarea 
-                                                value={data[item.id]} 
-                                                onChange={(e)=>setData({...data, [item.id]: e.target.value})}
-                                                placeholder="떠오르는 생각을 자유롭게 적으세요..."
-                                                className="w-full h-24 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium"
-                                            />
+                                    {questions.map(q => (
+                                        <div key={q.id} className={`${q.color} p-6 rounded-[2rem] border-2 border-white shadow-sm`}>
+                                            <h3 className={`font-black ${q.text} mb-1`}>{q.title}</h3>
+                                            <p className="text-xs text-slate-600 mb-4 font-bold">{q.q}</p>
+                                            <textarea value={data[q.id]} onChange={(e)=>setData({...data, [q.id]: e.target.value})} className="w-full h-24 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="아이디어를 적어보세요..." />
                                         </div>
                                     ))}
                                 </div>
                             </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">결과 보고서 보기</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 3: 결과 리포트 */}
-                    {step === 3 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">아이디어 리포트</h2>
-                            <p className="text-slate-500 mb-12 font-medium">새롭게 확장된 아이디어들을 확인하세요.</p>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-12 text-left">
-                                {questions.map((item) => (
-                                    <div key={item.id} className="p-6 bg-slate-50 rounded-2xl border border-slate-100">
-                                        <h4 className={`font-black ${item.text} mb-2`}>{item.title}</h4>
-                                        <p className="text-slate-700 text-sm font-medium leading-relaxed">
-                                            {data[item.id] || <span className="text-slate-300 italic">작성된 내용이 없습니다.</span>}
-                                        </p>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
-                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
-                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('scamper-app')).render(<ScamperApp />);
     </script>
 </body>
