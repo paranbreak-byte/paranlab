@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인생의 수레바퀴 점검 | 파란랩</title>
+    <title>인생의 수레바퀴 | 삶의 균형 점검 및 라이프 밸런스 테스트 | 파란랩</title>
+    <meta name="description" content="당신의 삶은 균형 잡혀 있나요? 건강, 재정, 관계 등 8가지 영역의 만족도를 점검하고 시각화된 수레바퀴 그래프를 통해 개선이 필요한 부분을 찾아보세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -19,140 +20,84 @@
 <body class="bg-slate-50">
     <div id="root">
         <div id="wheel-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">인생의 수레바퀴란?</h2>
+            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
+                <p><strong>인생의 수레바퀴(Wheel of Life)</strong>는 코칭 분야에서 가장 널리 사용되는 자기 진단 도구입니다. 삶을 구성하는 주요 영역들을 수레바퀴의 살로 표현하고, 각 영역의 만족도를 점으로 연결하여 현재 내 삶의 '모양'을 확인하는 기법입니다.</p>
+                <h3 class="text-lg font-bold text-slate-700 mt-8">점검 포인트</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>균형:</strong> 바퀴가 한쪽으로 찌그러져 있지는 않나요?</li>
+                    <li><strong>크기:</strong> 전체적인 만족도의 크기가 너무 작지는 않나요?</li>
+                    <li><strong>우선순위:</strong> 가장 점수가 낮은 영역을 위해 무엇을 할 수 있을까요?</li>
+                </ul>
+                <p>파란랩과 함께 정기적으로 삶을 점검하고 더 둥글고 큰 수레바퀴를 만들어 보세요.</p>
+            </div>
+        </section>
     </div>
 
     <script type="text/babel">
-        const { useState, useMemo } = React;
-
+        const { useState, useMemo, useEffect } = React;
         function WheelApp() {
-            const [step, setStep] = useState(1); // 1: 점수입력, 2: 결과확인
-            const [scores, setScores] = useState({
-                "건강": 5, "커리어": 5, "재정": 5, "관계": 5,
-                "즐거움": 5, "성장": 5, "환경": 5, "정신": 5
-            });
+            const saved = JSON.parse(localStorage.getItem('paranlab-wheel') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [scores, setScores] = useState(saved.scores || { "건강": 5, "커리어": 5, "재정": 5, "관계": 5, "즐거움": 5, "성장": 5, "환경": 5, "정신": 5 });
+
+            useEffect(() => {
+                if (ParanLabCore.isAutoSaveEnabled()) {
+                    localStorage.setItem('paranlab-wheel', JSON.stringify({ step, scores }));
+                }
+            }, [step, scores]);
 
             const categories = Object.keys(scores);
-
-            const updateScore = (cat, val) => {
-                setScores({ ...scores, [cat]: parseInt(val) });
-            };
-
-            // 레이더 차트 좌표 계산
             const points = useMemo(() => {
-                const center = 150;
-                const radius = 120;
+                const center = 150, radius = 120;
                 return categories.map((cat, i) => {
                     const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                    const score = scores[cat];
-                    const x = center + radius * (score / 10) * Math.cos(angle);
-                    const y = center + radius * (score / 10) * Math.sin(angle);
+                    const x = center + radius * (scores[cat] / 10) * Math.cos(angle);
+                    const y = center + radius * (scores[cat] / 10) * Math.sin(angle);
                     return `${x},${y}`;
                 }).join(" ");
             }, [scores]);
 
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>인생의 수레바퀴 보고서</title><style>body{font-family:sans-serif;padding:40px;text-align:center;} .box{padding:15px; border-bottom:1px solid #eee; text-align:left;}</style></head>
-                    <body>
-                        <h1>🎡 인생의 수레바퀴 점검 보고서</h1>
-                        <div style="margin:30px 0;">
-                            ${categories.map(cat => `<div class="box"><strong>${cat}:</strong> ${scores[cat]}점</div>`).join('')}
-                        </div>
-                        <p>© 2025 Paran Lab. 현명한 삶을 응원합니다.</p>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `wheel_of_life_${new Date().getTime()}.html`;
-                a.click();
-            };
-
-            const copyToClipboard = () => {
-                const text = `[파란랩 인생의 수레바퀴 보고서]\n\n` +
-                    categories.map(cat => `${cat}: ${scores[cat]}점`).join('\n') +
-                    `\n\n내 삶의 균형을 점검해보세요. 파란랩(paranlab.com)`;
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            };
-
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-2">인생의 수레바퀴</h2>
-                            <p className="text-slate-500 mb-10 font-medium">각 영역별로 현재 나의 만족도를 10점 만점으로 표시하세요.</p>
-                            
+                            <h2 className="text-3xl font-black text-slate-900 mb-10">영역별 만족도 입력</h2>
                             <div className="space-y-8 mb-10">
                                 {categories.map(cat => (
                                     <div key={cat} className="flex flex-col gap-2">
-                                        <div className="flex justify-between items-center">
-                                            <span className="font-black text-slate-700">{cat}</span>
-                                            <span className="text-blue-600 font-black">{scores[cat]}점</span>
-                                        </div>
-                                        <input 
-                                            type="range" min="1" max="10" value={scores[cat]} 
-                                            onChange={(e)=>updateScore(cat, e.target.value)}
-                                            className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600"
-                                        />
+                                        <div className="flex justify-between font-black text-slate-700"><span>{cat}</span><span className="text-blue-600">{scores[cat]}점</span></div>
+                                        <input type="range" min="1" max="10" value={scores[cat]} onChange={(e)=>setScores({...scores, [cat]: parseInt(e.target.value)})} className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" />
                                     </div>
                                 ))}
                             </div>
-                            
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">결과 그래프 보기</button>
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 그래프 보기</button>
                         </div>
-                    )}
-
-                    {step === 2 && (
+                    ) : (
                         <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
                             <h2 className="text-3xl font-black text-slate-900 mb-8">나의 인생 밸런스</h2>
-                            
-                            {/* SVG 레이더 차트 */}
                             <div className="flex justify-center mb-10">
                                 <svg width="300" height="300" viewBox="0 0 300 300">
-                                    {/* 배경 그리드 (원형) */}
-                                    {[2, 4, 6, 8, 10].map(r => (
-                                        <circle key={r} cx="150" cy="150" r={(120 * r) / 10} className="radar-grid" />
-                                    ))}
-                                    {/* 축 라인 */}
+                                    {[2, 4, 6, 8, 10].map(r => <circle key={r} cx="150" cy="150" r={(120 * r) / 10} className="radar-grid" />)}
                                     {categories.map((_, i) => {
                                         const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
                                         return <line key={i} x1="150" y1="150" x2={150 + 120 * Math.cos(angle)} y2={150 + 120 * Math.sin(angle)} className="radar-grid" />;
                                     })}
-                                    {/* 데이터 폴리곤 */}
                                     <polygon points={points} className="radar-line" />
-                                    {/* 라벨 */}
                                     {categories.map((cat, i) => {
                                         const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                                        const x = 150 + 140 * Math.cos(angle);
-                                        const y = 150 + 140 * Math.sin(angle);
-                                        return <text key={cat} x={x} y={y} textAnchor="middle" className="text-[10px] font-black fill-slate-400">{cat}</text>;
+                                        return <text key={cat} x={150 + 140 * Math.cos(angle)} y={150 + 140 * Math.sin(angle)} textAnchor="middle" className="text-[10px] font-black fill-slate-400">{cat}</text>;
                                     })}
                                 </svg>
                             </div>
-
-                            <div className="p-6 bg-blue-50 rounded-2xl mb-10 text-left">
-                                <h4 className="font-black text-blue-900 mb-2">💡 분석 가이드</h4>
-                                <p className="text-sm text-blue-700 leading-relaxed">
-                                    그래프가 원형에 가까울수록 균형 잡힌 삶을 살고 계시군요! <br/>
-                                    <strong>가장 움푹 들어간 영역</strong>이 있다면, 이번 달에는 그 부분에 조금 더 집중해보는 건 어떨까요?
-                                </p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
-                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('wheel-app')).render(<WheelApp />);
     </script>
 </body>
