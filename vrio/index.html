@@ -9,13 +9,14 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="vrio-app" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">VRIO 분석이란?</h2>
             <p><strong>VRIO 분석</strong>은 기업의 내부 자원과 역량이 경쟁 우위를 창출할 수 있는지 평가하는 도구입니다. 4가지 질문을 통해 해당 역량의 전략적 가치를 판단합니다.</p>
             <ul class="list-disc list-inside space-y-2">
@@ -33,20 +34,17 @@
             const [step, setStep] = useState(saved.step || 1);
             const [resource, setResource] = useState(saved.resource || "");
             const [answers, setAnswers] = useState(saved.answers || { v: null, r: null, i: null, o: null });
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-vrio', JSON.stringify({ step, resource, answers })); }, [step, resource, answers]);
-            const questions = [
-                { id: 'v', label: 'Value (가치)', q: '이 역량이 돈이 되거나 문제를 해결해 주나요?' },
-                { id: 'r', label: 'Rarity (희소성)', q: '이 역량을 가진 경쟁자가 거의 없나요?' },
-                { id: 'i', label: 'Inimitability (모방 불가능성)', q: '다른 사람들이 이것을 따라 하기 매우 어렵나요?' },
-                { id: 'o', label: 'Organization (조직)', q: '당신은 이 역량을 충분히 활용할 준비가 되어 있나요?' }
-            ];
+
             const result = useMemo(() => {
-                if (answers.v === false) return { status: "경쟁 열위", color: "bg-red-500" };
-                if (answers.r === false) return { status: "경쟁 동등", color: "bg-slate-500" };
-                if (answers.i === false) return { status: "일시적 우위", color: "bg-blue-500" };
-                if (answers.o === false) return { status: "미활용 우위", color: "bg-amber-500" };
-                return { status: "지속적 우위", color: "bg-emerald-600" };
+                if (answers.v === false) return { status: "경쟁 열위", color: "bg-red-500", desc: "현재 가치가 낮아 개선이 필요합니다." };
+                if (answers.r === false) return { status: "경쟁 동등", color: "bg-slate-500", desc: "가치는 있으나 누구나 가진 역량입니다." };
+                if (answers.i === false) return { status: "일시적 우위", color: "bg-blue-500", desc: "지금은 앞서있으나 곧 따라잡힐 수 있습니다." };
+                if (answers.o === false) return { status: "미활용 우위", color: "bg-amber-500", desc: "좋은 자원을 가졌으나 조직적 활용이 부족합니다." };
+                return { status: "지속적 우위", color: "bg-emerald-600", desc: "당신만의 독보적인 핵심 경쟁력입니다!" };
             }, [answers]);
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
@@ -58,12 +56,12 @@
                     ) : step === 2 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
                             <div className="space-y-10">
-                                {questions.map((q, i) => (
-                                    <div key={q.id}>
-                                        <h3 className="text-lg font-black text-slate-800 mb-4">{i+1}. {q.label}: {q.q}</h3>
+                                {['v','r','i','o'].map((id, i) => (
+                                    <div key={id}>
+                                        <h3 className="text-lg font-black text-slate-800 mb-4">{i+1}. {id.toUpperCase()} 질문에 답하세요.</h3>
                                         <div className="flex gap-4">
-                                            <button onClick={()=>setAnswers({...answers, [q.id]:true})} className={`flex-1 py-4 rounded-2xl font-black ${answers[q.id]===true?'bg-blue-600 text-white':'bg-slate-100 text-slate-400'}`}>예</button>
-                                            <button onClick={()=>setAnswers({...answers, [q.id]:false})} className={`flex-1 py-4 rounded-2xl font-black ${answers[q.id]===false?'bg-rose-600 text-white':'bg-slate-100 text-slate-400'}`}>아니오</button>
+                                            <button onClick={()=>setAnswers({...answers, [id]:true})} className={`flex-1 py-4 rounded-2xl font-black ${answers[id]===true?'bg-blue-600 text-white':'bg-slate-100 text-slate-400'}`}>예</button>
+                                            <button onClick={()=>setAnswers({...answers, [id]:false})} className={`flex-1 py-4 rounded-2xl font-black ${answers[id]===false?'bg-rose-600 text-white':'bg-slate-100 text-slate-400'}`}>아니오</button>
                                         </div>
                                     </div>
                                 ))}
@@ -71,18 +69,27 @@
                             <button disabled={Object.values(answers).includes(null)} onClick={()=>setStep(3)} className="w-full mt-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl disabled:opacity-30">결과 확인</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <div className={`p-10 rounded-[2.5rem] mb-10 text-white shadow-2xl ${result.color}`}>
-                                <p className="text-white/70 font-bold mb-2 uppercase tracking-widest">현재 경쟁 상태</p>
-                                <h3 className="text-5xl font-black">{result.status}</h3>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <div className={`p-10 rounded-[2.5rem] mb-10 text-white shadow-2xl ${result.color}`}>
+                                    <p className="text-white/70 font-bold mb-2 uppercase tracking-widest">현재 경쟁 상태</p>
+                                    <h3 className="text-5xl font-black mb-4">{result.status}</h3>
+                                    <p className="font-medium">{result.desc}</p>
+                                </div>
+                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'vrio-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`VRIO 분석 결과`, `<div class='box'>상태: ${result.status}</div>`, 'vrio-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[VRIO 분석 결과]\n대상: ${resource}\n결과: ${result.status}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('vrio-app')).render(<VrioApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<VrioApp />);
     </script>
 </body>
 </html>
