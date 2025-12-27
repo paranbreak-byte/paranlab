@@ -9,21 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="pest-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">PEST 분석이란?</h2>
-            <p><strong>PEST 분석</strong>은 기업을 둘러싼 거시적 외부 환경을 분석하는 프레임워크입니다. 내가 통제할 수 없는 거대한 흐름을 4가지 관점에서 정리하여 리스크를 피하고 기회를 선점하는 데 목적이 있습니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>Political:</strong> 정부 정책, 법규, 세제 변화</li>
-                <li><strong>Economic:</strong> 금리, 환율, 물가, 경제 성장률</li>
-                <li><strong>Social:</strong> 인구 구조, 라이프스타일, 문화 트렌드</li>
-                <li><strong>Technological:</strong> 신기술, AI, R&D 투자, 자동화</li>
-            </ul>
+            <p><strong>PEST 분석</strong>은 기업을 둘러싼 거시적 외부 환경을 분석하는 프레임워크입니다. 정치(P), 경제(E), 사회(S), 기술(T)의 변화를 읽는 데 목적이 있습니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -33,13 +28,16 @@
             const [step, setStep] = useState(saved.step || 1);
             const [subject, setSubject] = useState(saved.subject || "");
             const [data, setData] = useState(saved.data || { p:"", e:"", s:"", t:"" });
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-pest', JSON.stringify({ step, subject, data })); }, [step, subject, data]);
+
             const sections = [
                 { id: 'p', title: 'Political (정치)', color: 'bg-blue-50', text: 'text-blue-700' },
                 { id: 'e', title: 'Economic (경제)', color: 'bg-emerald-50', text: 'text-emerald-700' },
                 { id: 's', title: 'Social (사회)', color: 'bg-rose-50', text: 'text-rose-700' },
                 { id: 't', title: 'Technological (기술)', color: 'bg-amber-50', text: 'text-amber-700' }
             ];
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
@@ -49,24 +47,31 @@
                             <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-10 text-center">PEST 거시환경 리포트</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
                                     {sections.map(s => (
                                         <div key={s.id} className={`${s.color} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
                                             <h3 className={`font-black ${s.text} mb-4`}>{s.title}</h3>
-                                            <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} className="w-full h-40 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="외부 요인들을 적어보세요..." />
+                                            <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} className="w-full h-40 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="내용을 입력하세요..." />
                                         </div>
                                     ))}
                                 </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'pest-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`PEST 분석 결과`, `<div class='box'>정치: ${data.p}</div>`, 'pest-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 PEST 결과]\n주제: ${subject}\n정치: ${data.p}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('pest-app')).render(<PestApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<PestApp />);
     </script>
 </body>
 </html>
