@@ -9,14 +9,14 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="eisen-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
             <h2 class="text-2xl font-black text-slate-800 mb-6">아이젠하워 매트릭스 활용법</h2>
             <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
                 <p>미국의 제34대 대통령 드와이트 아이젠하워가 사용한 것으로 유명한 이 도구는 모든 업무를 4가지 영역으로 나눕니다.</p>
@@ -26,27 +26,21 @@
                     <li><strong>3영역 (긴급함 & 중요하지 않음):</strong> 타인에게 위임하거나 최소화해야 할 잡무</li>
                     <li><strong>4영역 (긴급하지 않음 & 중요하지 않음):</strong> 과감히 삭제하거나 뒤로 미뤄야 할 시간 낭비 요인</li>
                 </ul>
-                <p>성공하는 사람들은 2영역(중요하지만 긴급하지 않은 일)에 가장 많은 시간을 씁니다. 파란랩과 함께 당신의 시간을 재설계해 보세요.</p>
             </div>
         </section>
     </div>
-
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         function EisenApp() {
-            const savedData = JSON.parse(localStorage.getItem('paranlab-eisen') || '{}');
-            const [step, setStep] = useState(savedData.step || 1);
-            const [tasks, setTasks] = useState(savedData.tasks || [{ id: 1, text: "예시 업무", urgent: 5, important: 5 }]);
+            const saved = JSON.parse(localStorage.getItem('paranlab-eisen') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [tasks, setTasks] = useState(saved.tasks || [{ id: 1, text: "예시 업무", urgent: 5, important: 5 }]);
 
             useEffect(() => {
                 if (ParanLabCore.isAutoSaveEnabled()) {
                     localStorage.setItem('paranlab-eisen', JSON.stringify({ step, tasks }));
                 }
             }, [step, tasks]);
-
-            const addTask = () => setTasks([...tasks, { id: Date.now(), text: "", urgent: 5, important: 5 }]);
-            const updateTask = (id, field, value) => setTasks(tasks.map(t => t.id === id ? { ...t, [field]: value } : t));
-            const removeTask = (id) => setTasks(tasks.filter(t => t.id !== id));
 
             const quadrants = useMemo(() => {
                 const q = { q1: [], q2: [], q3: [], q4: [] };
@@ -61,27 +55,25 @@
 
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">할 일 목록 정리</h2>
-                            <div className="space-y-6 mb-10">
-                                {tasks.map((t) => (
-                                    <div key={t.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                        <div className="flex gap-3 mb-4"><input value={t.text} onChange={(e)=>updateTask(t.id, 'text', e.target.value)} placeholder="할 일을 입력하세요" className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" /><button onClick={()=>removeTask(t.id)} className="text-slate-300">✕</button></div>
-                                        <div className="grid grid-cols-2 gap-6">
-                                            <div><label className="block text-[10px] font-black text-rose-500 uppercase mb-2">긴급도: {t.urgent}</label><input type="range" min="1" max="10" value={t.urgent} onChange={(e)=>updateTask(t.id, 'urgent', parseInt(e.target.value))} className="w-full accent-rose-500" /></div>
-                                            <div><label className="block text-[10px] font-black text-blue-500 uppercase mb-2">중요도: {t.important}</label><input type="range" min="1" max="10" value={t.important} onChange={(e)=>updateTask(t.id, 'important', parseInt(e.target.value))} className="w-full accent-blue-500" /></div>
-                                        </div>
+                            <h2 className="text-3xl font-black mb-8">할 일 목록 정리</h2>
+                            {tasks.map((t) => (
+                                <div key={t.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 mb-4">
+                                    <div className="flex gap-3 mb-4"><input value={t.text} onChange={(e)=>setTasks(tasks.map(item=>item.id===t.id?{...item, text:e.target.value}:item))} placeholder="할 일을 입력하세요" className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" /><button onClick={()=>setTasks(tasks.filter(item=>item.id!==t.id))} className="text-slate-300">✕</button></div>
+                                    <div className="grid grid-cols-2 gap-6">
+                                        <div><label className="block text-[10px] font-black text-rose-500 uppercase mb-2">긴급도: {t.urgent}</label><input type="range" min="1" max="10" value={t.urgent} onChange={(e)=>setTasks(tasks.map(item=>item.id===t.id?{...item, urgent:parseInt(e.target.value)}:item))} className="w-full accent-rose-500" /></div>
+                                        <div><label className="block text-[10px] font-black text-blue-500 uppercase mb-2">중요도: {t.important}</label><input type="range" min="1" max="10" value={t.important} onChange={(e)=>setTasks(tasks.map(item=>item.id===t.id?{...item, important:parseInt(e.target.value)}:item))} className="w-full accent-blue-500" /></div>
                                     </div>
-                                ))}
-                                <button onClick={addTask} className="text-rose-600 font-black">+ 할 일 추가</button>
-                            </div>
+                                </div>
+                            ))}
+                            <button onClick={()=>setTasks([...tasks, {id:Date.now(), text:"", urgent:5, important:5}])} className="text-rose-600 font-black mb-8">+ 할 일 추가</button>
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl">매트릭스 보기</button>
                         </div>
-                    )}
-                    {step === 2 && (
+                    ) : (
                         <div className="space-y-8">
-                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">아이젠하워 매트릭스 결과</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100"><h3 className="text-rose-700 font-black mb-4">1. 즉시 실행 (Do)</h3><ul className="space-y-2 text-rose-900 font-bold text-sm">{quadrants.q1.map(t => <li key={t.id}>• {t.text}</li>)}</ul></div>
                                     <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100"><h3 className="text-blue-700 font-black mb-4">2. 계획 수립 (Schedule)</h3><ul className="space-y-2 text-blue-900 font-bold text-sm">{quadrants.q2.map(t => <li key={t.id}>• {t.text}</li>)}</ul></div>
@@ -89,13 +81,16 @@
                                     <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100"><h3 className="text-slate-700 font-black mb-4">4. 삭제/보류 (Eliminate)</h3><ul className="space-y-2 text-slate-900 font-bold text-sm">{quadrants.q4.map(t => <li key={t.id}>• {t.text}</li>)}</ul></div>
                                 </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'eisenhower-report')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 이미지로 저장 (PNG)</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            </div>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('eisen-app')).render(<EisenApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<EisenApp />);
     </script>
 </body>
 </html>
