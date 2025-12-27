@@ -3,161 +3,71 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>비용-편익 분석 (CBA) | 파란랩</title>
+    <title>비용-편익 분석 (CBA) | 투자 가치 및 경제성 진단 도구 | 파란랩</title>
+    <meta name="description" content="이 투자가 정말 남는 장사일까요? 비용-편익 분석(CBA)을 통해 투입되는 비용과 얻게 될 이득을 수치로 비교하여 합리적인 투자 결정을 내리세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="cba-app" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <div id="cba-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">비용-편익 분석(CBA)이란?</h2>
+            <p><strong>비용-편익 분석(Cost-Benefit Analysis)</strong>은 특정 프로젝트나 투자의 경제적 타당성을 평가하는 기법입니다. 모든 비용과 편익을 화폐 가치나 점수로 환산하여 비교합니다.</p>
+            <p>순 가치(편익-비용)가 0보다 크거나, 편익/비용 비율(BCR)이 1.0 이상일 때 경제적으로 가치 있는 투자로 판단합니다.</p>
+        </section>
     </div>
-
     <script type="text/babel">
-        const { useState, useMemo } = React;
-
+        const { useState, useEffect, useMemo } = React;
         function CbaApp() {
-            const [step, setStep] = useState(1); // 1: 주제, 2: 비용 입력, 3: 편익 입력, 4: 결과
-            const [subject, setSubject] = useState("");
-            const [costs, setCosts] = useState([{ id: 1, text: "직접 비용 (돈)", value: 50 }]);
-            const [benefits, setBenefits] = useState([{ id: 1, text: "예상 수익/가치", value: 80 }]);
-
-            const totalCost = useMemo(() => costs.reduce((acc, c) => acc + c.value, 0), [costs]);
-            const totalBenefit = useMemo(() => benefits.reduce((acc, b) => acc + b.value, 0), [benefits]);
-            const netValue = totalBenefit - totalCost;
+            const saved = JSON.parse(localStorage.getItem('paranlab-cba') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [costs, setCosts] = useState(saved.costs || [{ id: 1, text: "직접 비용", value: 50 }]);
+            const [benefits, setBenefits] = useState(saved.benefits || [{ id: 1, text: "예상 수익", value: 80 }]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-cba', JSON.stringify({ step, costs, benefits })); }, [step, costs, benefits]);
+            const totalCost = useMemo(() => costs.reduce((a,b)=>a+b.value,0), [costs]);
+            const totalBenefit = useMemo(() => benefits.reduce((a,b)=>a+b.value,0), [benefits]);
             const bcr = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : totalBenefit;
-
-            const updateItem = (list, setList, id, field, val) => {
-                setList(list.map(item => item.id === id ? { ...item, [field]: field === 'value' ? parseInt(val) || 0 : val } : item));
-            };
-
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>비용-편익 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:500px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.plus{color:#059669; font-weight:bold;}.minus{color:#e11d48; font-weight:bold;}</style></head>
-                    <body>
-                        <h1>📊 비용-편익 분석 보고서</h1>
-                        <p><strong>분석 주제:</strong> ${subject}</p>
-                        <div class="box">
-                            <div style="font-size:20px; font-weight:bold;">순 가치: <span class="${netValue >= 0 ? 'plus' : 'minus'}">${netValue} 점</span></div>
-                            <div style="margin-top:10px;">편익/비용 비율(BCR): ${bcr}</div>
-                        </div>
-                        <p>※ 비율이 1.0 이상이면 경제적으로 가치 있는 투자입니다.</p>
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `cba_report_${new Date().getTime()}.html`;
-                a.click();
-            };
-
-            const copyToClipboard = () => {
-                const text = `[파란랩 비용-편익 분석 보고서]\n주제: ${subject}\n\n총 편익: ${totalBenefit}점\n총 비용: ${totalCost}점\n순 가치: ${netValue}점 (비율: ${bcr})\n\n결론: ${netValue >= 0 ? '추진 가치 있음' : '재검토 필요'}\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            };
-
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">무엇에 투자할 계획인가요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">돈이나 시간이 들어가는 모든 결정(구매, 교육, 프로젝트 등)을 적어주세요.</p>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 300만원짜리 코딩 부트캠프 수강" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">분석 시작하기</button>
+                            <h2 className="text-2xl font-black text-rose-600 mb-6">투입 비용 (Costs)</h2>
+                            {costs.map(c => (
+                                <div key={c.id} className="p-4 bg-rose-50 rounded-2xl mb-4 border border-rose-100">
+                                    <input value={c.text} onChange={(e)=>setCosts(costs.map(i=>i.id===c.id?{...i, text:e.target.value}:i))} className="w-full p-2 mb-2 rounded-lg border font-bold" />
+                                    <input type="range" min="1" max="100" value={c.value} onChange={(e)=>setCosts(costs.map(i=>i.id===c.id?{...i, value:parseInt(e.target.value)}:i))} className="w-full accent-rose-600" />
+                                </div>
+                            ))}
+                            <button onClick={()=>setCosts([...costs, {id:Date.now(), text:"", value:50}])} className="text-rose-600 font-black mb-8">+ 비용 추가</button>
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음 단계</button>
                         </div>
-                    )}
-
-                    {step === 2 && (
+                    ) : step === 2 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-rose-600 mb-2">투입되는 비용 (Costs)</h2>
-                            <p className="text-slate-500 mb-10 font-medium">돈, 시간, 노력, 스트레스 등 소모되는 모든 것을 적으세요.</p>
-                            <div className="space-y-4 mb-10">
-                                {costs.map((c) => (
-                                    <div key={c.id} className="p-6 bg-rose-50 rounded-[2rem] border border-rose-100">
-                                        <div className="flex gap-3 mb-4">
-                                            <input value={c.text} onChange={(e)=>updateItem(costs, setCosts, c.id, 'text', e.target.value)} className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" />
-                                            <button onClick={()=>setCosts(costs.filter(item => item.id !== c.id))} className="text-rose-300">✕</button>
-                                        </div>
-                                        <div className="flex justify-between text-xs font-black text-rose-400 mb-2 uppercase">부담 정도: {c.value}점</div>
-                                        <input type="range" min="1" max="100" value={c.value} onChange={(e)=>updateItem(costs, setCosts, c.id, 'value', e.target.value)} className="w-full h-2 bg-rose-200 rounded-full appearance-none cursor-pointer accent-rose-600" />
-                                    </div>
-                                ))}
-                                <button onClick={()=>setCosts([...costs, {id: Date.now(), text: "", value: 50}])} className="text-rose-600 font-black">+ 비용 항목 추가</button>
-                            </div>
-                            <button onClick={()=>setStep(3)} className="w-full py-6 bg-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-rose-200">다음 (얻게 될 이득 입력)</button>
+                            <h2 className="text-2xl font-black text-emerald-600 mb-6">얻게 될 편익 (Benefits)</h2>
+                            {benefits.map(b => (
+                                <div key={b.id} className="p-4 bg-emerald-50 rounded-2xl mb-4 border border-emerald-100">
+                                    <input value={b.text} onChange={(e)=>setBenefits(benefits.map(i=>i.id===b.id?{...i, text:e.target.value}:i))} className="w-full p-2 mb-2 rounded-lg border font-bold" />
+                                    <input type="range" min="1" max="100" value={b.value} onChange={(e)=>setBenefits(benefits.map(i=>i.id===b.id?{...i, value:parseInt(e.target.value)}:i))} className="w-full accent-emerald-600" />
+                                </div>
+                            ))}
+                            <button onClick={()=>setBenefits([...benefits, {id:Date.now(), text:"", value:50}])} className="text-emerald-600 font-black mb-8">+ 편익 추가</button>
+                            <button onClick={()=>setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
                         </div>
-                    )}
-
-                    {step === 3 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-emerald-600 mb-2">얻게 될 편익 (Benefits)</h2>
-                            <p className="text-slate-500 mb-10 font-medium">수익, 시간 절약, 행복, 경력 등 얻게 될 모든 가치를 적으세요.</p>
-                            <div className="space-y-4 mb-10">
-                                {benefits.map((b) => (
-                                    <div key={b.id} className="p-6 bg-emerald-50 rounded-[2rem] border border-emerald-100">
-                                        <div className="flex gap-3 mb-4">
-                                            <input value={b.text} onChange={(e)=>updateItem(benefits, setBenefits, b.id, 'text', e.target.value)} className="flex-1 p-3 bg-white rounded-xl outline-none font-bold" />
-                                            <button onClick={()=>setBenefits(benefits.filter(item => item.id !== b.id))} className="text-emerald-300">✕</button>
-                                        </div>
-                                        <div className="flex justify-between text-xs font-black text-emerald-400 mb-2 uppercase">가치 정도: {b.value}점</div>
-                                        <input type="range" min="1" max="100" value={b.value} onChange={(e)=>updateItem(benefits, setBenefits, b.id, 'value', e.target.value)} className="w-full h-2 bg-emerald-200 rounded-full appearance-none cursor-pointer accent-emerald-600" />
-                                    </div>
-                                ))}
-                                <button onClick={()=>setBenefits([...benefits, {id: Date.now(), text: "", value: 50}])} className="text-emerald-600 font-black">+ 편익 항목 추가</button>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(4)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">최종 결과 보기</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 4 && (
+                    ) : (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-2">투자 가치 분석 결과</h2>
-                            <p className="text-slate-500 mb-12 font-medium">비용 대비 편익을 계산한 최종 성적표입니다.</p>
-                            
-                            <div className="flex gap-4 mb-8">
-                                <div className="flex-1 p-6 bg-rose-50 rounded-3xl border border-rose-100">
-                                    <p className="text-xs font-black text-rose-400 uppercase mb-1">총 비용</p>
-                                    <span className="text-3xl font-black text-rose-600">{totalCost}</span>
-                                </div>
-                                <div className="flex-1 p-6 bg-emerald-50 rounded-3xl border border-emerald-100">
-                                    <p className="text-xs font-black text-emerald-400 uppercase mb-1">총 편익</p>
-                                    <span className="text-3xl font-black text-emerald-600">{totalBenefit}</span>
-                                </div>
-                            </div>
-
-                            <div className={`p-10 rounded-[2.5rem] mb-10 border-4 ${netValue >= 0 ? 'border-emerald-500 bg-emerald-50' : 'border-rose-500 bg-rose-50'}`}>
-                                <p className="text-slate-500 font-bold mb-2 uppercase tracking-widest">최종 판단</p>
-                                <h3 className={`text-5xl font-black mb-4 ${netValue >= 0 ? 'text-emerald-600' : 'text-rose-600'}`}>
-                                    {netValue >= 0 ? '추진하세요! (GO)' : '재고하세요! (STOP)'}
-                                </h3>
-                                <p className="text-slate-600 font-medium">편익/비용 비율(BCR)이 <span className="font-black">{bcr}</span>로 측정되었습니다.</p>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 복사하기</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
-                            </div>
+                            <h2 className="text-4xl font-black text-slate-900 mb-6">분석 결과: {bcr >= 1.0 ? "추진 권장" : "재검토 필요"}</h2>
+                            <p className="text-slate-500 mb-10 font-medium">편익/비용 비율(BCR): <span className="text-blue-600 font-black">{bcr}</span></p>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('cba-app')).render(<CbaApp />);
     </script>
 </body>
