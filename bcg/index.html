@@ -9,21 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="bcg-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">BCG 매트릭스란?</h2>
             <p><strong>BCG 매트릭스</strong>는 보스턴 컨설팅 그룹(BCG)에서 개발한 전략 분석 도구입니다. '시장 성장률'과 '상대적 시장 점유율'을 기준으로 사업 아이템을 4가지 영역으로 분류합니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>Star (스타):</strong> 성장성도 높고 점유율도 높은 유망 사업. 집중 투자가 필요합니다.</li>
-                <li><strong>Cash Cow (현금 젖소):</strong> 성장은 낮지만 점유율이 높아 돈을 벌어다 주는 효자 사업.</li>
-                <li><strong>Question Mark (물음표):</strong> 성장은 높지만 점유율이 낮아 키울지 버릴지 고민이 필요한 사업.</li>
-                <li><strong>Dog (개):</strong> 성장도 낮고 점유율도 낮은 사업. 정리를 검토해야 합니다.</li>
-            </ul>
         </section>
     </div>
     <script type="text/babel">
@@ -32,7 +27,9 @@
             const saved = JSON.parse(localStorage.getItem('paranlab-bcg') || '{}');
             const [step, setStep] = useState(saved.step || 1);
             const [items, setItems] = useState(saved.items || [{ id: 1, text: "", growth: 5, share: 5 }]);
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-bcg', JSON.stringify({ step, items })); }, [step, items]);
+
             const quadrants = useMemo(() => {
                 const q = { star: [], cow: [], question: [], dog: [] };
                 items.forEach(i => {
@@ -43,6 +40,7 @@
                 });
                 return q;
             }, [items]);
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
@@ -61,20 +59,29 @@
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            <div className="grid grid-cols-2 gap-4">
-                                <div className="p-6 bg-amber-50 rounded-[2rem] border-2 border-amber-100"><h3 className="font-black text-amber-700">🌟 Star</h3><ul className="text-xs">{quadrants.star.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700">❓ Question</h3><ul className="text-xs">{quadrants.question.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700">💰 Cash Cow</h3><ul className="text-xs">{quadrants.cow.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                <div className="p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100"><h3 className="font-black text-rose-700">🐕 Dog</h3><ul className="text-xs">{quadrants.dog.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">BCG 매트릭스 결과</h2>
+                                <div className="grid grid-cols-2 gap-4 mb-10">
+                                    <div className="p-6 bg-amber-50 rounded-[2rem] border-2 border-amber-100"><h3 className="font-black text-amber-700">🌟 Star</h3><ul className="text-xs">{quadrants.star.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700">❓ Question</h3><ul className="text-xs">{quadrants.question.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700">💰 Cash Cow</h3><ul className="text-xs">{quadrants.cow.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                    <div className="p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100"><h3 className="font-black text-rose-700">🐕 Dog</h3><ul className="text-xs">{quadrants.dog.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'bcg-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`BCG 분석 결과`, `<div class='box'>Star: ${quadrants.star.map(i=>i.text).join(', ')}</div>`, 'bcg-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[BCG 분석 결과]\nStar: ${quadrants.star.map(i=>i.text).join(', ')}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('bcg-app')).render(<BcgApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<BcgApp />);
     </script>
 </body>
 </html>
