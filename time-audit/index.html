@@ -9,16 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="time-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">시간 기록 분석(Time Audit)이란?</h2>
-            <p><strong>시간 기록 분석</strong>은 자신의 하루 일과를 객관적으로 기록하여 시간 사용의 패턴을 파악하는 자기계발 도구입니다. "바쁘게 살았는데 한 게 없다"는 느낌이 들 때, 실제로 에너지가 어디에 소모되었는지 눈으로 확인하게 해줍니다.</p>
-            <p>생산적 활동, 자기계발, 필수 생활, 휴식, 낭비되는 시간으로 분류하여 삶의 질을 높이는 시간 배분 전략을 세울 수 있습니다.</p>
+            <p><strong>시간 기록 분석</strong>은 자신의 하루 일과를 객관적으로 기록하여 시간 사용의 패턴을 파악하는 자기계발 도구입니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -39,9 +39,7 @@
                                 <div key={a.id} className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-slate-50 rounded-2xl">
                                     <input value={a.name} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, name:e.target.value}:i))} placeholder="활동명" className="flex-1 p-3 rounded-xl border font-bold" />
                                     <input type="number" value={a.h} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, h:parseFloat(e.target.value)||0}:i))} className="w-20 p-3 rounded-xl border text-center font-black" />
-                                    <select value={a.cat} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, cat:e.target.value}:i))} className="p-3 rounded-xl border font-bold text-sm">
-                                        {Object.keys(cats).map(k => <option key={k} value={k}>{cats[k].label}</option>)}
-                                    </select>
+                                    <select value={a.cat} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, cat:e.target.value}:i))} className="p-3 rounded-xl border font-bold text-sm">{Object.keys(cats).map(k => <option key={k} value={k}>{cats[k].label}</option>)}</select>
                                     <button onClick={()=>setActs(acts.filter(i=>i.id!==a.id))} className="text-rose-500 font-black px-2">✕</button>
                                 </div>
                             ))}
@@ -50,21 +48,24 @@
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">시간 사용 리포트</h2>
-                            <div className="space-y-6 mb-12">
-                                {Object.keys(cats).map(k => {
-                                    const sum = acts.filter(a => a.cat === k).reduce((a, b) => a + b.h, 0);
-                                    const per = totalH > 0 ? (sum / totalH * 100).toFixed(1) : 0;
-                                    return (
-                                        <div key={k} className="text-left">
-                                            <div className="flex justify-between font-bold mb-1"><span>{cats[k].label}</span><span>{sum}h ({per}%)</span></div>
-                                            <div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div className={`${cats[k].color} h-full`} style={{ width: `${per}%` }}></div></div>
-                                        </div>
-                                    );
-                                })}
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-blue-600">시간 사용 리포트</h2>
+                                <div className="space-y-6 mb-12">
+                                    {Object.keys(cats).map(k => {
+                                        const sum = acts.filter(a => a.cat === k).reduce((a, b) => a + b.h, 0);
+                                        const per = totalH > 0 ? (sum / totalH * 100).toFixed(1) : 0;
+                                        return (<div key={k} className="text-left"><div className="flex justify-between font-bold mb-1"><span>{cats[k].label}</span><span>{sum}h ({per}%)</span></div><div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div className={`${cats[k].color} h-full`} style={{ width: `${per}%` }}></div></div></div>);
+                                    })}
+                                </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'time-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`시간 기록 결과`, ``, 'time-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[시간 기록 결과]\n총 시간: ${totalH}h`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
