@@ -9,28 +9,18 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="pmi-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">PMI 기법이란 무엇인가요?</h2>
-            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-                <p><strong>PMI(Plus, Minus, Interesting)</strong>는 창의적 사고의 대가 에드워드 드 보노가 제안한 아이디어 평가 도구입니다. 어떤 제안이나 아이디어를 접했을 때 즉각적으로 판단(좋다/나쁘다)하지 않고, 세 가지 관점에서 충분히 검토하도록 돕습니다.</p>
-                <h3 class="text-lg font-bold text-slate-700 mt-8">PMI의 세 가지 관점</h3>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong>Plus (좋은 점):</strong> 아이디어가 가진 긍정적인 측면과 이득</li>
-                    <li><strong>Minus (나쁜 점):</strong> 아이디어가 가진 부정적인 측면과 리스크</li>
-                    <li><strong>Interesting (흥미로운 점):</strong> 좋고 나쁨을 떠나 이 아이디어가 가진 잠재력이나 특이한 점</li>
-                </ul>
-                <p>특히 'Interesting' 단계는 고정관념을 깨고 새로운 기회를 발견하게 하는 PMI만의 핵심적인 특징입니다.</p>
-            </div>
+            <p><strong>PMI(Plus, Minus, Interesting)</strong>는 창의적 사고의 대가 에드워드 드 보노가 제안한 아이디어 평가 도구입니다.</p>
         </section>
     </div>
-
     <script type="text/babel">
         const { useState, useEffect } = React;
         function PmiApp() {
@@ -39,37 +29,39 @@
             const [idea, setIdea] = useState(saved.idea || "");
             const [data, setData] = useState(saved.data || { p: "", m: "", i: "" });
 
-            useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-pmi', JSON.stringify({ step, idea, data }));
-                }
-            }, [step, idea, data]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-pmi', JSON.stringify({ step, idea, data })); }, [step, idea, data]);
 
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 아이디어를 평가할까요?</h2>
-                            <input value={idea} onChange={(e)=>setIdea(e.target.value)} placeholder="예: 주 4일제 도입, 제주도 한 달 살기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-amber-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
+                            <input value={idea} onChange={(e)=>setIdea(e.target.value)} placeholder="예: 주 4일제 도입" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-amber-500 rounded-[2rem] outline-none text-xl font-black" />
                             <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-amber-500 text-white rounded-[2rem] font-black text-xl shadow-xl">평가 시작하기</button>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">아이디어 다각도 분석</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700 mb-4">Plus (좋은 점)</h3><textarea value={data.p} onChange={(e)=>setData({...data, p: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
-                                    <div className="p-6 bg-red-50 rounded-[2rem] border-2 border-red-100"><h3 className="font-black text-red-700 mb-4">Minus (나쁜 점)</h3><textarea value={data.m} onChange={(e)=>setData({...data, m: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
-                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700 mb-4">Interesting (흥미로운 점)</h3><textarea value={data.i} onChange={(e)=>setData({...data, i: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">PMI 아이디어 리포트</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
+                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-emerald-700 mb-4">Plus</h3><textarea value={data.p} onChange={(e)=>setData({...data, p:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
+                                    <div className="p-6 bg-red-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-red-700 mb-4">Minus</h3><textarea value={data.m} onChange={(e)=>setData({...data, m:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
+                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-blue-700 mb-4">Interesting</h3><textarea value={data.i} onChange={(e)=>setData({...data, i:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
                                 </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'pmi-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`PMI 분석 결과`, `<div class='box'>Plus: ${data.p}</div>`, 'pmi-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[PMI 분석 결과]\nPlus: ${data.p}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('pmi-app')).render(<PmiApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<PmiApp />);
     </script>
 </body>
 </html>
