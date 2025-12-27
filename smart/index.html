@@ -16,18 +16,16 @@
 <body class="bg-slate-50">
     <div id="root">
         <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">성공하는 목표의 5가지 조건 (SMART)</h2>
-            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-                <p>목표를 세울 때 다음 5가지 필터를 통과하면 달성 확률이 비약적으로 높아집니다.</p>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong>Specific (구체적):</strong> 누가, 무엇을, 어떻게 할지 명확해야 합니다.</li>
-                    <li><strong>Measurable (측정 가능):</strong> 숫자로 성공 여부를 확인할 수 있어야 합니다.</li>
-                    <li><strong>Achievable (달성 가능):</strong> 현재 나의 자원으로 실현 가능한 범위여야 합니다.</li>
-                    <li><strong>Relevant (연관성):</strong> 나의 가치관이나 장기 계획과 맞닿아 있어야 합니다.</li>
-                    <li><strong>Time-bound (기한 설정):</strong> 언제까지 끝낼지 마감 기한이 있어야 합니다.</li>
-                </ul>
-            </div>
+            <p>목표를 세울 때 다음 5가지 필터를 통과하면 달성 확률이 비약적으로 높아집니다.</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>Specific (구체적):</strong> 누가, 무엇을, 어떻게 할지 명확해야 합니다.</li>
+                <li><strong>Measurable (측정 가능):</strong> 숫자로 성공 여부를 확인할 수 있어야 합니다.</li>
+                <li><strong>Achievable (달성 가능):</strong> 현재 나의 자원으로 실현 가능한 범위여야 합니다.</li>
+                <li><strong>Relevant (연관성):</strong> 나의 가치관이나 장기 계획과 맞닿아 있어야 합니다.</li>
+                <li><strong>Time-bound (기한 설정):</strong> 언제까지 끝낼지 마감 기한이 있어야 합니다.</li>
+            </ul>
         </section>
     </div>
     <script type="text/babel">
@@ -52,16 +50,36 @@
                 { id: 't', title: 'Time-bound (기한 설정)', q: '언제까지 이 목표를 달성할 것인가요?' }
             ];
 
+            const handleSaveHtml = () => {
+                const content = steps.map(s => `<div class="box"><strong>${s.title}:</strong> ${data[s.id]}</div>`).join('');
+                ParanLabCore.saveAsHtml(`SMART 목표 설계도`, content, 'smart-report');
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step <= 5 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            {step === 0 ? (<div><h2 className="text-3xl font-black mb-4">이루고 싶은 목표는?</h2><input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 다이어트 성공하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" /><button onClick={()=>setStep(1)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">목표 구체화 시작</button></div>) : (<div><div className="flex items-center gap-4 mb-6"><span className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xl">{step}</span><h2 className="text-2xl font-black">{steps[step-1].title}</h2></div><p className="text-slate-600 mb-8 font-bold text-lg">{steps[step-1].q}</p><textarea value={data[steps[step-1].id]} onChange={(e)=>setData({...data, [steps[step-1].id]: e.target.value})} className="w-full h-40 p-6 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl outline-none text-lg font-medium resize-none" /><div className="flex gap-4 mt-10"><button onClick={()=>setStep(step-1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(step+1)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">{step === 5 ? "완료" : "다음"}</button></div></div>)}
+                            {step === 0 ? (
+                                <div><h2 className="text-3xl font-black mb-4">이루고 싶은 목표는?</h2><input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 다이어트 성공하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" /><button onClick={()=>setStep(1)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">목표 구체화 시작</button></div>
+                            ) : (
+                                <div><div className="flex items-center gap-4 mb-6"><span className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xl">{step}</span><h2 className="text-2xl font-black">{steps[step-1].title}</h2></div><p className="text-slate-600 mb-8 font-bold text-lg">{steps[step-1].q}</p><textarea value={data[steps[step-1].id]} onChange={(e)=>setData({...data, [steps[step-1].id]: e.target.value})} className="w-full h-40 p-6 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl outline-none text-lg font-medium resize-none" /><div className="flex gap-4 mt-10"><button onClick={()=>setStep(step-1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(step+1)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">{step === 5 ? "완료" : "다음"}</button></div></div>
+                            )}
                         </div>
                     ) : (
                         <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center"><h2 className="text-4xl font-black text-blue-600 mb-12">SMART 목표 설계도</h2><div className="space-y-4 mb-12 text-left">{steps.map((s, i) => (<div key={i} className="p-6 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{s.title}</span><p className="text-slate-800 font-bold mt-1">{data[s.id] || "미작성"}</p></div>))}</div><p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p></div>
-                            <div className="grid grid-cols-1 gap-4 no-print"><button onClick={()=>ParanLabCore.saveAsImage('report-card', 'smart-goal-report')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 이미지로 저장 (PNG)</button><button onClick={()=>setStep(0)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button></div>
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-4xl font-black text-blue-600 mb-12">SMART 목표 설계도</h2>
+                                <div className="space-y-4 mb-12 text-left">
+                                    {steps.map((s, i) => (<div key={i} className="p-6 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{s.title}</span><p className="text-slate-800 font-bold mt-1">{data[s.id] || "미작성"}</p></div>))}
+                                </div>
+                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'smart-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[SMART 목표]\n목표: ${goal}\n구체적: ${data.s}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(0)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
