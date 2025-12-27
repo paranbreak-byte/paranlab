@@ -1,12 +1,5 @@
-/**
- * Paran Lab Core Framework v6.0
- * [Full Integration] 31개 도구 전체 등록 및 가치 사슬 분석 포함 버전
- */
-
 const ParanLabCore = {
-    // 1. 도구 데이터베이스 (총 31개)
     toolsList: [
-        // 결정 카테고리 (9개)
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
         { id: "eisenhower", name: "아이젠하워", href: "/eisenhower/", category: "결정", desc: "긴급성과 중요도 기준 우선순위 분류", tags: ["업무", "시간관리", "공부"], icon: "📅", guide: "할 일이 너무 많아 혼란스러울 때, 긴급도와 중요도에 따라 지금 당장 할 일을 분류합니다." },
@@ -16,8 +9,6 @@ const ParanLabCore = {
         { id: "paired", name: "쌍대 비교법", href: "/paired/", category: "결정", desc: "1:1 토너먼트 방식의 절대 순위 도출", tags: ["순위", "우선순위", "단순비교"], icon: "⚔️", guide: "모든 항목을 1:1로 맞붙여서, 내 마음속의 진짜 1순위가 무엇인지 찾아냅니다." },
         { id: "cba", name: "비용-편익 분석", href: "/cba/", category: "결정", desc: "투입 비용 대비 경제적 이득 수치화", tags: ["투자", "쇼핑", "창업"], icon: "📈", guide: "들어가는 돈과 시간 대비 얻는 가치가 1.0 이상(이득)인지 냉정하게 계산합니다." },
         { id: "force-field", name: "Force Field", href: "/force-field/", category: "결정", desc: "변화의 추진력과 저항력의 균형 분석", tags: ["변화", "습관", "다이어트"], icon: "🏹", guide: "새로운 변화를 시도할 때, 나를 밀어주는 힘과 가로막는 힘을 분석하여 성공 전략을 짭니다." },
-
-        // 전략 카테고리 (8개)
         { id: "swot", name: "SWOT 전략", href: "/swot/", category: "전략", desc: "내외부 환경 분석을 통한 전략 수립", tags: ["창업", "자기분석", "경쟁력"], icon: "🧩", guide: "나의 강점/약점과 외부의 기회/위협을 교차 분석하여 승리하는 전략을 도출합니다." },
         { id: "pest", name: "PEST 분석", href: "/pest/", category: "전략", desc: "정치/경제/사회/기술 거시 환경 분석", tags: ["시장조사", "트렌드", "사업계획"], icon: "🌐", guide: "내가 통제할 수 없는 거대한 외부 흐름(정치, 경제 등)을 읽고 리스크에 대비합니다." },
         { id: "3c", name: "3C 분석", href: "/3c/", category: "전략", desc: "고객/경쟁사/자사 중심 시장 분석", tags: ["마케팅", "경쟁", "비즈니스"], icon: "🎯", guide: "고객의 니즈, 경쟁사의 전략, 나의 강점을 분석하여 시장에서의 필승 지점을 찾습니다." },
@@ -26,8 +17,6 @@ const ParanLabCore = {
         { id: "bcg", name: "BCG 매트릭스", href: "/bcg/", category: "전략", desc: "사업 포트폴리오 집중 및 유지 결정", tags: ["정리", "투자배분", "수익성"], icon: "⭐", guide: "여러 사업 중 어떤 것에 집중 투자하고 어떤 것을 정리해야 할지 명확히 구분합니다." },
         { id: "porter", name: "5 Forces", href: "/porter/", category: "전략", desc: "산업의 경쟁 강도 및 매력도 측정", tags: ["레드오션", "블루오션", "시장진입"], icon: "🛡️", guide: "진입하려는 시장이 얼마나 치열한 곳인지, 수익을 낼 수 있는 구조인지 분석합니다." },
         { id: "value-chain", name: "가치 사슬 분석", href: "/value-chain/", category: "전략", desc: "비즈니스 프로세스별 부가가치 창출 구조 분석", tags: ["운영", "프로세스", "효율화"], icon: "⛓️", guide: "제품이나 서비스가 고객에게 전달되는 전 과정을 분석하여, 어디서 가치가 만들어지고 어디서 비용이 새는지 파악합니다." },
-
-        // 기획 카테고리 (8개)
         { id: "pmi", name: "PMI 아이디어", href: "/pmi/", category: "기획", desc: "아이디어의 장점/단점/흥미로운 점 평가", tags: ["아이디어", "창의력", "검토"], icon: "💡", guide: "아이디어를 단순히 좋다/나쁘다가 아니라 '흥미로운 잠재력'까지 포함해 다각도로 봅니다." },
         { id: "5whys", name: "5 Whys 분석", href: "/5whys/", category: "기획", desc: "질문 반복을 통한 문제의 근본 원인 파악", tags: ["문제해결", "원인분석", "실수"], icon: "❓", guide: "문제의 겉모습에 속지 않고, '왜?'라는 질문을 5번 던져 진짜 뿌리 원인을 찾아냅니다." },
         { id: "smart", name: "SMART 목표", href: "/smart/", category: "기획", desc: "막연한 목표를 실행 가능한 계획으로 구체화", tags: ["목표설정", "계획", "성공"], icon: "📍", guide: "막연한 소망을 구체적이고 측정 가능한 '실행 계획'으로 필터링하여 달성률을 높입니다." },
@@ -36,8 +25,6 @@ const ParanLabCore = {
         { id: "6hats", name: "여섯 색깔 모자", href: "/6hats/", category: "기획", desc: "관점을 분리하여 다각도로 사고하기", tags: ["회의", "토론", "다각도"], icon: "🎩", guide: "감정, 비판, 낙관 등 6가지 관점의 모자를 번갈아 쓰며 편향 없는 결론을 내립니다." },
         { id: "affinity", name: "친화도법", href: "/affinity/", category: "기획", desc: "흩어진 아이디어를 그룹화하여 핵심 도출", tags: ["정리", "포스트잇", "그룹화"], icon: "📎", guide: "어지럽게 널린 수많은 아이디어를 비슷한 것끼리 묶어 핵심 키워드를 뽑아냅니다." },
         { id: "mandalart", name: "만다라트", href: "/mandalart/", category: "기획", desc: "핵심 목표 중심의 64개 세부 계획 수립", tags: ["오타니", "계획표", "만다라트"], icon: "🕸️", guide: "하나의 핵심 목표를 8개의 세부 목표와 64개의 실행 과제로 확장하는 강력한 계획표입니다." },
-
-        // 자기계발 카테고리 (6개)
         { id: "wheel", name: "인생의 수레바퀴", href: "/wheel/", category: "자기계발", desc: "삶의 8대 영역 균형 상태 점검", tags: ["밸런스", "라이프스타일", "점검"], icon: "🎡", guide: "건강, 재정, 관계 등 삶의 주요 영역을 점검하여 내가 놓치고 있는 균형을 시각화합니다." },
         { id: "ikigai", name: "이키가이 찾기", href: "/ikigai/", category: "자기계발", desc: "좋아하고 잘하는 일의 교집합 발견", tags: ["진로", "직업", "행복"], icon: "🌸", guide: "좋아하는 일, 잘하는 일, 돈 되는 일, 세상이 원하는 일의 교집합인 '삶의 목적'을 찾습니다." },
         { id: "johari", name: "조하리의 창", href: "/johari/", category: "자기계발", desc: "나와 타인의 인식을 통한 소통 분석", tags: ["인간관계", "심리", "소통"], icon: "🪟", guide: "내가 아는 나와 남이 보는 나를 비교하여, 인간관계의 소통 문제를 진단합니다." },
@@ -125,4 +112,74 @@ const ParanLabCore = {
                                     `<span class="text-[10px] font-bold text-rose-400 flex items-center gap-1">프라이버시 모드 (저장 안함)</span>`
                                 }
                             </div>
-                            <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}
+                            <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1>
+                            <p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p>
+                        </div>
+                    </div>
+                </div>
+            `;
+        },
+        footer: function(familySites) {
+            const sitesHtml = familySites.map(s => `
+                <a href="${s.href}" target="_blank" class="hover:text-blue-600 transition-colors">${s.name}</a>
+            `).join('<span class="text-slate-200">|</span>');
+
+            return `
+                <footer class="max-w-6xl mx-auto px-6 py-16 mt-12 border-t border-slate-100 text-center no-print">
+                    <div class="mb-12">
+                        <h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4>
+                        <div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">
+                            ${sitesHtml}
+                        </div>
+                    </div>
+                    <div class="mb-12">
+                        <h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4>
+                        <a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
+                            paranbreak@gmail.com
+                        </a>
+                    </div>
+                    <div class="mb-10">
+                        <button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다. 공용 PC라면 반드시 실행하세요.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">
+                            입력 데이터 초기화 (개인정보 보호)
+                        </button>
+                    </div>
+                    <p class="text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p>
+                </footer>
+            `;
+        }
+    },
+
+    injectFavicon: function() {
+        const link = document.createElement('link');
+        link.rel = 'icon';
+        link.href = 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%232563eb%22/><text y=%22.9em%22 x=%2250%%22 font-size=%2270%22 text-anchor=%22middle%22 fill=%22white%22 font-family=%22sans-serif%22 font-weight=%22bold%22>P</text></svg>';
+        document.head.appendChild(link);
+    },
+
+    render: function() {
+        this.initPrivacyGuard();
+        this.injectFavicon();
+        const root = document.getElementById('root');
+        if (!root) return;
+        const currentPath = window.location.pathname;
+        const currentTool = this.toolsList.find(t => currentPath.includes(t.href));
+        const isAutoSaveOn = this.isAutoSaveEnabled();
+
+        const headerElem = document.createElement('div');
+        headerElem.innerHTML = this.layout.header(this.toolsList, isAutoSaveOn);
+        document.body.insertBefore(headerElem, document.body.firstChild);
+
+        if (currentTool && currentPath !== "/" && currentPath !== "/index.html") {
+            const toolHeaderElem = document.createElement('div');
+            toolHeaderElem.innerHTML = this.layout.toolHeader(currentTool, isAutoSaveOn);
+            root.parentNode.insertBefore(toolHeaderElem, root);
+        }
+
+        const footerElem = document.createElement('div');
+        footerElem.innerHTML = this.layout.footer(this.familySites);
+        document.body.appendChild(footerElem);
+    }
+};
+
+window.addEventListener('load', () => ParanLabCore.render());
