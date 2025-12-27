@@ -4,19 +4,25 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AHP 분석 | 이직, 자동차 구매 결정 장애 해결 도구 | 파란랩</title>
-    <meta name="description" content="결정하기 힘든 고민이 있으신가요? AHP(계층 분석 과정) 도구를 통해 여러 후보 중 최선의 선택을 수학적으로 도출해 보세요. 이직, 이사, 쇼핑 결정에 최적화되어 있습니다.">
+    <meta name="description" content="결정하기 힘든 고민이 있으신가요? AHP(계층 분석 과정) 도구를 통해 여러 후보 중 최선의 선택을 수학적으로 도출해 보세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;} .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; }
+        .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
+    </style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+
+        <!-- SEO 텍스트 섹션 -->
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">AHP 분석이란 무엇인가요?</h2>
             <p><strong>AHP(Analytic Hierarchy Process, 계층 분석 과정)</strong>는 복잡한 의사결정 상황에서 인간의 주관적인 선호도를 수학적으로 계산하여 최적의 대안을 찾아주는 도구입니다. 1970년대 토마스 사티 교수가 고안한 이 방식은 현재 전 세계 비즈니스 현장에서 가장 널리 쓰이는 결정 모델 중 하나입니다.</p>
             <h3 class="text-lg font-bold text-slate-700 mt-8">언제 사용하면 좋은가요?</h3>
@@ -25,11 +31,12 @@
                 <li>조건이 다른 여러 회사 중 이직할 곳을 정해야 할 때</li>
                 <li>신혼집이나 이사 갈 동네를 결정해야 할 때</li>
             </ul>
-            <p>파란랩은 복잡한 행렬 계산을 <strong>직관적인 비중 조절 바</strong>로 재설계하여 누구나 쉽게 전문적인 보고서를 얻을 수 있도록 만들었습니다.</p>
         </section>
     </div>
+
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
+
         function AhpApp() {
             const saved = JSON.parse(localStorage.getItem('paranlab-ahp') || '{}');
             const [step, setStep] = useState(saved.step || 1);
@@ -70,6 +77,25 @@
                 }).sort((a, b) => b.score - a.score);
             }, [step]);
 
+            // [기능] HTML 저장용 데이터 생성
+            const handleSaveHtml = () => {
+                const content = finalResults.map((res, i) => `
+                    <div class="box">
+                        <strong>${i + 1}위: ${res.name}</strong><br>
+                        종합 점수: ${res.score.toFixed(0)}점
+                    </div>
+                `).join('');
+                ParanLabCore.saveAsHtml(`AHP 분석 결과: ${goal}`, content, 'ahp-report');
+            };
+
+            // [기능] 텍스트 복사용 데이터 생성
+            const handleCopyText = () => {
+                const text = `[파란랩 AHP 분석 보고서]\n주제: ${goal || "미정"}\n\n` + 
+                    finalResults.map((res, i) => `${i+1}위: ${res.name} (${res.score.toFixed(0)}점)`).join('\n') +
+                    `\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
+                ParanLabCore.copyToClipboard(text);
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step < 6 ? (
@@ -82,15 +108,41 @@
                         </div>
                     ) : (
                         <div className="space-y-6">
+                            {/* [중요] 이미지 저장용 카드 영역 */}
                             <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <div className="flex justify-between items-center mb-10 border-b pb-6"><div className="text-left"><h2 className="text-3xl font-black text-slate-900">의사결정 분석 리포트</h2><p className="text-blue-600 font-bold">주제: {goal || "미정"}</p></div><div className="text-right text-[10px] font-black text-slate-300 uppercase tracking-widest">Paran Lab<br/>Decision Science</div></div>
-                                <div className="space-y-6 mb-10">{finalResults.map((res, i) => (<div key={i} className={`p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}><div className="flex justify-between items-center"><div className="text-left"><span className={`text-xs font-black px-4 py-1.5 rounded-full mb-3 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}순위 추천</span><h3 className="text-3xl font-black text-slate-900">{res.name}</h3></div><div className="text-right"><p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">종합 점수</p><span className="text-6xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span></div></div></div>))}</div>
+                                <div className="flex justify-between items-center mb-10 border-b pb-6 text-left">
+                                    <div>
+                                        <h2 className="text-3xl font-black text-slate-900">의사결정 분석 리포트</h2>
+                                        <p className="text-blue-600 font-bold">주제: {goal || "미정"}</p>
+                                    </div>
+                                    <div className="text-right text-[10px] font-black text-slate-300 uppercase tracking-widest">Paran Lab<br/>Decision Science</div>
+                                </div>
+                                <div className="space-y-6 mb-10">
+                                    {finalResults.map((res, i) => (
+                                        <div key={i} className={`p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
+                                            <div className="flex justify-between items-center">
+                                                <div className="text-left"><span className={`text-xs font-black px-4 py-1.5 rounded-full mb-3 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}순위 추천</span><h3 className="text-3xl font-black text-slate-900">{res.name}</h3></div>
+                                                <div className="text-right"><p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">종합 점수</p><span className="text-6xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span></div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
                                 <p className="text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className="grid grid-cols-1 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'ahp-report')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl flex items-center justify-center gap-2">리포트 이미지로 저장 (PNG)</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                            
+                            {/* [중요] 공통 기능 버튼 3종 세트 */}
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'ahp-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2 hover:bg-slate-800 transition-all">
+                                    🖼️ 이미지 저장
+                                </button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2 hover:bg-blue-500 transition-all">
+                                    📄 HTML 다운로드
+                                </button>
+                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2 hover:bg-emerald-500 transition-all">
+                                    📋 결과 복사
+                                </button>
                             </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
