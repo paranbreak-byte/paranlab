@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
@@ -18,24 +19,12 @@
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="ikigai-app" class="max-w-3xl mx-auto py-10 px-4"></div>
-
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">이키가이(Ikigai)란 무엇인가요?</h2>
-            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-                <p><strong>이키가이(Ikigai)</strong>는 일본어로 '살아가는 보람' 혹은 '존재하는 이유'를 뜻합니다. 오키나와 장수 마을의 비결로 알려진 이 개념은 현대인들에게 직업적 만족과 삶의 행복을 동시에 찾는 프레임워크로 사랑받고 있습니다.</p>
-                <h3 class="text-lg font-bold text-slate-700 mt-8">4가지 핵심 질문</h3>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong>What you LOVE:</strong> 당신이 사랑하고 즐거워하는 일</li>
-                    <li><strong>What you are GOOD AT:</strong> 당신이 남들보다 잘하는 재능</li>
-                    <li><strong>What the world NEEDS:</strong> 세상이 당신에게 필요로 하는 가치</li>
-                    <li><strong>What you can be PAID FOR:</strong> 경제적 보상을 받을 수 있는 일</li>
-                </ul>
-                <p>이 네 가지가 모두 만나는 지점이 바로 당신의 '이키가이'입니다. 파란랩과 함께 당신의 행복한 교집합을 찾아보세요.</p>
-            </div>
+        <div id="app-container" class="max-w-3xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">이키가이(Ikigai)란?</h2>
+            <p><strong>이키가이</strong>는 좋아하는 것, 잘하는 것, 세상이 필요한 것, 수익이 되는 것의 교집합을 찾아 삶의 보람을 발견하는 기법입니다.</p>
         </section>
     </div>
-
     <script type="text/babel">
         const { useState, useEffect } = React;
         function IkigaiApp() {
@@ -43,18 +32,7 @@
             const [step, setStep] = useState(saved.step || 1);
             const [data, setData] = useState(saved.data || { love: "", talent: "", need: "", money: "" });
 
-            useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-ikigai', JSON.stringify({ step, data }));
-                }
-            }, [step, data]);
-
-            const sections = [
-                { id: 'love', title: '좋아하는 것', color: 'bg-rose-100', text: 'text-rose-600' },
-                { id: 'talent', title: '잘하는 것', color: 'bg-blue-100', text: 'text-blue-600' },
-                { id: 'need', title: '세상이 필요한 것', color: 'bg-emerald-100', text: 'text-emerald-600' },
-                { id: 'money', title: '수익이 되는 것', color: 'bg-amber-100', text: 'text-amber-600' }
-            ];
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-ikigai', JSON.stringify({ step, data })); }, [step, data]);
 
             return (
                 <div className="animate-in fade-in duration-500">
@@ -62,34 +40,42 @@
                         <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
                             <h2 className="text-2xl font-black text-slate-900 mb-8 text-center">4가지 핵심 질문</h2>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                                {sections.map(s => (
-                                    <div key={s.id} className={`${s.color} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
-                                        <h3 className={`font-black ${s.text} mb-2`}>{s.title}</h3>
-                                        <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} placeholder="내용을 입력하세요..." className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" />
+                                {[{id:'love',t:'좋아하는 것',c:'bg-rose-100'},{id:'talent',t:'잘하는 것',c:'bg-blue-100'},{id:'need',t:'세상이 필요한 것',c:'bg-emerald-100'},{id:'money',t:'수익이 되는 것',c:'bg-amber-100'}].map(s => (
+                                    <div key={s.id} className={`${s.c} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
+                                        <h3 className="font-black mb-2">{s.t}</h3>
+                                        <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} placeholder="내용을 입력하세요..." className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" />
                                     </div>
                                 ))}
                             </div>
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl">이키가이 확인하기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-12 text-rose-600">나의 이키가이 지도</h2>
-                            <div className="relative w-full max-w-md mx-auto mb-12 aspect-square">
-                                <svg viewBox="0 0 400 400" className="w-full h-full">
-                                    <circle cx="200" cy="150" r="100" fill="#fecdd3" className="venn-circle" />
-                                    <circle cx="150" cy="230" r="100" fill="#bfdbfe" className="venn-circle" />
-                                    <circle cx="250" cy="230" r="100" fill="#a7f3d0" className="venn-circle" />
-                                    <circle cx="200" cy="280" r="100" fill="#fde68a" className="venn-circle" />
-                                    <text x="200" y="235" textAnchor="middle" className="text-[14px] font-black fill-slate-800">IKIGAI</text>
-                                </svg>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-4xl font-black text-slate-900 mb-12 text-rose-600">나의 이키가이 지도</h2>
+                                <div className="relative w-full max-w-md mx-auto mb-12 aspect-square">
+                                    <svg viewBox="0 0 400 400" className="w-full h-full">
+                                        <circle cx="200" cy="150" r="100" fill="#fecdd3" className="venn-circle" />
+                                        <circle cx="150" cy="230" r="100" fill="#bfdbfe" className="venn-circle" />
+                                        <circle cx="250" cy="230" r="100" fill="#a7f3d0" className="venn-circle" />
+                                        <circle cx="200" cy="280" r="100" fill="#fde68a" className="venn-circle" />
+                                        <text x="200" y="235" textAnchor="middle" className="text-[14px] font-black fill-slate-800">IKIGAI</text>
+                                    </svg>
+                                </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'ikigai-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`이키가이 결과`, ``, 'ikigai-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[이키가이 결과]\n좋아하는 것: ${data.love}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('ikigai-app')).render(<IkigaiApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<IkigaiApp />);
     </script>
 </body>
 </html>
