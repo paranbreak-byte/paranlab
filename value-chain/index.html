@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>가치 사슬 분석 (Value Chain) | 비즈니스 프로세스 강점 진단 도구 | 파란랩</title>
+    <meta name="description" content="당신의 비즈니스에서 진짜 가치가 만들어지는 곳은 어디인가요? 가치 사슬 분석을 통해 원재료 도입부터 서비스까지 각 단계의 경쟁력을 점검해 보세요.">
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <div id="vc-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">가치 사슬(Value Chain) 분석이란?</h2>
+            <p>마이클 포터가 제안한 <strong>가치 사슬 분석</strong>은 제품이나 서비스가 고객에게 전달되기까지의 모든 과정을 사슬처럼 연결하여 분석하는 도구입니다. 각 단계에서 어떤 가치가 더해지는지, 어디서 비용이 낭비되는지 파악하여 경쟁 우위를 확보합니다.</p>
+        </section>
+    </div>
+    <script type="text/babel">
+        const { useState, useEffect } = React;
+        function VcApp() {
+            const saved = JSON.parse(localStorage.getItem('paranlab-vc') || '{}');
+            const [data, setData] = useState(saved.data || { inbound:"", ops:"", outbound:"", marketing:"", service:"" });
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-vc', JSON.stringify({ data })); }, [data]);
+            const steps = [
+                { id: 'inbound', title: '물류 도입', desc: '원재료 확보, 데이터 수집' },
+                { id: 'ops', title: '운영/생산', desc: '제품 제조, 서비스 개발' },
+                { id: 'outbound', title: '물류 출고', desc: '배송, 유통, 전달' },
+                { id: 'marketing', title: '마케팅/판매', desc: '홍보, 영업, 가격 전략' },
+                { id: 'service', title: '사후 서비스', desc: 'A/S, 고객 피드백 관리' }
+            ];
+            return (
+                <div className="animate-in fade-in duration-500">
+                    <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                        <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">비즈니스 가치 사슬 점검</h2>
+                        <div className="space-y-6">
+                            {steps.map(s => (
+                                <div key={s.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                    <h3 className="font-black text-blue-600 mb-1">{s.title}</h3>
+                                    <p className="text-[10px] text-slate-400 font-bold mb-4 uppercase">{s.desc}</p>
+                                    <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]:e.target.value})} className="w-full h-24 bg-white rounded-2xl p-4 outline-none focus:ring-4 ring-blue-100 resize-none text-sm font-medium" placeholder="이 단계의 강점이나 개선점을 적으세요..." />
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            );
+        }
+        ReactDOM.createRoot(document.getElementById('vc-app')).render(<VcApp />);
+    </script>
+</body>
+</html>
