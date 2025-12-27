@@ -3,181 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>로직 트리 문제 해결 | 파란랩</title>
+    <title>로직 트리 문제 해결 | 논리적 사고와 문제 분해 도구 | 파란랩</title>
+    <meta name="description" content="복잡한 문제를 해결 가능한 작은 단위로 쪼개보세요. 로직 트리 기법을 통해 문제의 원인을 파악하고 구체적인 실행 계획을 수립할 수 있습니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-        .tree-line { position: relative; }
-        .tree-line::before { content: ''; position: absolute; left: -20px; top: 50%; width: 20px; height: 2px; background: #e2e8f0; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="logic-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">로직 트리(Logic Tree)란?</h2>
+            <p><strong>로직 트리</strong>는 주요 과제를 나무 모양으로 분해하여 논리적으로 정리하는 기법입니다. 맥킨지 등 글로벌 컨설팅 펌에서 문제 해결의 기본 도구로 사용하며, '중복 없이, 누락 없이(MECE)' 생각하는 것이 핵심입니다.</p>
+            <p>거대한 문제를 해결 가능한 수준의 작은 조각으로 나누다 보면, 지금 당장 무엇을 해야 할지 명확해집니다.</p>
+        </section>
     </div>
-
     <script type="text/babel">
-        const { useState } = React;
-
+        const { useState, useEffect } = React;
         function LogicApp() {
-            const [step, setStep] = useState(1); // 1: 문제정의, 2: 1단계 분해, 3: 2단계 분해, 4: 결과
-            const [mainProblem, setMainProblem] = useState("");
-            const [branches, setBranches] = useState([
-                { id: 1, text: "", subs: ["", ""] },
-                { id: 2, text: "", subs: ["", ""] },
-                { id: 3, text: "", subs: ["", ""] }
-            ]);
-
-            const updateBranch = (idx, val) => {
-                const newBranches = [...branches];
-                newBranches[idx].text = val;
-                setBranches(newBranches);
-            };
-
-            const updateSub = (bIdx, sIdx, val) => {
-                const newBranches = [...branches];
-                newBranches[bIdx].subs[sIdx] = val;
-                setBranches(newBranches);
-            };
-
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>로직 트리 보고서</title><style>body{font-family:sans-serif;padding:40px;} .node{padding:15px; margin:10px; border:1px solid #eee; border-radius:10px; background:#f8fafc;} .main{background:#2563eb; color:white; font-weight:bold;}</style></head>
-                    <body>
-                        <h1>🌳 로직 트리 분석 보고서</h1>
-                        <div class="node main">핵심 문제: ${mainProblem}</div>
-                        ${branches.map(b => `
-                            <div style="margin-left:30px;">
-                                <div class="node">└─ ${b.text}</div>
-                                ${b.subs.map(s => `<div style="margin-left:30px;" class="node">   └─ ${s}</div>`).join('')}
-                            </div>
-                        `).join('')}
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `logic_tree_${new Date().getTime()}.html`;
-                a.click();
-            };
-
-            const copyToClipboard = () => {
-                let text = `[파란랩 로직 트리 보고서]\n핵심 문제: ${mainProblem}\n\n`;
-                branches.forEach(b => {
-                    text += `■ ${b.text}\n`;
-                    b.subs.forEach(s => { text += `  - ${s}\n`; });
-                });
-                text += `\n문제를 쪼개면 해결책이 보입니다. 파란랩(paranlab.com)`;
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            };
-
+            const saved = JSON.parse(localStorage.getItem('paranlab-logic') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [mainProblem, setMainProblem] = useState(saved.mainProblem || "");
+            const [branches, setBranches] = useState(saved.branches || [{ id: 1, text: "", subs: ["", ""] }, { id: 2, text: "", subs: ["", ""] }]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-logic', JSON.stringify({ step, mainProblem, branches })); }, [step, mainProblem, branches]);
+            const updateBranch = (idx, val) => { const n = [...branches]; n[idx].text = val; setBranches(n); };
+            const updateSub = (bIdx, sIdx, val) => { const n = [...branches]; n[bIdx].subs[sIdx] = val; setBranches(n); };
             return (
                 <div className="animate-in fade-in duration-500">
-                    {/* STEP 1: 핵심 문제 정의 */}
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">해결하고 싶은 큰 문제는?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">가장 먼저 해결해야 할 핵심 과제를 적어주세요.</p>
-                            <input value={mainProblem} onChange={(e)=>setMainProblem(e.target.value)} placeholder="예: 유튜브 구독자 1만 명 달성하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">문제 쪼개기 시작</button>
+                            <input value={mainProblem} onChange={(e)=>setMainProblem(e.target.value)} placeholder="예: 유튜브 구독자 1만 명 달성하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">문제 쪼개기 시작</button>
                         </div>
-                    )}
-
-                    {/* STEP 2: 1단계 분해 */}
-                    {step === 2 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-2">문제를 3가지 덩어리로 나눠보세요</h2>
-                            <p className="text-slate-500 mb-10 font-medium">핵심 문제: <span className="text-blue-600 font-black">{mainProblem}</span></p>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                                {branches.map((b, i) => (
-                                    <div key={b.id} className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100">
-                                        <label className="block text-[10px] font-black text-blue-400 uppercase mb-2">분류 {i+1}</label>
-                                        <textarea value={b.text} onChange={(e)=>updateBranch(i, e.target.value)} placeholder="어떤 요소가 있나요?" className="w-full h-24 bg-white rounded-2xl p-4 outline-none focus:ring-4 ring-blue-200 resize-none text-sm font-bold" />
+                    ) : (
+                        <div className="space-y-8">
+                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-800 mb-8">논리적 분해</h2>
+                                {branches.map((b, bIdx) => (
+                                    <div key={b.id} className="mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
+                                        <input value={b.text} onChange={(e)=>updateBranch(bIdx, e.target.value)} placeholder="상위 분류" className="w-full p-4 mb-4 bg-white rounded-xl font-black text-blue-600 outline-none border border-blue-100" />
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                            {b.subs.map((s, sIdx) => <input key={sIdx} value={s} onChange={(e)=>updateSub(bIdx, sIdx, e.target.value)} placeholder="세부 실행 방안" className="p-4 bg-white rounded-xl border border-slate-100 outline-none text-sm font-medium" />)}
+                                        </div>
                                     </div>
                                 ))}
                             </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">더 자세히 쪼개기</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 3: 2단계 분해 (실행 계획) */}
-                    {step === 3 && (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-8">이제 구체적인 행동을 적어보세요</h2>
-                                <div className="space-y-10">
-                                    {branches.map((b, bIdx) => (
-                                        <div key={b.id} className="relative pl-8 border-l-4 border-blue-100">
-                                            <h3 className="text-lg font-black text-blue-600 mb-4">● {b.text || `분류 ${bIdx+1}`}</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                                {b.subs.map((s, sIdx) => (
-                                                    <input key={sIdx} value={s} onChange={(e)=>updateSub(bIdx, sIdx, e.target.value)} placeholder="구체적인 실행 방법" className="p-4 bg-slate-50 rounded-xl border border-slate-100 outline-none focus:bg-white focus:border-blue-500 font-medium text-sm" />
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(4)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">최종 트리 확인</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {/* STEP 4: 결과 리포트 */}
-                    {step === 4 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-2 text-blue-600">문제 해결 지도</h2>
-                            <p className="text-slate-500 mb-12 font-medium">복잡했던 문제가 명확한 실행 계획으로 정리되었습니다.</p>
-                            
-                            <div className="text-left space-y-8 mb-12">
-                                <div className="p-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg inline-block">
-                                    {mainProblem}
-                                </div>
-                                
-                                <div className="space-y-6">
-                                    {branches.map((b, bIdx) => (
-                                        <div key={b.id} className="ml-6 space-y-4">
-                                            <div className="p-4 bg-blue-50 text-blue-700 rounded-xl font-bold border border-blue-100 inline-block">
-                                                └─ {b.text}
-                                            </div>
-                                            <div className="ml-10 space-y-2">
-                                                {b.subs.map((s, sIdx) => (
-                                                    <div key={sIdx} className="p-3 bg-slate-50 text-slate-600 rounded-lg border border-slate-100 text-sm font-medium">
-                                                        └─ {s}
-                                                    </div>
-                                                ))}
-                                            </div>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={copyToClipboard} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
-                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('logic-app')).render(<LogicApp />);
     </script>
 </body>
