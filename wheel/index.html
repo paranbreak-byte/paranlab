@@ -9,6 +9,7 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
@@ -19,23 +20,12 @@
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="wheel-app" class="max-w-2xl mx-auto py-10 px-4"></div>
-
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
+        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">인생의 수레바퀴란?</h2>
-            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-                <p><strong>인생의 수레바퀴(Wheel of Life)</strong>는 코칭 분야에서 가장 널리 사용되는 자기 진단 도구입니다. 삶을 구성하는 주요 영역들을 수레바퀴의 살로 표현하고, 각 영역의 만족도를 점으로 연결하여 현재 내 삶의 '모양'을 확인하는 기법입니다.</p>
-                <h3 class="text-lg font-bold text-slate-700 mt-8">점검 포인트</h3>
-                <ul class="list-disc list-inside space-y-2">
-                    <li><strong>균형:</strong> 바퀴가 한쪽으로 찌그러져 있지는 않나요?</li>
-                    <li><strong>크기:</strong> 전체적인 만족도의 크기가 너무 작지는 않나요?</li>
-                    <li><strong>우선순위:</strong> 가장 점수가 낮은 영역을 위해 무엇을 할 수 있을까요?</li>
-                </ul>
-                <p>파란랩과 함께 정기적으로 삶을 점검하고 더 둥글고 큰 수레바퀴를 만들어 보세요.</p>
-            </div>
+            <p><strong>인생의 수레바퀴(Wheel of Life)</strong>는 삶의 주요 영역들을 점검하여 현재 내 삶의 균형 상태를 시각적으로 확인하는 도구입니다.</p>
         </section>
     </div>
-
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         function WheelApp() {
@@ -43,11 +33,7 @@
             const [step, setStep] = useState(saved.step || 1);
             const [scores, setScores] = useState(saved.scores || { "건강": 5, "커리어": 5, "재정": 5, "관계": 5, "즐거움": 5, "성장": 5, "환경": 5, "정신": 5 });
 
-            useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-wheel', JSON.stringify({ step, scores }));
-                }
-            }, [step, scores]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-wheel', JSON.stringify({ step, scores })); }, [step, scores]);
 
             const categories = Object.keys(scores);
             const points = useMemo(() => {
@@ -76,29 +62,37 @@
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 그래프 보기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-3xl font-black text-slate-900 mb-8">나의 인생 밸런스</h2>
-                            <div className="flex justify-center mb-10">
-                                <svg width="300" height="300" viewBox="0 0 300 300">
-                                    {[2, 4, 6, 8, 10].map(r => <circle key={r} cx="150" cy="150" r={(120 * r) / 10} className="radar-grid" />)}
-                                    {categories.map((_, i) => {
-                                        const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                                        return <line key={i} x1="150" y1="150" x2={150 + 120 * Math.cos(angle)} y2={150 + 120 * Math.sin(angle)} className="radar-grid" />;
-                                    })}
-                                    <polygon points={points} className="radar-line" />
-                                    {categories.map((cat, i) => {
-                                        const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                                        return <text key={cat} x={150 + 140 * Math.cos(angle)} y={150 + 140 * Math.sin(angle)} textAnchor="middle" className="text-[10px] font-black fill-slate-400">{cat}</text>;
-                                    })}
-                                </svg>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-3xl font-black text-slate-900 mb-8">나의 인생 밸런스</h2>
+                                <div className="flex justify-center mb-10">
+                                    <svg width="300" height="300" viewBox="0 0 300 300">
+                                        {[2, 4, 6, 8, 10].map(r => <circle key={r} cx="150" cy="150" r={(120 * r) / 10} className="radar-grid" />)}
+                                        {categories.map((_, i) => {
+                                            const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
+                                            return <line key={i} x1="150" y1="150" x2={150 + 120 * Math.cos(angle)} y2={150 + 120 * Math.sin(angle)} className="radar-grid" />;
+                                        })}
+                                        <polygon points={points} className="radar-line" />
+                                        {categories.map((cat, i) => {
+                                            const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
+                                            return <text key={cat} x={150 + 140 * Math.cos(angle)} y={150 + 140 * Math.sin(angle)} textAnchor="middle" className="text-[10px] font-black fill-slate-400">{cat}</text>;
+                                        })}
+                                    </svg>
+                                </div>
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'wheel-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`인생의 수레바퀴 결과`, ``, 'wheel-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[인생의 수레바퀴 결과]\n` + categories.map(c => `${c}: ${scores[c]}점`).join('\n'))} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('wheel-app')).render(<WheelApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<WheelApp />);
     </script>
 </body>
 </html>
