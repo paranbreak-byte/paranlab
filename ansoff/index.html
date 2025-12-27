@@ -3,156 +3,76 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>안소프 성장 전략 매트릭스 | 파란랩</title>
+    <title>안소프 성장 전략 매트릭스 | 비즈니스 확장 경로 진단 | 파란랩</title>
+    <meta name="description" content="사업을 어떻게 키울지 고민이신가요? 안소프 매트릭스를 통해 시장 침투, 제품 개발, 시장 개척, 다각화 중 당신에게 가장 적합한 성장 전략을 찾아보세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="ansoff-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">안소프 매트릭스(Ansoff Matrix)란?</h2>
+            <p><strong>안소프 매트릭스</strong>는 기업이 어떤 방향으로 성장해야 할지 결정할 때 사용하는 전략 기획 도구입니다. '제품'과 '시장'이라는 두 가지 축을 기준으로 4가지 성장 경로를 제시합니다.</p>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>시장 침투:</strong> 기존 시장에서 기존 제품의 점유율을 높이는 가장 안전한 전략</li>
+                <li><strong>제품 개발:</strong> 기존 고객에게 새로운 제품을 선보이는 전략</li>
+                <li><strong>시장 개척:</strong> 기존 제품을 새로운 시장이나 고객층에 판매하는 전략</li>
+                <li><strong>다각화:</strong> 새로운 시장에서 새로운 제품으로 도전하는 가장 위험하지만 잠재력이 큰 전략</li>
+            </ul>
+        </section>
     </div>
-
     <script type="text/babel">
-        const { useState, useMemo } = React;
-
+        const { useState, useEffect, useMemo } = React;
         function AnsoffApp() {
-            const [step, setStep] = useState(1); // 1: 주제, 2: 아이디어 분류, 3: 결과
-            const [subject, setSubject] = useState("");
-            const [ideas, setIdeas] = useState([
-                { id: 1, text: "", type: "penetration" }
-            ]);
-
-            const addIdea = () => setIdeas([...ideas, { id: Date.now(), text: "", type: "penetration" }]);
-            const updateIdea = (id, field, value) => {
-                setIdeas(ideas.map(i => i.id === id ? { ...i, [field]: value } : i));
-            };
-            const removeIdea = (id) => setIdeas(ideas.filter(i => i.id !== id));
-
-            const quadrants = useMemo(() => {
-                return {
-                    penetration: ideas.filter(i => i.type === "penetration"),
-                    marketDev: ideas.filter(i => i.type === "marketDev"),
-                    productDev: ideas.filter(i => i.type === "productDev"),
-                    diversification: ideas.filter(i => i.type === "diversification")
-                };
-            }, [ideas]);
-
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>안소프 성장 전략 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:800px;margin:0 auto;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;}.box{padding:20px;border-radius:15px;border:1px solid #eee;min-height:150px;}</style></head>
-                    <body>
-                        <h1>📈 안소프 성장 전략 보고서</h1>
-                        <p><strong>분석 주제:</strong> ${subject}</p>
-                        <div class="grid">
-                            <div class="box" style="background:#eff6ff;"><h3>1. 시장 침투 (기존 제품/시장)</h3>${quadrants.penetration.map(i=>`<div>• ${i.text}</div>`).join('')}</div>
-                            <div class="box" style="background:#ecfdf5;"><h3>2. 제품 개발 (신제품/기존시장)</h3>${quadrants.productDev.map(i=>`<div>• ${i.text}</div>`).join('')}</div>
-                            <div class="box" style="background:#fffbeb;"><h3>3. 시장 개척 (기존제품/신시장)</h3>${quadrants.marketDev.map(i=>`<div>• ${i.text}</div>`).join('')}</div>
-                            <div class="box" style="background:#fef2f2;"><h3>4. 다각화 (신제품/신시장)</h3>${quadrants.diversification.map(i=>`<div>• ${i.text}</div>`).join('')}</div>
-                        </div>
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `ansoff_strategy_${new Date().getTime()}.html`;
-                a.click();
-            };
-
+            const saved = JSON.parse(localStorage.getItem('paranlab-ansoff') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [subject, setSubject] = useState(saved.subject || "");
+            const [ideas, setIdeas] = useState(saved.ideas || [{ id: 1, text: "", type: "penetration" }]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-ansoff', JSON.stringify({ step, subject, ideas })); }, [step, subject, ideas]);
+            const quadrants = useMemo(() => ({
+                penetration: ideas.filter(i => i.type === "penetration"),
+                marketDev: ideas.filter(i => i.type === "marketDev"),
+                productDev: ideas.filter(i => i.type === "productDev"),
+                diversification: ideas.filter(i => i.type === "diversification")
+            }), [ideas]);
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 비즈니스를 키워볼까요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">성장 전략이 필요한 사업이나 프로젝트 이름을 적어주세요.</p>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 나의 온라인 쇼핑몰, 동네 빵집 성장 전략" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">전략 구상 시작</button>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 나의 온라인 쇼핑몰 성장 전략" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">전략 구상 시작</button>
                         </div>
-                    )}
-
-                    {step === 2 && (
+                    ) : (
                         <div className="space-y-8">
                             <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-6">성장 아이디어 분류하기</h2>
-                                <div className="space-y-4 mb-10">
-                                    {ideas.map((idea) => (
-                                        <div key={idea.id} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 flex flex-col md:flex-row gap-4 items-center">
-                                            <input value={idea.text} onChange={(e)=>updateIdea(idea.id, 'text', e.target.value)} placeholder="아이디어를 입력하세요" className="flex-1 p-4 bg-white rounded-xl outline-none font-bold border border-slate-200" />
-                                            <select value={idea.type} onChange={(e)=>updateIdea(idea.id, 'type', e.target.value)} className="p-4 bg-white rounded-xl font-bold border border-slate-200 outline-none text-sm">
-                                                <option value="penetration">시장 침투 (기존제품/기존시장)</option>
-                                                <option value="productDev">제품 개발 (신제품/기존시장)</option>
-                                                <option value="marketDev">시장 개척 (기존제품/신시장)</option>
-                                                <option value="diversification">다각화 (신제품/신시장)</option>
-                                            </select>
-                                            <button onClick={()=>removeIdea(idea.id)} className="text-slate-300 hover:text-red-500">✕</button>
-                                        </div>
-                                    ))}
-                                    <button onClick={addIdea} className="text-blue-600 font-black">+ 아이디어 추가</button>
-                                </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button>
-                                <button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-blue-200">전략 매트릭스 보기</button>
-                            </div>
-                        </div>
-                    )}
-
-                    {step === 3 && (
-                        <div className="space-y-8">
-                            <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">안소프 성장 매트릭스</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100">
-                                        <h3 className="text-blue-700 font-black mb-2">1. 시장 침투 (Penetration)</h3>
-                                        <p className="text-[10px] text-blue-400 font-bold mb-4 uppercase">가장 안전함: 기존 고객에게 더 많이 팔기</p>
-                                        <ul className="space-y-2 text-blue-900 font-bold text-sm">
-                                            {quadrants.penetration.map(i => <li key={i.id}>• {i.text}</li>)}
-                                        </ul>
+                                <h2 className="text-2xl font-black text-slate-900 mb-6">아이디어 분류</h2>
+                                {ideas.map(idea => (
+                                    <div key={idea.id} className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-slate-50 rounded-2xl">
+                                        <input value={idea.text} onChange={(e)=>setIdeas(ideas.map(i=>i.id===idea.id?{...i, text:e.target.value}:i))} placeholder="아이디어 내용" className="flex-1 p-3 rounded-xl border outline-none font-bold" />
+                                        <select value={idea.type} onChange={(e)=>setIdeas(ideas.map(i=>i.id===idea.id?{...i, type:e.target.value}:i))} className="p-3 rounded-xl border font-bold text-sm">
+                                            <option value="penetration">시장 침투</option><option value="productDev">제품 개발</option><option value="marketDev">시장 개척</option><option value="diversification">다각화</option>
+                                        </select>
+                                        <button onClick={()=>setIdeas(ideas.filter(i=>i.id!==idea.id))} className="text-rose-500 font-black px-2">✕</button>
                                     </div>
-                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100">
-                                        <h3 className="text-emerald-700 font-black mb-2">2. 제품 개발 (Product Dev)</h3>
-                                        <p className="text-[10px] text-emerald-400 font-bold mb-4 uppercase">보통 위험: 기존 고객을 위한 새로운 물건</p>
-                                        <ul className="space-y-2 text-emerald-900 font-bold text-sm">
-                                            {quadrants.productDev.map(i => <li key={i.id}>• {i.text}</li>)}
-                                        </ul>
-                                    </div>
-                                    <div className="p-8 bg-amber-50 rounded-[2.5rem] border-2 border-amber-100">
-                                        <h3 className="text-amber-700 font-black mb-2">3. 시장 개척 (Market Dev)</h3>
-                                        <p className="text-[10px] text-amber-400 font-bold mb-4 uppercase">보통 위험: 새로운 고객/지역 찾아가기</p>
-                                        <ul className="space-y-2 text-amber-900 font-bold text-sm">
-                                            {quadrants.marketDev.map(i => <li key={i.id}>• {i.text}</li>)}
-                                        </ul>
-                                    </div>
-                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100">
-                                        <h3 className="text-rose-700 font-black mb-2">4. 다각화 (Diversification)</h3>
-                                        <p className="text-[10px] text-rose-400 font-bold mb-4 uppercase">가장 위험: 새로운 시장에서 새로운 도전</p>
-                                        <ul className="space-y-2 text-rose-900 font-bold text-sm">
-                                            {quadrants.diversification.map(i => <li key={i.id}>• {i.text}</li>)}
-                                        </ul>
-                                    </div>
-                                </div>
+                                ))}
+                                <button onClick={()=>setIdeas([...ideas, {id:Date.now(), text:"", type:"penetration"}])} className="text-blue-600 font-black">+ 아이디어 추가</button>
                             </div>
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={()=>setStep(2)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700 mb-2">시장 침투</h3><ul className="text-sm space-y-1">{quadrants.penetration.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700 mb-2">제품 개발</h3><ul className="text-sm space-y-1">{quadrants.productDev.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
                             </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('ansoff-app')).render(<AnsoffApp />);
     </script>
 </body>
