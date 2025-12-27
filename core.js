@@ -1,6 +1,6 @@
 /**
- * Paran Lab Core Framework v8.0 (AdSense Integrated)
- * 모든 도구에 구글 애드센스 자동 삽입 및 데이터 관리 통합
+ * Paran Lab Core Framework v9.0 (High-Speed AdSense)
+ * 소유권 확인을 위해 광고 스크립트를 즉시 주입합니다.
  */
 
 const ParanLabCore = {
@@ -39,21 +39,18 @@ const ParanLabCore = {
         { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", desc: "하루 시간 사용의 효율성 및 낭비 점검", tags: ["시간관리", "갓생", "효율"], icon: "⏳", guide: "나의 24시간이 생산적인지, 소모적인지 시각화하여 시간 사용의 우선순위를 조정합니다." }
     ],
 
-    familySites: [
-        { name: "FactBomber", href: "https://factbomber.kr" }
-    ],
+    familySites: [{ name: "FactBomber", href: "https://factbomber.kr" }],
 
-    // [중요] 구글 애드센스 스크립트 자동 주입 함수
+    // [중요] 즉시 실행 함수로 변경 (소유권 확인 최적화)
     injectAdSense: function() {
+        if (document.querySelector('script[src*="adsbygoogle"]')) return;
         const adScript = document.createElement('script');
         adScript.async = true;
         adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145";
         adScript.crossOrigin = "anonymous";
         document.head.appendChild(adScript);
-        console.log("AdSense Script Injected.");
     },
 
-    // 공통 기능들 (이미지 저장, HTML 저장, 복사 등)
     saveAsImage: function(elementId, fileName) {
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -75,9 +72,7 @@ const ParanLabCore = {
         a.click();
     },
 
-    copyToClipboard: function(text) {
-        navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-    },
+    copyToClipboard: function(text) { navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!")); },
 
     initPrivacyGuard: function() {
         const isAutoSaveOff = localStorage.getItem('paranlab-autosave') === 'false';
@@ -89,9 +84,7 @@ const ParanLabCore = {
         }
     },
 
-    isAutoSaveEnabled: function() {
-        return localStorage.getItem('paranlab-autosave') !== 'false';
-    },
+    isAutoSaveEnabled: function() { return localStorage.getItem('paranlab-autosave') !== 'false'; },
 
     toggleAutoSave: function() {
         const current = this.isAutoSaveEnabled();
@@ -114,53 +107,15 @@ const ParanLabCore = {
                 const catTools = tools.filter(t => t.category === cat);
                 return `<div class="py-2"><div class="px-4 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">${cat}</div>${catTools.map(t => `<a href="${t.href}" class="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">${t.name}</a>`).join('')}</div>`;
             }).join('<div class="border-b border-slate-50"></div>');
-
-            return `
-                <header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 no-print">
-                    <div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center">
-                        <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a>
-                        <div class="flex items-center gap-4">
-                            <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
-                                <span class="hidden md:inline text-[10px] font-black ${isAutoSaveOn ? 'text-blue-600' : 'text-rose-500'} uppercase">${isAutoSaveOn ? 'Auto-Save ON' : 'Privacy Mode'}</span>
-                                <button onclick="ParanLabCore.toggleAutoSave()" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isAutoSaveOn ? 'bg-blue-600' : 'bg-slate-300'}"><span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isAutoSaveOn ? 'translate-x-5' : 'translate-x-1'}"></span></button>
-                            </div>
-                            <div class="relative group">
-                                <button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">전체 도구</button>
-                                <div class="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-y-auto max-h-[80vh] z-50">${menuHtml}</div>
-                            </div>
-                        </div>
-                    </div>
-                </header>
-            `;
+            return `<header class="border-b border-slate-100 bg-white/80 backdrop-blur-md sticky top-0 z-50 no-print"><div class="max-w-6xl mx-auto px-6 py-4 flex justify-between items-center"><a href="/" class="text-2xl font-black text-blue-600 tracking-tighter">PARAN LAB</a><div class="flex items-center gap-4"><div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100"><span class="hidden md:inline text-[10px] font-black ${isAutoSaveOn ? 'text-blue-600' : 'text-rose-500'} uppercase">${isAutoSaveOn ? 'Auto-Save ON' : 'Privacy Mode'}</span><button onclick="ParanLabCore.toggleAutoSave()" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isAutoSaveOn ? 'bg-blue-600' : 'bg-slate-300'}"><span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isAutoSaveOn ? 'translate-x-5' : 'translate-x-1'}"></span></button></div><div class="relative group"><button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">전체 도구</button><div class="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-y-auto max-h-[80vh] z-50">${menuHtml}</div></div></div></div></header>`;
         },
         toolHeader: function(tool, isAutoSaveOn) {
             if (!tool) return '';
-            return `
-                <div class="max-w-2xl mx-auto mt-8 mb-12 px-4 no-print">
-                    <div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl relative overflow-hidden">
-                        <div class="absolute top-0 right-0 p-10 opacity-10 text-8xl">${tool.icon}</div>
-                        <div class="relative z-10">
-                            <div class="flex justify-between items-start mb-4">
-                                <span class="inline-block px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">${tool.category} Tool</span>
-                                ${isAutoSaveOn ? `<span class="text-[10px] font-bold text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>자동 저장 중</span>` : `<span class="text-[10px] font-bold text-rose-400 flex items-center gap-1">프라이버시 모드 (저장 안함)</span>`}
-                            </div>
-                            <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1>
-                            <p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p>
-                        </div>
-                    </div>
-                </div>
-            `;
+            return `<div class="max-w-2xl mx-auto mt-8 mb-12 px-4 no-print"><div class="bg-slate-900 rounded-[2.5rem] p-8 md:p-10 text-white shadow-2xl relative overflow-hidden"><div class="absolute top-0 right-0 p-10 opacity-10 text-8xl">${tool.icon}</div><div class="relative z-10"><div class="flex justify-between items-start mb-4"><span class="inline-block px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">${tool.category} Tool</span>${isAutoSaveOn ? `<span class="text-[10px] font-bold text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>자동 저장 중</span>` : `<span class="text-[10px] font-bold text-rose-400 flex items-center gap-1">프라이버시 모드 (저장 안함)</span>`}</div><h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1><p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p></div></div></div>`;
         },
         footer: function(familySites) {
             const sitesHtml = familySites.map(s => `<a href="${s.href}" target="_blank" class="hover:text-blue-600 transition-colors">${s.name}</a>`).join('<span class="text-slate-200">|</span>');
-            return `
-                <footer class="max-w-6xl mx-auto px-6 py-16 mt-12 border-t border-slate-100 text-center no-print">
-                    <div class="mb-12"><h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4><div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">${sitesHtml}</div></div>
-                    <div class="mb-12"><h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4><a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">paranbreak@gmail.com</a></div>
-                    <div class="mb-10"><button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">입력 데이터 초기화 (개인정보 보호)</button></div>
-                    <p class="text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p>
-                </footer>
-            `;
+            return `<footer class="max-w-6xl mx-auto px-6 py-16 mt-12 border-t border-slate-100 text-center no-print"><div class="mb-12"><h4 class="text-slate-400 text-[10px] font-black uppercase tracking-[0.2em] mb-6">Family Sites</h4><div class="flex justify-center items-center gap-4 md:gap-8 text-sm font-bold text-slate-500">${sitesHtml}</div></div><div class="mb-12"><h4 class="text-slate-800 font-bold mb-2">도구 제보 및 피드백</h4><a href="mailto:paranbreak@gmail.com" class="inline-flex items-center gap-2 px-6 py-3 bg-slate-100 hover:bg-blue-50 text-blue-600 rounded-2xl text-sm font-bold transition-all">paranbreak@gmail.com</a></div><div class="mb-10"><button onclick="if(confirm('작성 중인 모든 도구의 입력 내용이 초기화됩니다.')){localStorage.clear(); location.reload();}" class="px-5 py-2.5 bg-white text-slate-400 rounded-xl text-[10px] font-black hover:text-rose-500 hover:border-rose-200 transition-all uppercase tracking-widest border border-slate-100 shadow-sm">입력 데이터 초기화 (개인정보 보호)</button></div><p class="text-slate-300 text-[10px] font-medium uppercase tracking-[0.2em]">© 2025 Paran Lab. All rights reserved.</p></footer>`;
         }
     },
 
@@ -172,7 +127,7 @@ const ParanLabCore = {
     },
 
     render: function() {
-        this.injectAdSense(); // [추가] 애드센스 스크립트 주입
+        this.injectAdSense(); // 즉시 실행
         this.initPrivacyGuard();
         this.injectFavicon();
         const root = document.getElementById('root');
@@ -194,4 +149,6 @@ const ParanLabCore = {
     }
 };
 
-window.addEventListener('load', () => ParanLabCore.render());
+// 스크립트 로드 즉시 실행 (window.onload를 기다리지 않음)
+ParanLabCore.injectAdSense();
+window.addEventListener('DOMContentLoaded', () => ParanLabCore.render());
