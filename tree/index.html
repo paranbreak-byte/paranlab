@@ -9,13 +9,14 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="tree-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-3xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">결정 트리(Decision Tree)란?</h2>
             <p><strong>결정 트리</strong>는 여러 가지 선택지와 그에 따른 불확실한 결과(시나리오)를 나무 가지 모양으로 시각화하여 분석하는 도구입니다. 각 결과가 발생할 확률과 그 가치를 곱하여 '기대 가치(Expected Value)'를 계산합니다.</p>
             <p>막연한 불안감 대신, 수학적인 기댓값을 비교함으로써 리스크를 최소화하고 이득을 최대화하는 결정을 내릴 수 있습니다.</p>
@@ -26,17 +27,40 @@
         function TreeApp() {
             const saved = JSON.parse(localStorage.getItem('paranlab-tree') || '{}');
             const [step, setStep] = useState(saved.step || 1);
+            const [subject, setSubject] = useState(saved.subject || "");
             const [options, setOptions] = useState(saved.options || [
                 { id: 1, text: "선택지 A", scenarios: [{ text: "성공", prob: 50, value: 8 }, { text: "실패", prob: 50, value: 2 }] },
                 { id: 2, text: "선택지 B", scenarios: [{ text: "성공", prob: 50, value: 7 }, { text: "실패", prob: 50, value: 4 }] }
             ]);
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-tree', JSON.stringify({ step, options })); }, [step, options]);
-            const results = useMemo(() => options.map(opt => ({ ...opt, ev: (opt.scenarios[0].prob * opt.scenarios[0].value + opt.scenarios[1].prob * opt.scenarios[1].value) / 100 })).sort((a,b)=>b.ev-a.ev), [options]);
+
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-tree', JSON.stringify({ step, subject, options })); }, [step, subject, options]);
+
+            const results = useMemo(() => options.map(opt => ({
+                ...opt,
+                ev: (opt.scenarios[0].prob * opt.scenarios[0].value + opt.scenarios[1].prob * opt.scenarios[1].value) / 100
+            })).sort((a, b) => b.ev - a.ev), [options]);
+
+            const handleSaveHtml = () => {
+                const content = results.map((res, i) => `<div class="box"><strong>${i+1}위: ${res.text}</strong><br>기대 만족도: ${res.ev.toFixed(1)}점</div>`).join('');
+                ParanLabCore.saveAsHtml(`결정 트리 분석 결과: ${subject}`, content, 'tree-report');
+            };
+
+            const handleCopyText = () => {
+                const text = `[파란랩 결정 트리 보고서]\n주제: ${subject}\n\n` + results.map((res, i) => `${i+1}위: ${res.text} (기대치: ${res.ev.toFixed(1)}점)`).join('\n');
+                ParanLabCore.copyToClipboard(text);
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-8">시나리오 설정</h2>
+                            <h2 className="text-3xl font-black mb-6">어떤 결정을 앞두고 있나요?</h2>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 신규 사업 추진 여부" className="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none text-lg font-bold mb-8" />
+                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">시나리오 설정하기</button>
+                        </div>
+                    ) : step === 2 ? (
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                            <h2 className="text-2xl font-black mb-8 text-center">상황별 확률과 만족도</h2>
                             {options.map(opt => (
                                 <div key={opt.id} className="p-6 bg-slate-50 rounded-[2rem] mb-8 border border-slate-100">
                                     <input value={opt.text} onChange={(e)=>setOptions(options.map(o=>o.id===opt.id?{...o, text:e.target.value}:o))} className="w-full p-3 mb-6 rounded-xl border font-black text-blue-600" />
@@ -58,25 +82,33 @@
                                     </div>
                                 </div>
                             ))}
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
+                            <button onClick={()=>setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">최적의 시나리오</h2>
-                            <div className="space-y-6 mb-10">
-                                {results.map((res, i) => (
-                                    <div key={res.id} className={`p-8 rounded-[2.5rem] border-4 ${i === 0 ? 'border-blue-600 bg-blue-50' : 'border-slate-50 bg-white'}`}>
-                                        <div className="flex justify-between items-center"><h3 className="text-2xl font-black">{res.text}</h3><span className="text-4xl font-black text-blue-600">{res.ev.toFixed(1)}점</span></div>
-                                    </div>
-                                ))}
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-3xl font-black text-slate-900 mb-10">최적의 시나리오 결과</h2>
+                                <div className="space-y-6 mb-10">
+                                    {results.map((res, i) => (
+                                        <div key={res.id} className={`p-8 rounded-[2.5rem] border-4 ${i === 0 ? 'border-blue-600 bg-blue-50' : 'border-slate-50 bg-white'}`}>
+                                            <div className="flex justify-between items-center"><h3 className="text-2xl font-black">{res.text}</h3><span className="text-4xl font-black text-blue-600">{res.ev.toFixed(1)}점</span></div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'tree-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('tree-app')).render(<TreeApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<TreeApp />);
     </script>
 </body>
 </html>
