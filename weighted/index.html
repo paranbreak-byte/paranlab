@@ -9,16 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="weighted-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">가중치 점수 모델이란?</h2>
-            <p><strong>가중치 점수 모델(Weighted Scoring Model)</strong>은 여러 대안을 평가할 때 각 평가 기준의 중요도가 서로 다를 경우 사용하는 의사결정 도구입니다. 각 기준에 가중치(Weight)를 부여하고, 후보별로 점수를 매겨 합산함으로써 가장 높은 가치를 지닌 대안을 선별합니다.</p>
-            <p>AHP보다 간편하면서도 단순 합산 방식보다 훨씬 정교한 결과를 제공하여 비즈니스 기획이나 고가의 제품 구매 결정에 널리 쓰입니다.</p>
+            <p><strong>가중치 점수 모델(Weighted Scoring Model)</strong>은 여러 대안을 평가할 때 각 평가 기준의 중요도가 서로 다를 경우 사용하는 의사결정 도구입니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -30,7 +30,11 @@
             const [crits, setCrits] = useState(saved.crits || [{ text: "가격", w: 5 }, { text: "성능", w: 5 }]);
             const [scores, setScores] = useState(saved.scores || {});
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-weighted', JSON.stringify({ step, alts, crits, scores })); }, [step, alts, crits, scores]);
+            useEffect(() => {
+                if (ParanLabCore.isAutoSaveEnabled()) {
+                    localStorage.setItem('paranlab-weighted', JSON.stringify({ step, alts, crits, scores }));
+                }
+            }, [step, alts, crits, scores]);
 
             const results = useMemo(() => {
                 const totalW = crits.reduce((a, b) => a + b.w, 0);
@@ -41,11 +45,21 @@
                 }).sort((a, b) => b.score - a.score);
             }, [step, alts, crits, scores]);
 
+            const handleSaveHtml = () => {
+                const content = results.map((res, i) => `<div class="box"><strong>${i+1}위: ${res.name}</strong> - ${res.score.toFixed(1)}점</div>`).join('');
+                ParanLabCore.saveAsHtml(`가중치 점수 분석 보고서`, content, 'weighted-report');
+            };
+
+            const handleCopyText = () => {
+                const text = `[파란랩 가중치 점수 보고서]\n${results.map((res, i) => `${i+1}위: ${res.name} (${res.score.toFixed(0)}점)`).join('\n')}\n\n파란랩(paranlab.com)`;
+                ParanLabCore.copyToClipboard(text);
+            };
+
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
+                    {step === 1 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-8">후보 및 기준 설정</h2>
+                            <h2 className="text-3xl font-black mb-8">후보 및 기준 설정</h2>
                             <div className="mb-8"><label className="text-xs font-black text-slate-400 uppercase">비교 후보</label>
                                 {alts.map((a, i) => <div key={i} className="flex gap-2 mb-2"><input value={a} onChange={(e)=>{const n=[...alts]; n[i]=e.target.value; setAlts(n);}} className="flex-1 p-3 bg-slate-50 rounded-xl font-bold" /><button onClick={()=>setAlts(alts.filter((_,idx)=>idx!==i))}>✕</button></div>)}
                                 <button onClick={()=>setAlts([...alts, ""])} className="text-blue-600 font-black">+ 후보 추가</button>
@@ -56,9 +70,10 @@
                             </div>
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">가중치 설정하기</button>
                         </div>
-                    ) : step === 2 ? (
+                    )}
+                    {step === 2 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-8 text-center">기준별 중요도(가중치)</h2>
+                            <h2 className="text-2xl font-black mb-8 text-center">기준별 중요도(가중치)</h2>
                             {crits.map((c, i) => (
                                 <div key={i} className="mb-6">
                                     <div className="flex justify-between font-bold mb-2"><span>{c.text}</span><span className="text-blue-600">{c.w}</span></div>
@@ -67,9 +82,10 @@
                             ))}
                             <button onClick={()=>setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">점수 입력하기</button>
                         </div>
-                    ) : step === 3 ? (
+                    )}
+                    {step === 3 && (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-10 text-center">후보별 점수 매기기</h2>
+                            <h2 className="text-2xl font-black mb-10 text-center">후보별 점수 매기기</h2>
                             {crits.map((c, cIdx) => (
                                 <div key={cIdx} className="p-6 bg-slate-50 rounded-[2rem] mb-8">
                                     <h3 className="font-black text-blue-900 mb-6">{c.text} 측면 점수</h3>
@@ -83,21 +99,29 @@
                             ))}
                             <button onClick={()=>setStep(4)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
                         </div>
-                    ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">최종 분석 결과</h2>
-                            {results.map((res, i) => (
-                                <div key={i} className={`p-8 rounded-[2.5rem] border-4 mb-6 ${i===0?'border-blue-600 bg-blue-50':'border-slate-50'}`}>
-                                    <div className="flex justify-between items-center"><h3 className="text-2xl font-black">{res.name}</h3><span className="text-4xl font-black text-blue-600">{res.score.toFixed(0)}점</span></div>
-                                </div>
-                            ))}
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
+                    )}
+                    {step === 4 && (
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">최종 분석 결과</h2>
+                                {results.map((res, i) => (
+                                    <div key={i} className={`p-8 rounded-[2.5rem] border-4 mb-6 ${i===0?'border-blue-500 bg-blue-50':'border-slate-50'}`}>
+                                        <div className="flex justify-between items-center"><h3 className="text-2xl font-black">{res.name}</h3><span className="text-4xl font-black text-blue-600">{res.score.toFixed(0)}점</span></div>
+                                    </div>
+                                ))}
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'weighted-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('weighted-app')).render(<WeightedApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<WeightedApp />);
     </script>
 </body>
 </html>
