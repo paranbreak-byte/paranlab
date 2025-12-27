@@ -3,104 +3,72 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMI 아이디어 평가 도구 | 파란랩</title>
+    <title>PMI 아이디어 평가 | 장점, 단점, 흥미로운 점 분석 도구 | 파란랩</title>
+    <meta name="description" content="새로운 아이디어가 떠올랐나요? PMI 기법을 통해 장점(Plus), 단점(Minus), 그리고 흥미로운 잠재력(Interesting)을 다각도로 분석하여 아이디어의 진짜 가치를 확인하세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
         <div id="pmi-app" class="max-w-4xl mx-auto py-10 px-4"></div>
+
+        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">PMI 기법이란 무엇인가요?</h2>
+            <div class="prose prose-slate text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
+                <p><strong>PMI(Plus, Minus, Interesting)</strong>는 창의적 사고의 대가 에드워드 드 보노가 제안한 아이디어 평가 도구입니다. 어떤 제안이나 아이디어를 접했을 때 즉각적으로 판단(좋다/나쁘다)하지 않고, 세 가지 관점에서 충분히 검토하도록 돕습니다.</p>
+                <h3 class="text-lg font-bold text-slate-700 mt-8">PMI의 세 가지 관점</h3>
+                <ul class="list-disc list-inside space-y-2">
+                    <li><strong>Plus (좋은 점):</strong> 아이디어가 가진 긍정적인 측면과 이득</li>
+                    <li><strong>Minus (나쁜 점):</strong> 아이디어가 가진 부정적인 측면과 리스크</li>
+                    <li><strong>Interesting (흥미로운 점):</strong> 좋고 나쁨을 떠나 이 아이디어가 가진 잠재력이나 특이한 점</li>
+                </ul>
+                <p>특히 'Interesting' 단계는 고정관념을 깨고 새로운 기회를 발견하게 하는 PMI만의 핵심적인 특징입니다.</p>
+            </div>
+        </section>
     </div>
 
     <script type="text/babel">
-        const { useState } = React;
-
+        const { useState, useEffect } = React;
         function PmiApp() {
-            const [step, setStep] = useState(1);
-            const [idea, setIdea] = useState("");
-            const [data, setData] = useState({ p: "", m: "", i: "" });
+            const saved = JSON.parse(localStorage.getItem('paranlab-pmi') || '{}');
+            const [step, setStep] = useState(saved.step || 1);
+            const [idea, setIdea] = useState(saved.idea || "");
+            const [data, setData] = useState(saved.data || { p: "", m: "", i: "" });
 
-            const saveAsHtml = () => {
-                const htmlContent = `
-                    <!DOCTYPE html>
-                    <html>
-                    <head><meta charset="UTF-8"><title>파란랩 PMI 분석 보고서</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;}h1{border-bottom:4px solid #f59e0b;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;border:1px solid #eee;}.p{background:#f0fdf4;}.m{background:#fef2f2;}.i{background:#eff6ff;}</style></head>
-                    <body>
-                        <h1>💡 PMI 아이디어 분석 보고서</h1>
-                        <p><strong>아이디어:</strong> ${idea || "미정"}</p>
-                        <div class="box p"><strong>Plus (좋은 점):</strong><br>${data.p || "없음"}</div>
-                        <div class="box m"><strong>Minus (나쁜 점):</strong><br>${data.m || "없음"}</div>
-                        <div class="box i"><strong>Interesting (흥미로운 점):</strong><br>${data.i || "없음"}</div>
-                        <div style="font-size:12px; color:#999; text-align:center; margin-top:40px;">© 2025 Paran Lab.</div>
-                    </body>
-                    </html>
-                `;
-                const blob = new Blob([htmlContent], { type: 'text/html' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `pmi_report_${new Date().getTime()}.html`;
-                a.click();
-            };
-
-            const copyToClipboard = () => {
-                const text = `[파란랩 PMI 아이디어 보고서]\n아이디어: ${idea || "미정"}\n\n1. Plus: ${data.p}\n2. Minus: ${data.m}\n3. Interesting: ${data.i}\n\n현명한 선택을 돕는 파란랩(paranlab.com)`;
-                navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
-            };
+            useEffect(() => {
+                if (ParanLabCore.isAutoSaveEnabled()) {
+                    localStorage.setItem('paranlab-pmi', JSON.stringify({ step, idea, data }));
+                }
+            }, [step, idea, data]);
 
             return (
                 <div className="animate-in fade-in duration-500">
-                    {step === 1 && (
+                    {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
                             <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 아이디어를 평가할까요?</h2>
-                            <p className="text-slate-500 mb-10 font-medium">새로운 계획이나 떠오른 생각을 입력해주세요.</p>
                             <input value={idea} onChange={(e)=>setIdea(e.target.value)} placeholder="예: 주 4일제 도입, 제주도 한 달 살기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-amber-500 rounded-[2rem] outline-none text-xl font-black transition-all" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-amber-500 text-white rounded-[2rem] font-black text-xl shadow-xl shadow-amber-200">평가 시작하기</button>
+                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-amber-500 text-white rounded-[2rem] font-black text-xl shadow-xl">평가 시작하기</button>
                         </div>
-                    )}
-
-                    {step === 2 && (
+                    ) : (
                         <div className="space-y-8">
                             <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-2">아이디어 다각도 분석</h2>
-                                <p className="text-slate-500 mb-10 font-medium">세 가지 관점에서 아이디어를 바라보세요.</p>
-                                
+                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">아이디어 다각도 분석</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100">
-                                        <h3 className="font-black text-emerald-700 mb-2">Plus (좋은 점)</h3>
-                                        <p className="text-[10px] text-emerald-400 mb-4 uppercase font-bold tracking-widest">이 아이디어의 긍정적인 면</p>
-                                        <textarea value={data.p} onChange={(e)=>setData({...data, p: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="무엇이 좋아지나요?" />
-                                    </div>
-                                    <div className="p-6 bg-red-50 rounded-[2rem] border-2 border-red-100">
-                                        <h3 className="font-black text-red-700 mb-2">Minus (나쁜 점)</h3>
-                                        <p className="text-[10px] text-red-400 mb-4 uppercase font-bold tracking-widest">이 아이디어의 부정적인 면</p>
-                                        <textarea value={data.m} onChange={(e)=>setData({...data, m: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="어떤 리스크가 있나요?" />
-                                    </div>
-                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100">
-                                        <h3 className="font-black text-blue-700 mb-2">Interesting (흥미로운 점)</h3>
-                                        <p className="text-[10px] text-blue-400 mb-4 uppercase font-bold tracking-widest">잠재력이나 특이한 점</p>
-                                        <textarea value={data.i} onChange={(e)=>setData({...data, i: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" placeholder="어떤 가능성이 보이나요?" />
-                                    </div>
+                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700 mb-4">Plus (좋은 점)</h3><textarea value={data.p} onChange={(e)=>setData({...data, p: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
+                                    <div className="p-6 bg-red-50 rounded-[2rem] border-2 border-red-100"><h3 className="font-black text-red-700 mb-4">Minus (나쁜 점)</h3><textarea value={data.m} onChange={(e)=>setData({...data, m: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
+                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700 mb-4">Interesting (흥미로운 점)</h3><textarea value={data.i} onChange={(e)=>setData({...data, i: e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none focus:ring-4 ring-white/50 resize-none text-sm font-medium" /></div>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 gap-4">
-                                <button onClick={saveAsHtml} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">리포트 다운로드 (.html)</button>
-                                <button onClick={copyToClipboard} className="py-6 bg-amber-500 text-white rounded-[2rem] font-black text-xl shadow-xl">텍스트 결과 복사하기</button>
-                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
-                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-
         ReactDOM.createRoot(document.getElementById('pmi-app')).render(<PmiApp />);
     </script>
 </body>
