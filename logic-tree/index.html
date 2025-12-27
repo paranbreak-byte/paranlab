@@ -9,16 +9,16 @@
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="logic-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">로직 트리(Logic Tree)란?</h2>
             <p><strong>로직 트리</strong>는 주요 과제를 나무 모양으로 분해하여 논리적으로 정리하는 기법입니다. 맥킨지 등 글로벌 컨설팅 펌에서 문제 해결의 기본 도구로 사용하며, '중복 없이, 누락 없이(MECE)' 생각하는 것이 핵심입니다.</p>
-            <p>거대한 문제를 해결 가능한 수준의 작은 조각으로 나누다 보면, 지금 당장 무엇을 해야 할지 명확해집니다.</p>
         </section>
     </div>
     <script type="text/babel">
@@ -28,9 +28,12 @@
             const [step, setStep] = useState(saved.step || 1);
             const [mainProblem, setMainProblem] = useState(saved.mainProblem || "");
             const [branches, setBranches] = useState(saved.branches || [{ id: 1, text: "", subs: ["", ""] }, { id: 2, text: "", subs: ["", ""] }]);
+
             useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-logic', JSON.stringify({ step, mainProblem, branches })); }, [step, mainProblem, branches]);
+
             const updateBranch = (idx, val) => { const n = [...branches]; n[idx].text = val; setBranches(n); };
             const updateSub = (bIdx, sIdx, val) => { const n = [...branches]; n[bIdx].subs[sIdx] = val; setBranches(n); };
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
@@ -40,25 +43,32 @@
                             <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">문제 쪼개기 시작</button>
                         </div>
                     ) : (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-800 mb-8">논리적 분해</h2>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
+                                <h2 className="text-2xl font-black text-slate-900 mb-8 text-center">로직 트리 분석 결과</h2>
+                                <div className="p-6 bg-blue-600 text-white rounded-2xl font-black text-xl mb-8 inline-block">{mainProblem}</div>
                                 {branches.map((b, bIdx) => (
-                                    <div key={b.id} className="mb-10 p-6 bg-slate-50 rounded-[2rem] border border-slate-100">
-                                        <input value={b.text} onChange={(e)=>updateBranch(bIdx, e.target.value)} placeholder="상위 분류" className="w-full p-4 mb-4 bg-white rounded-xl font-black text-blue-600 outline-none border border-blue-100" />
+                                    <div key={b.id} className="ml-6 mb-8 border-l-4 border-blue-100 pl-6">
+                                        <input value={b.text} onChange={(e)=>updateBranch(bIdx, e.target.value)} className="font-black text-blue-600 text-lg bg-transparent outline-none mb-4 w-full" placeholder="상위 분류" />
                                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            {b.subs.map((s, sIdx) => <input key={sIdx} value={s} onChange={(e)=>updateSub(bIdx, sIdx, e.target.value)} placeholder="세부 실행 방안" className="p-4 bg-white rounded-xl border border-slate-100 outline-none text-sm font-medium" />)}
+                                            {b.subs.map((s, sIdx) => <input key={sIdx} value={s} onChange={(e)=>updateSub(bIdx, sIdx, e.target.value)} className="p-3 bg-slate-50 rounded-xl border border-slate-100 outline-none text-sm" placeholder="세부 실행 방안" />)}
                                         </div>
                                     </div>
                                 ))}
+                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'logic-tree-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`로직 트리 결과`, `<div class='box'>핵심: ${mainProblem}</div>`, 'logic-tree-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[로직 트리 결과]\n핵심: ${mainProblem}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('logic-app')).render(<LogicApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<LogicApp />);
     </script>
 </body>
 </html>
