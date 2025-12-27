@@ -1,6 +1,6 @@
 /**
- * Paran Lab Core Framework v7.0 (Master System)
- * 모든 도구의 공통 기능(이미지/HTML저장, 복사, 프라이버시) 통합 관리
+ * Paran Lab Core Framework v8.0 (AdSense Integrated)
+ * 모든 도구에 구글 애드센스 자동 삽입 및 데이터 관리 통합
  */
 
 const ParanLabCore = {
@@ -43,7 +43,17 @@ const ParanLabCore = {
         { name: "FactBomber", href: "https://factbomber.kr" }
     ],
 
-    // [공통 기능] 이미지 저장 (html2canvas 활용)
+    // [중요] 구글 애드센스 스크립트 자동 주입 함수
+    injectAdSense: function() {
+        const adScript = document.createElement('script');
+        adScript.async = true;
+        adScript.src = "https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145";
+        adScript.crossOrigin = "anonymous";
+        document.head.appendChild(adScript);
+        console.log("AdSense Script Injected.");
+    },
+
+    // 공통 기능들 (이미지 저장, HTML 저장, 복사 등)
     saveAsImage: function(elementId, fileName) {
         const element = document.getElementById(elementId);
         if (!element) return;
@@ -55,17 +65,8 @@ const ParanLabCore = {
         });
     },
 
-    // [공통 기능] HTML 저장
     saveAsHtml: function(title, contentHtml, fileName) {
-        const htmlContent = `
-            <!DOCTYPE html>
-            <html>
-            <head><meta charset="UTF-8"><title>${title}</title>
-            <style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;line-height:1.6;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.footer{font-size:12px;color:#999;text-align:center;margin-top:40px;}</style>
-            </head>
-            <body><h1>📊 ${title}</h1>${contentHtml}<div class="footer">© 2025 Paran Lab.</div></body>
-            </html>
-        `;
+        const htmlContent = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>${title}</title><style>body{font-family:sans-serif;padding:40px;max-width:600px;margin:0 auto;line-height:1.6;}h1{border-bottom:4px solid #2563eb;padding-bottom:10px;}.box{padding:20px;border-radius:15px;margin-bottom:15px;background:#f8fafc;border:1px solid #eee;}.footer{font-size:12px;color:#999;text-align:center;margin-top:40px;}</style></head><body><h1>📊 ${title}</h1>${contentHtml}<div class="footer">© 2025 Paran Lab.</div></body></html>`;
         const blob = new Blob([htmlContent], { type: 'text/html' });
         const url = URL.createObjectURL(blob);
         const a = document.createElement('a');
@@ -74,12 +75,10 @@ const ParanLabCore = {
         a.click();
     },
 
-    // [공통 기능] 텍스트 복사
     copyToClipboard: function(text) {
         navigator.clipboard.writeText(text).then(() => alert("결과가 복사되었습니다!"));
     },
 
-    // 프라이버시 모드 로직
     initPrivacyGuard: function() {
         const isAutoSaveOff = localStorage.getItem('paranlab-autosave') === 'false';
         if (isAutoSaveOff) {
@@ -113,12 +112,7 @@ const ParanLabCore = {
             const categories = ["결정", "전략", "기획", "자기계발"];
             const menuHtml = categories.map(cat => {
                 const catTools = tools.filter(t => t.category === cat);
-                return `
-                    <div class="py-2">
-                        <div class="px-4 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">${cat}</div>
-                        ${catTools.map(t => `<a href="${t.href}" class="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">${t.name}</a>`).join('')}
-                    </div>
-                `;
+                return `<div class="py-2"><div class="px-4 py-1 text-[10px] font-black text-slate-400 uppercase tracking-widest">${cat}</div>${catTools.map(t => `<a href="${t.href}" class="block px-4 py-2 text-sm font-bold text-slate-700 hover:bg-blue-50 hover:text-blue-600 transition-colors">${t.name}</a>`).join('')}</div>`;
             }).join('<div class="border-b border-slate-50"></div>');
 
             return `
@@ -128,9 +122,7 @@ const ParanLabCore = {
                         <div class="flex items-center gap-4">
                             <div class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 rounded-full border border-slate-100">
                                 <span class="hidden md:inline text-[10px] font-black ${isAutoSaveOn ? 'text-blue-600' : 'text-rose-500'} uppercase">${isAutoSaveOn ? 'Auto-Save ON' : 'Privacy Mode'}</span>
-                                <button onclick="ParanLabCore.toggleAutoSave()" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isAutoSaveOn ? 'bg-blue-600' : 'bg-slate-300'}">
-                                    <span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isAutoSaveOn ? 'translate-x-5' : 'translate-x-1'}"></span>
-                                </button>
+                                <button onclick="ParanLabCore.toggleAutoSave()" class="relative inline-flex h-5 w-9 items-center rounded-full transition-colors ${isAutoSaveOn ? 'bg-blue-600' : 'bg-slate-300'}"><span class="inline-block h-3 w-3 transform rounded-full bg-white transition-transform ${isAutoSaveOn ? 'translate-x-5' : 'translate-x-1'}"></span></button>
                             </div>
                             <div class="relative group">
                                 <button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">전체 도구</button>
@@ -150,10 +142,7 @@ const ParanLabCore = {
                         <div class="relative z-10">
                             <div class="flex justify-between items-start mb-4">
                                 <span class="inline-block px-3 py-1 bg-blue-600 rounded-full text-[10px] font-black uppercase tracking-widest">${tool.category} Tool</span>
-                                ${isAutoSaveOn ? 
-                                    `<span class="text-[10px] font-bold text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>자동 저장 중</span>` : 
-                                    `<span class="text-[10px] font-bold text-rose-400 flex items-center gap-1">프라이버시 모드 (저장 안함)</span>`
-                                }
+                                ${isAutoSaveOn ? `<span class="text-[10px] font-bold text-emerald-400 flex items-center gap-1"><span class="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></span>자동 저장 중</span>` : `<span class="text-[10px] font-bold text-rose-400 flex items-center gap-1">프라이버시 모드 (저장 안함)</span>`}
                             </div>
                             <h1 class="text-3xl md:text-4xl font-black mb-4">${tool.name}</h1>
                             <p class="text-slate-400 font-medium leading-relaxed mb-6 text-sm md:text-base">${tool.guide}</p>
@@ -183,6 +172,7 @@ const ParanLabCore = {
     },
 
     render: function() {
+        this.injectAdSense(); // [추가] 애드센스 스크립트 주입
         this.initPrivacyGuard();
         this.injectFavicon();
         const root = document.getElementById('root');
