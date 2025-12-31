@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5 Whys 분석 | 문제 해결을 위한 근본 원인 분석 도구 | 파란랩</title>
-    <meta name="description" content="문제의 겉모습에 속지 마세요. '왜?'라는 질문을 5번 반복하여 진짜 원인을 찾아내는 5 Whys 기법으로 반복되는 실수를 방지하고 완벽한 해결책을 도출하세요.">
+    <meta name="description" content="반복되는 문제의 뿌리를 뽑으세요. 5 Whys 기법을 통해 현상 뒤에 숨겨진 진짜 원인을 찾아내고 완벽한 해결책을 도출하는 실전 가이드를 제공합니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -16,10 +16,14 @@
 <body class="bg-slate-50">
     <div id="root">
         <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">5 Whys 분석이란 무엇인가요?</h2>
-            <p><strong>5 Whys 분석</strong>은 토요타 자동차의 생산 방식을 혁신시킨 문제 해결 기법입니다. 어떤 현상이 발생했을 때 단순히 그 현상을 해결하는 데 그치지 않고, "왜?"라는 질문을 5번 연속으로 던져 문제의 가장 깊은 곳에 있는 '근본 원인(Root Cause)'을 찾아내는 것이 목적입니다.</p>
-            <p>파란랩의 5 Whys 도구는 단계별 질문을 통해 당신이 문제의 본질에 도달하도록 안내하며, 분석 결과를 깔끔한 리포트로 만들어 드립니다.</p>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+            <h2 class="text-2xl font-black text-slate-800 mb-6">5 Whys 분석으로 문제의 본질을 꿰뚫는 법</h2>
+            <p><strong>5 Whys 분석</strong>은 단순히 "왜?"라고 묻는 것이 아닙니다. 각 단계의 답변이 다음 질문의 근거가 되는 논리적 사슬을 만드는 과정입니다. 이 기법을 통해 우리는 임시방편이 아닌, 문제를 영구적으로 해결할 수 있는 '근본 원인'에 도달하게 됩니다.</p>
+            <h3 class="text-lg font-bold text-slate-700 mt-8">실전 활용 사례</h3>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>업무 실수:</strong> 왜 보고서 수치가 틀렸나? → 왜 검토 시간이 부족했나? → 왜 업무가 몰렸나?</li>
+                <li><strong>개인 습관:</strong> 왜 자꾸 늦잠을 자나? → 왜 밤에 늦게 자나? → 왜 스마트폰을 보나?</li>
+            </ul>
         </section>
     </div>
     <script type="text/babel">
@@ -30,15 +34,11 @@
             const [problem, setProblem] = useState(saved.problem || "");
             const [whys, setWhys] = useState(saved.whys || ["", "", "", "", ""]);
 
-            useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-5whys', JSON.stringify({ step, problem, whys }));
-                }
-            }, [step, problem, whys]);
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-5whys', JSON.stringify({ step, problem, whys })); }, [step, problem, whys]);
 
-            const handleSaveHtml = () => {
-                const content = whys.map((w, i) => `<div class="box"><strong>Why ${i+1}:</strong> ${w}</div>`).join('');
-                ParanLabCore.saveAsHtml(`5 Whys 분석 결과`, content, '5whys-report');
+            const applyTemplate = () => {
+                setProblem("이번 달 카드값이 너무 많이 나왔다");
+                setStep(1);
             };
 
             return (
@@ -46,10 +46,13 @@
                     {step <= 5 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
                             {step === 0 ? (
-                                <div>
+                                <div className="text-center">
                                     <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 문제가 발생했나요?</h2>
-                                    <input value={problem} onChange={(e)=>setProblem(e.target.value)} placeholder="예: 이번 달 카드값이 너무 많이 나왔다" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-violet-500 rounded-[2rem] outline-none text-xl font-black" />
-                                    <button onClick={()=>setStep(1)} className="w-full mt-10 py-6 bg-violet-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
+                                    <input value={problem} onChange={(e)=>setProblem(e.target.value)} placeholder="예: 업무 실수가 잦아졌다" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-violet-500 rounded-[2rem] outline-none text-xl font-black mb-8" />
+                                    <div className="flex flex-col gap-4">
+                                        <button onClick={()=>setStep(1)} className="w-full py-6 bg-violet-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
+                                        <button onClick={applyTemplate} className="text-violet-600 font-bold underline">생활 밀착형 예시 불러오기</button>
+                                    </div>
                                 </div>
                             ) : (
                                 <div>
@@ -69,14 +72,16 @@
                                         <div key={i} className="flex gap-4 items-start"><div className="w-8 h-8 bg-violet-50 text-violet-400 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-black">{i+1}</div><div className={`p-4 rounded-2xl flex-1 font-bold ${i === 4 ? 'bg-violet-600 text-white shadow-lg' : 'bg-slate-50 text-slate-600'}`}>{w}</div></div>
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div className="p-6 bg-violet-50 rounded-2xl border-2 border-dashed border-violet-200">
+                                    <h4 className="font-black text-violet-900 mb-2">💡 최종 솔루션</h4>
+                                    <p className="text-violet-700 font-medium">가장 하단의 <strong>[{whys[4]}]</strong> 요인을 해결하는 데 집중하세요.</p>
+                                </div>
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
                                 <button onClick={()=>ParanLabCore.saveAsImage('report-card', '5whys-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
                                 <button onClick={()=>ParanLabCore.copyToClipboard(`[5 Whys 분석 결과]\n문제: ${problem}\n근본원인: ${whys[4]}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                                <button onClick={()=>setStep(0)} className="py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm">다시 하기</button>
                             </div>
-                            <button onClick={()=>setStep(0)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
