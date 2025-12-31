@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>만다라트 계획표 | 오타니 쇼헤이 목표 달성법 | 파란랩</title>
-    <meta name="description" content="하나의 핵심 목표를 64개의 구체적인 행동으로 확장해 보세요. 오타니 쇼헤이가 사용하여 유명해진 만다라트 기법으로 당신의 꿈을 현실로 만듭니다.">
+    <title>만다라트 계획표 만들기 | 오타니 쇼헤이 목표 달성법 양식 | 파란랩</title>
+    <meta name="description" content="오타니 쇼헤이의 성공 비결, 만다라트 계획표를 온라인에서 바로 만들어보세요. 핵심 목표를 64개의 구체적 행동으로 확장하고 이미지로 저장하여 매일 확인하세요.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -21,11 +21,22 @@
 <body class="bg-slate-50">
     <div id="root">
         <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">만다라트(Mandalart)란?</h2>
-            <p><strong>만다라트</strong>는 핵심 목표를 중심으로 8개의 세부 목표와 64개의 구체적 실행 방안을 수립하는 강력한 목표 달성 도구입니다.</p>
+
+        <!-- SEO 콘텐츠 섹션 -->
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-6">
+            <h2 class="text-2xl font-black text-slate-800">만다라트 계획표로 목표를 현실로 만드는 법</h2>
+            <p>만다라트(Mandalart)는 일본의 야구 천재 <strong>오타니 쇼헤이</strong>가 고등학교 시절부터 사용하여 전 세계적으로 유명해진 목표 달성 도구입니다. '연꽃 만개법'이라고도 불리는 이 기법은 하나의 핵심 목표를 8개의 세부 목표로, 다시 64개의 구체적인 실행 방안으로 확장합니다.</p>
+            
+            <h3 class="text-lg font-bold text-slate-700">만다라트 작성 팁</h3>
+            <ul class="list-disc list-inside space-y-2">
+                <li><strong>가장 중심(핵심 목표):</strong> 가장 이루고 싶은 단 하나의 꿈을 적으세요.</li>
+                <li><strong>주변 8칸(세부 목표):</strong> 핵심 목표를 이루기 위한 8가지 요소(기술, 체력, 운, 인간관계 등)를 채웁니다.</li>
+                <li><strong>가장 바깥쪽(실행 계획):</strong> 세부 목표를 달성하기 위해 오늘 당장 할 수 있는 구체적인 행동을 적으세요.</li>
+            </ul>
+            <p>파란랩의 만다라트 도구는 복잡한 81칸을 단계별로 안내하여 중도 포기 없이 완벽한 계획표를 완성하게 돕습니다.</p>
         </section>
     </div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
         function MandaApp() {
@@ -35,16 +46,41 @@
             const [subGoals, setSubGoals] = useState(saved.subGoals || Array(8).fill(""));
             const [actions, setActions] = useState(saved.actions || Array(8).fill(null).map(() => Array(8).fill("")));
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-manda', JSON.stringify({ step, mainGoal, subGoals, actions })); }, [step, mainGoal, subGoals, actions]);
+            useEffect(() => {
+                if (ParanLabCore.isAutoSaveEnabled()) {
+                    localStorage.setItem('paranlab-manda', JSON.stringify({ step, mainGoal, subGoals, actions }));
+                }
+            }, [step, mainGoal, subGoals, actions]);
+
+            const applyOhtani = () => {
+                setMainGoal("8구단 드래프트 1순위");
+                setSubGoals(["몸만들기", "제구", "구위", "멘탈", "스피드", "인간성", "운", "변화구"]);
+                setStep(2);
+            };
 
             return (
                 <div className="animate-in fade-in duration-500">
                     {step < 3 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
+                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto text-center">
                             {step === 1 ? (
-                                <div><h2 className="text-3xl font-black mb-4 text-center">최종 목표는?</h2><input value={mainGoal} onChange={(e)=>setMainGoal(e.target.value)} placeholder="예: 10억 자산가" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black text-center" /><button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음</button></div>
+                                <div>
+                                    <h2 className="text-3xl font-black text-slate-900 mb-4">당신의 최종 목표는?</h2>
+                                    <input value={mainGoal} onChange={(e)=>setMainGoal(e.target.value)} placeholder="예: 10억 자산가, 프로 작가 되기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black text-center mb-8" />
+                                    <div className="flex flex-col gap-4">
+                                        <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음 단계로</button>
+                                        <button onClick={applyOhtani} className="text-blue-600 font-bold underline">오타니 쇼헤이 예시 불러오기</button>
+                                    </div>
+                                </div>
                             ) : (
-                                <div><h2 className="text-2xl font-black mb-8 text-center">8가지 세부 목표</h2><div className="manda-grid max-w-md mx-auto">{[0,1,2,3].map(i => <div key={i} className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[i]} onChange={(e)=>{const n=[...subGoals]; n[i]=e.target.value; setSubGoals(n);}} className="w-full bg-transparent text-center outline-none text-[10px]" placeholder={`목표${i+1}`} /></div>)}<div className="manda-cell bg-blue-600 text-white font-black text-[10px]">{mainGoal}</div>{[4,5,6,7].map(i => <div key={i} className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[i]} onChange={(e)=>{const n=[...subGoals]; n[i]=e.target.value; setSubGoals(n);}} className="w-full bg-transparent text-center outline-none text-[10px]" placeholder={`목표${i+1}`} /></div>)}</div><div className="flex gap-4 mt-10"><button onClick={()=>setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-400 rounded-2xl font-black">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-lg">상세 계획</button></div></div>
+                                <div>
+                                    <h2 className="text-2xl font-black text-slate-900 mb-8">8가지 세부 목표</h2>
+                                    <div className="manda-grid max-w-md mx-auto mb-10">
+                                        {[0,1,2,3].map(i => <div key={i} className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[i]} onChange={(e)=>{const n=[...subGoals]; n[i]=e.target.value; setSubGoals(n);}} className="w-full bg-transparent text-center outline-none text-[10px] font-bold" placeholder={`목표${i+1}`} /></div>)}
+                                        <div className="manda-cell bg-blue-600 text-white font-black text-[10px]">{mainGoal || "핵심목표"}</div>
+                                        {[4,5,6,7].map(i => <div key={i} className="manda-cell bg-slate-50 border border-slate-200"><input value={subGoals[i]} onChange={(e)=>{const n=[...subGoals]; n[i]=e.target.value; setSubGoals(n);}} className="w-full bg-transparent text-center outline-none text-[10px] font-bold" placeholder={`목표${i+1}`} /></div>)}
+                                    </div>
+                                    <div className="flex gap-4"><button onClick={()=>setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-400 rounded-2xl font-black">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-5 bg-blue-600 text-white rounded-2xl font-black shadow-lg">상세 계획 세우기</button></div>
+                                </div>
                             )}
                         </div>
                     ) : (
@@ -59,19 +95,18 @@
                                                 {Array(9).fill(0).map((_, i) => {
                                                     if (i === 4) return <div key={i} className="manda-cell bg-blue-600 text-white font-bold text-[8px]">{sub}</div>;
                                                     const aIdx = i > 4 ? i - 1 : i;
-                                                    return <div key={i} className="manda-cell bg-white border border-slate-100 shadow-sm"><textarea value={actions[sIdx][aIdx]} onChange={(e)=>{const n=[...actions]; n[sIdx][aIdx]=e.target.value; setActions(n);}} className="w-full h-full bg-transparent text-center outline-none resize-none text-[8px]" placeholder="행동" /></div>;
+                                                    return <div key={i} className="manda-cell bg-white border border-slate-100 shadow-sm"><textarea value={actions[sIdx][aIdx]} onChange={(e)=>{const n=[...actions]; n[sIdx][aIdx]=e.target.value; setActions(n);}} className="w-full h-full bg-transparent text-center outline-none resize-none text-[8px] font-medium" placeholder="행동" /></div>;
                                                 })}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
+                                <p className="text-center mt-6 text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'mandalart-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`만다라트 결과`, ``, 'mandalart-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[만다라트 결과]\n핵심목표: ${mainGoal}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'mandalart-report')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>setStep(1)} className="py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 하기</button>
                             </div>
-                            <button onClick={()=>setStep(2)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
