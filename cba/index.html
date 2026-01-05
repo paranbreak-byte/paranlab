@@ -3,90 +3,169 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>비용-편익 분석 (CBA) | 투자 가치 및 경제성 진단 도구 | 파란랩</title>
-    <meta name="description" content="이 투자가 정말 남는 장사일까요? 비용-편익 분석(CBA)을 통해 투입되는 비용과 얻게 될 이득을 수치로 비교하여 합리적인 투자 결정을 내리세요.">
+    <title>비용-편익 분석(CBA) | 경제적 타당성 검토 도구 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">비용-편익 분석(CBA)이란?</h2>
-            <p><strong>비용-편익 분석(Cost-Benefit Analysis)</strong>은 특정 프로젝트나 투자의 경제적 타당성을 평가하는 기법입니다. 모든 비용과 편익을 점수로 환산하여 비교합니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
+
         function CbaApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-cba') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [costs, setCosts] = useState(saved.costs || [{ id: 1, text: "직접 비용", value: 50 }]);
-            const [benefits, setBenefits] = useState(saved.benefits || [{ id: 1, text: "예상 수익", value: 80 }]);
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                subject: "내 집 마련 경제성 분석",
+                costs: [{ id: 1, text: "", value: 50 }],
+                benefits: [{ id: 1, text: "", value: 50 }]
+            });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-cba', JSON.stringify({ step, subject, costs, benefits })); }, [step, subject, costs, benefits]);
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-cba');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
 
-            const totalCost = useMemo(() => costs.reduce((a,b)=>a+b.value,0), [costs]);
-            const totalBenefit = useMemo(() => benefits.reduce((a,b)=>a+b.value,0), [benefits]);
-            const bcr = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : totalBenefit;
+            const results = useMemo(() => {
+                const totalCost = data.costs.reduce((a, b) => a + Number(b.value || 0), 0);
+                const totalBenefit = data.benefits.reduce((a, b) => a + Number(b.value || 0), 0);
+                const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : 0;
+                return { totalCost, totalBenefit, ratio };
+            }, [data]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'cba-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 CBA 리포트]\nB/C 비율: ${results.ratio}\n경제적 타당성을 분석했습니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 CBA 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'cba-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black mb-6">무엇에 투자할 계획인가요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 300만원짜리 코딩 부트캠프 수강" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black mb-10" />
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : step === 2 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-rose-600 mb-6">투입 비용 (Costs)</h2>
-                            {costs.map(c => (
-                                <div key={c.id} className="p-4 bg-rose-50 rounded-2xl mb-4 border border-rose-100">
-                                    <input value={c.text} onChange={(e)=>setCosts(costs.map(i=>i.id===c.id?{...i, text:e.target.value}:i))} className="w-full p-2 mb-2 rounded-lg border font-bold" />
-                                    <input type="range" min="1" max="100" value={c.value} onChange={(e)=>setCosts(costs.map(i=>i.id===c.id?{...i, value:parseInt(e.target.value)}:i))} className="w-full accent-rose-600" />
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Cba Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">비용과 편익을 수치로 비교하세요.</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                    <div className="space-y-6">
+                                        <h3 className="text-xl font-black text-rose-600">Costs (비용/손실)</h3>
+                                        {data.costs.map((c, i) => (
+                                            <div key={c.id} className="p-6 bg-rose-50 rounded-3xl space-y-4">
+                                                <input type="text" value={c.text} onChange={e => {
+                                                    const newCosts = [...data.costs]; newCosts[i].text = e.target.value; setData({...data, costs: newCosts});
+                                                }} className="w-full bg-transparent border-none outline-none font-bold" placeholder="비용 항목" />
+                                                <input type="range" min="1" max="100" value={c.value} onChange={e => {
+                                                    const newCosts = [...data.costs]; newCosts[i].value = e.target.value; setData({...data, costs: newCosts});
+                                                }} />
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, costs: [...data.costs, {id: Date.now(), text: "", value: 50}]})} className="text-rose-600 font-bold text-sm">+ 비용 추가</button>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <h3 className="text-xl font-black text-emerald-600">Benefits (편익/이익)</h3>
+                                        {data.benefits.map((b, i) => (
+                                            <div key={b.id} className="p-6 bg-emerald-50 rounded-3xl space-y-4">
+                                                <input type="text" value={b.text} onChange={e => {
+                                                    const newBenefits = [...data.benefits]; newBenefits[i].text = e.target.value; setData({...data, benefits: newBenefits});
+                                                }} className="w-full bg-transparent border-none outline-none font-bold" placeholder="편익 항목" />
+                                                <input type="range" min="1" max="100" value={b.value} onChange={e => {
+                                                    const newBenefits = [...data.benefits]; newBenefits[i].value = e.target.value; setData({...data, benefits: newBenefits});
+                                                }} />
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, benefits: [...data.benefits, {id: Date.now(), text: "", value: 50}]})} className="text-emerald-600 font-bold text-sm">+ 편익 추가</button>
+                                    </div>
                                 </div>
-                            ))}
-                            <button onClick={()=>setCosts([...costs, {id:Date.now(), text:"", value:50}])} className="text-rose-600 font-black mb-8">+ 비용 추가</button>
-                            <button onClick={()=>setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음 단계</button>
-                        </div>
-                    ) : step === 3 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-emerald-600 mb-6">얻게 될 편익 (Benefits)</h2>
-                            {benefits.map(b => (
-                                <div key={b.id} className="p-4 bg-emerald-50 rounded-2xl mb-4 border border-emerald-100">
-                                    <input value={b.text} onChange={(e)=>setBenefits(benefits.map(i=>i.id===b.id?{...i, text:e.target.value}:i))} className="w-full p-2 mb-2 rounded-lg border font-bold" />
-                                    <input type="range" min="1" max="100" value={b.value} onChange={(e)=>setBenefits(benefits.map(i=>i.id===b.id?{...i, value:parseInt(e.target.value)}:i))} className="w-full accent-emerald-600" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">경제성 분석 결과 확인</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Cost-Benefit Analysis</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">경제성 타당성 리포트</h2>
                                 </div>
-                            ))}
-                            <button onClick={()=>setBenefits([...benefits, {id:Date.now(), text:"", value:50}])} className="text-emerald-600 font-black mb-8">+ 편익 추가</button>
-                            <button onClick={()=>setStep(4)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-3xl font-black text-slate-900 mb-6">CBA 분석 결과: {bcr >= 1.0 ? "추진 권장" : "재검토 필요"}</h2>
-                                <p className="text-slate-500 mb-10 font-medium">편익/비용 비율(BCR): <span className="text-blue-600 font-black text-2xl">{bcr}</span></p>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                                    <div className="p-10 bg-rose-50 rounded-[3rem] text-center">
+                                        <h3 className="text-xs font-black text-rose-400 uppercase mb-2">Total Cost</h3>
+                                        <p className="text-4xl font-black text-rose-600">{results.totalCost}</p>
+                                    </div>
+                                    <div className="p-10 bg-emerald-50 rounded-[3rem] text-center">
+                                        <h3 className="text-xs font-black text-emerald-400 uppercase mb-2">Total Benefit</h3>
+                                        <p className="text-4xl font-black text-emerald-600">{results.totalBenefit}</p>
+                                    </div>
+                                    <div className="p-10 bg-blue-600 rounded-[3rem] text-center text-white shadow-xl">
+                                        <h3 className="text-xs font-black uppercase mb-2 opacity-70">B/C Ratio</h3>
+                                        <p className="text-4xl font-black">{results.ratio}</p>
+                                    </div>
+                                </div>
+                                <div className="p-12 bg-slate-900 text-white rounded-[3.5rem] text-center">
+                                    <h4 className="text-2xl font-black mb-4">
+                                        {results.ratio >= 1 ? "이 사업(선택)은 경제적 타당성이 있습니다." : "비용이 편익보다 큽니다. 재검토가 필요합니다."}
+                                    </h4>
+                                    <p className="text-sm opacity-60">B/C 비율이 1.0 이상일 때 투자가치가 있는 것으로 판단합니다.</p>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Calculated by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'cba-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`CBA 분석 결과`, `<div class='box'>BCR: ${bcr}</div>`, 'cba-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 CBA 결과]\n주제: ${subject}\nBCR: ${bcr}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                            </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<CbaApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<CbaApp />);
     </script>
 </body>
 </html>
