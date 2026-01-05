@@ -3,112 +3,171 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>결정 트리 시나리오 분석 | 확률 기반 최적의 선택 도구 | 파란랩</title>
-    <meta name="description" content="미래의 불확실성을 숫자로 계산해 보세요. 결정 트리 분석을 통해 각 시나리오별 발생 확률과 기대 가치를 산출하여 가장 유리한 선택지를 찾아드립니다.">
+    <title>의사결정 나무 | 확률 기반 기댓값 분석 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-3xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">결정 트리(Decision Tree)란?</h2>
-            <p><strong>결정 트리</strong>는 여러 가지 선택지와 그에 따른 불확실한 결과(시나리오)를 나무 가지 모양으로 시각화하여 분석하는 도구입니다. 각 결과가 발생할 확률과 그 가치를 곱하여 '기대 가치(Expected Value)'를 계산합니다.</p>
-            <p>막연한 불안감 대신, 수학적인 기댓값을 비교함으로써 리스크를 최소화하고 이득을 최대화하는 결정을 내릴 수 있습니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
-        function TreeApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-tree') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [options, setOptions] = useState(saved.options || [
-                { id: 1, text: "선택지 A", scenarios: [{ text: "성공", prob: 50, value: 8 }, { text: "실패", prob: 50, value: 2 }] },
-                { id: 2, text: "선택지 B", scenarios: [{ text: "성공", prob: 50, value: 7 }, { text: "실패", prob: 50, value: 4 }] }
-            ]);
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-tree', JSON.stringify({ step, subject, options })); }, [step, subject, options]);
+        function DecisionTreeApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                goal: "투자 대응 전략 결정",
+                options: [
+                    { name: "추가 매수", successProb: 40, successVal: 5000, failVal: -2000 },
+                    { name: "손절 후 예금", successProb: 100, successVal: 3500, failVal: 3500 }
+                ]
+            });
 
-            const results = useMemo(() => options.map(opt => ({
-                ...opt,
-                ev: (opt.scenarios[0].prob * opt.scenarios[0].value + opt.scenarios[1].prob * opt.scenarios[1].value) / 100
-            })).sort((a, b) => b.ev - a.ev), [options]);
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-tree');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(parsed);
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
 
-            const handleSaveHtml = () => {
-                const content = results.map((res, i) => `<div class="box"><strong>${i+1}위: ${res.text}</strong><br>기대 만족도: ${res.ev.toFixed(1)}점</div>`).join('');
-                ParanLabCore.saveAsHtml(`결정 트리 분석 결과: ${subject}`, content, 'tree-report');
-            };
+            const results = useMemo(() => {
+                return data.options.map(opt => {
+                    const ev = (opt.successVal * (opt.successProb / 100)) + (opt.failVal * (1 - opt.successProb / 100));
+                    return { ...opt, ev };
+                });
+            }, [data]);
 
-            const handleCopyText = () => {
-                const text = `[파란랩 결정 트리 보고서]\n주제: ${subject}\n\n` + results.map((res, i) => `${i+1}위: ${res.text} (기대치: ${res.ev.toFixed(1)}점)`).join('\n');
-                ParanLabCore.copyToClipboard(text);
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'decision-tree.png', { type: 'image/png' });
+                        const shareText = `[파란랩 의사결정 나무 리포트]\n목표: ${data.goal}\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 의사결정 나무', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'decision-tree.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
             };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black mb-6">어떤 결정을 앞두고 있나요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 신규 사업 추진 여부" className="w-full p-5 bg-slate-50 border-2 border-transparent focus:border-blue-500 rounded-2xl outline-none text-lg font-bold mb-8" />
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">시나리오 설정하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : step === 2 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black mb-8 text-center">상황별 확률과 만족도</h2>
-                            {options.map(opt => (
-                                <div key={opt.id} className="p-6 bg-slate-50 rounded-[2rem] mb-8 border border-slate-100">
-                                    <input value={opt.text} onChange={(e)=>setOptions(options.map(o=>o.id===opt.id?{...o, text:e.target.value}:o))} className="w-full p-3 mb-6 rounded-xl border font-black text-blue-600" />
-                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                        {opt.scenarios.map((s, idx) => (
-                                            <div key={idx} className="bg-white p-4 rounded-2xl shadow-sm">
-                                                <div className="text-xs font-black text-slate-400 mb-2">{s.text} 확률: {s.prob}%</div>
-                                                <input type="range" min="0" max="100" value={s.prob} onChange={(e)=>{
-                                                    const val = parseInt(e.target.value);
-                                                    setOptions(options.map(o => o.id === opt.id ? { ...o, scenarios: o.scenarios.map((sc, si) => si === idx ? { ...sc, prob: val } : { ...sc, prob: 100 - val }) } : o));
-                                                }} className="w-full accent-blue-600 mb-4" />
-                                                <div className="text-xs font-black text-slate-400 mb-2">예상 만족도: {s.value}점</div>
-                                                <input type="range" min="1" max="10" value={s.value} onChange={(e)=>{
-                                                    const val = parseInt(e.target.value);
-                                                    setOptions(options.map(o => o.id === opt.id ? { ...o, scenarios: o.scenarios.map((sc, si) => si === idx ? { ...sc, value: val } : sc) } : o));
-                                                }} className="w-full accent-emerald-500" />
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Decision Tree Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900">불확실한 상황에서의 기댓값을 계산하세요.</h2>
+                                <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black shadow-inner" placeholder="의사결정 목표" />
+                                <div className="space-y-8">
+                                    {data.options.map((opt, i) => (
+                                        <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">
+                                            <input type="text" value={opt.name} onChange={e => {
+                                                const newOpt = [...data.options]; newOpt[i].name = e.target.value; setData({...data, options: newOpt});
+                                            }} className="w-full bg-transparent border-none outline-none text-xl font-black text-blue-600" placeholder="대안 이름" />
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                                <div>
+                                                    <label className="block text-xs font-black text-slate-400 mb-2">성공 확률 (%)</label>
+                                                    <input type="number" value={opt.successProb} onChange={e => {
+                                                        const newOpt = [...data.options]; newOpt[i].successProb = parseInt(e.target.value); setData({...data, options: newOpt});
+                                                    }} className="w-full p-3 bg-white rounded-xl border border-slate-200 font-bold" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-black text-slate-400 mb-2">성공 시 가치</label>
+                                                    <input type="number" value={opt.successVal} onChange={e => {
+                                                        const newOpt = [...data.options]; newOpt[i].successVal = parseInt(e.target.value); setData({...data, options: newOpt});
+                                                    }} className="w-full p-3 bg-white rounded-xl border border-slate-200 font-bold" />
+                                                </div>
+                                                <div>
+                                                    <label className="block text-xs font-black text-slate-400 mb-2">실패 시 가치</label>
+                                                    <input type="number" value={opt.failVal} onChange={e => {
+                                                        const newOpt = [...data.options]; newOpt[i].failVal = parseInt(e.target.value); setData({...data, options: newOpt});
+                                                    }} className="w-full p-3 bg-white rounded-xl border border-slate-200 font-bold" />
+                                                </div>
                                             </div>
-                                        ))}
-                                    </div>
-                                </div>
-                            ))}
-                            <button onClick={()=>setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10">최적의 시나리오 결과</h2>
-                                <div className="space-y-6 mb-10">
-                                    {results.map((res, i) => (
-                                        <div key={res.id} className={`p-8 rounded-[2.5rem] border-4 ${i === 0 ? 'border-blue-600 bg-blue-50' : 'border-slate-50 bg-white'}`}>
-                                            <div className="flex justify-between items-center"><h3 className="text-2xl font-black">{res.text}</h3><span className="text-4xl font-black text-blue-600">{res.ev.toFixed(1)}점</span></div>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">기댓값 분석 결과 확인</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'tree-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Expected Value Analysis</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">의사결정 나무 분석 리포트</h2>
+                                </div>
+                                <div className="space-y-8 mb-12">
+                                    {results.map((res, i) => (
+                                        <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                                            <div>
+                                                <h3 className="text-2xl font-black text-slate-800 mb-2">{res.name}</h3>
+                                                <p className="text-sm text-slate-500 font-bold">성공확률 {res.successProb}% | 성공가치 {res.successVal} | 실패가치 {res.failVal}</p>
+                                            </div>
+                                            <div className="text-center md:text-right">
+                                                <p className="text-xs font-black text-blue-400 uppercase mb-1">Expected Value</p>
+                                                <p className="text-4xl font-black text-blue-600">{res.ev.toLocaleString()}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
+                                    <h4 className="text-2xl font-black mb-4">"가장 높은 기댓값을 가진 선택지는 '{results.sort((a,b)=>b.ev-a.ev)[0].name}'입니다."</h4>
+                                    <p className="text-sm opacity-60 leading-relaxed">
+                                        의사결정 나무는 감정이 아닌 수학적 확률에 근거하여 최선의 선택을 돕습니다. 하지만 최악의 상황(실패 시 가치)이 감당 가능한 수준인지 반드시 확인하세요.
+                                    </p>
+                                </div>
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Calculated by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<TreeApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<DecisionTreeApp />);
     </script>
 </body>
 </html>
