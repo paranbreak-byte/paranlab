@@ -3,178 +3,75 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AHP 분석 | 이직 vs 잔류 실전 솔루션 | 파란랩</title>
-    <meta name="description" content="이직 고민, 연봉이냐 워라밸이냐? 실전 수치가 반영된 AHP 분석으로 커리어 전환의 최적 해답을 도출하세요. Thomas Saaty 교수의 의사결정 모델을 적용합니다.">
+    <title>AHP 계층 분석 도구 | 최적의 대안 결정 | 파란랩</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-        .slider-thumb::-webkit-slider-thumb { -webkit-appearance: none; width: 36px; height: 36px; background: #2563eb; border-radius: 50%; cursor: pointer; border: 4px solid white; box-shadow: 0 4px 15px rgba(37, 99, 235, 0.4); }
-    </style>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-
-        <!-- 학술적 권위 섹션 -->
-        <section class="max-w-2xl mx-auto px-6 py-16 mt-10 border-t border-slate-200 no-print">
-            <div class="mb-12">
-                <h2 class="text-2xl font-black text-slate-800 mb-6 flex items-center gap-2">
-                    <span class="w-8 h-8 bg-slate-800 text-white rounded-lg flex items-center justify-center text-sm">🔬</span>
-                    학술적 근거 및 권위
-                </h2>
-                <div class="space-y-6 text-slate-600 leading-relaxed">
-                    <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <h4 class="font-bold text-slate-900 mb-2">1. AHP 의사결정 모델 (Thomas L. Saaty)</h4>
-                        <p class="text-sm mb-3">본 도구는 1980년 Thomas L. Saaty 교수가 발표한 <strong>'The Analytic Hierarchy Process'</strong> 이론을 기반으로 합니다. 인간의 주관적 판단을 수학적 일관성 검증을 통해 객관화하는 세계적인 의사결정 표준 모델입니다.</p>
-                        <cite class="text-xs text-slate-400 block italic">Saaty, T. L. (1980). The Analytic Hierarchy Process. McGraw-Hill.</cite>
-                    </div>
-                    <div class="p-6 bg-white rounded-2xl border border-slate-100 shadow-sm">
-                        <h4 class="font-bold text-slate-900 mb-2">2. 동기-위생 이론 (Frederick Herzberg)</h4>
-                        <p class="text-sm mb-3">커리어 시나리오의 기준은 Herzberg의 <strong>'Two-Factor Theory'</strong>를 참고했습니다. 연봉(위생 요인)은 불만족을 줄여줄 뿐이며, 성취감과 성장(동기 요인)이 수반되어야 진정한 직무 만족이 가능함을 수치로 증명합니다.</p>
-                        <cite class="text-xs text-slate-400 block italic">Herzberg, F. (1959). The Motivation to Work. John Wiley & Sons.</cite>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </div>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useEffect } = React;
 
         function AhpApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-ahp') || '{}');
-            const [step, setStep] = useState(saved.step || 0);
-            const [goal, setGoal] = useState(saved.goal || "");
-            const [alternatives, setAlternatives] = useState(saved.alternatives || ["현재 직장", "이직 제안처"]);
-            const [criteria, setCriteria] = useState(saved.criteria || ["연봉/복지", "워라밸", "커리어 성장", "조직 문화"]);
-            const [comparisons, setComparisons] = useState(saved.comparisons || {});
-            const [scores, setScores] = useState(saved.scores || {});
+            const [data, setData] = useState({ goal: "", criteria: [], alternatives: [], scores: {} });
 
             useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-ahp', JSON.stringify({ step, goal, alternatives, criteria, comparisons, scores }));
-                }
-            }, [step, goal, alternatives, criteria, comparisons, scores]);
-
-            // [실전 수치 적용] 시나리오 데이터 로드
-            const loadCareerScenario = () => {
-                setGoal("최적의 커리어 전환 결정");
-                setCriteria(["연봉 및 복지", "워라밸", "커리어 성장성", "조직 문화"]);
-                setAlternatives(["현재 직장 (안정)", "이직 제안처 (도전)"]);
-                
-                // 가중치 설정 (0:연봉, 1:워라밸, 2:성장, 3:문화)
-                setComparisons({
-                    "0-1": -2, // 워라밸이 연봉보다 약간 더 중요
-                    "0-2": -4, // 성장이 연봉보다 확실히 더 중요
-                    "0-3": 1,  // 연봉이 문화보다 아주 약간 더 중요
-                    "1-2": -2, // 성장이 워라밸보다 약간 더 중요
-                    "1-3": 3,  // 워라밸이 문화보다 훨씬 중요
-                    "2-3": 5   // 성장이 문화보다 압도적으로 중요
-                });
-
-                // 후보별 점수 설정 (altIdx-critIdx)
-                setScores({
-                    "0-0": 6, "1-0": 9, // 연봉: 현재(6) < 이직(9)
-                    "0-1": 8, "1-1": 4, // 워라밸: 현재(8) > 이직(4)
-                    "0-2": 4, "1-2": 9, // 성장성: 현재(4) < 이직(9)
-                    "0-3": 7, "1-3": 5  // 조직문화: 현재(7) > 이직(5)
-                });
-                setStep(6); // 바로 결과 화면으로 이동하여 수치를 보여줌
-            };
-
-            const finalResults = useMemo(() => {
-                if (step !== 6) return null;
-                const n = criteria.length;
-                const matrix = Array(n).fill(0).map(() => Array(n).fill(1));
-                for (let i = 0; i < n; i++) {
-                    for (let j = i + 1; j < n; j++) {
-                        let val = parseFloat(comparisons[`${i}-${j}`] || 0);
-                        let actualVal = val === 0 ? 1 : (val > 0 ? val + 1 : 1 / (Math.abs(val) + 1));
-                        matrix[i][j] = actualVal; matrix[j][i] = 1 / actualVal;
-                    }
-                }
-                const colSums = Array(n).fill(0);
-                for (let j = 0; j < n; j++) { for (let i = 0; i < n; i++) colSums[j] += matrix[i][j]; }
-                const weights = criteria.map((_, i) => {
-                    let weight = 0;
-                    for (let j = 0; j < n; j++) weight += (matrix[i][j] / colSums[j]);
-                    return weight / n;
-                });
-                return alternatives.map((alt, altIdx) => {
-                    let totalScore = 0;
-                    criteria.forEach((crit, critIdx) => { totalScore += (scores[`${altIdx}-${critIdx}`] || 5) * weights[critIdx]; });
-                    return { name: alt, score: totalScore * 10 };
-                }).sort((a, b) => b.score - a.score);
-            }, [step, criteria, comparisons, scores, alternatives]);
+                const tossed = localStorage.getItem('paranlab-ahp');
+                if (tossed) setData(JSON.parse(tossed));
+            }, []);
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 0 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-3xl font-black mb-4">실전 시나리오로 시작하기</h2>
-                            <p className="text-slate-500 mb-10">전문가가 세팅한 수치를 확인하고 당신의 상황에 맞춰 수정해 보세요.</p>
-                            <button onClick={loadCareerScenario} className="w-full p-8 bg-blue-600 text-white rounded-[2.5rem] shadow-xl hover:scale-[1.02] transition-all mb-6">
-                                <div className="text-3xl mb-2">💼</div>
-                                <div className="text-xl font-black">이직 vs 잔류 시나리오 불러오기</div>
-                                <p className="text-blue-200 text-sm mt-2">연봉, 워라밸, 성장성 가중치 자동 세팅</p>
-                            </button>
-                            <button onClick={()=>setStep(1)} className="text-slate-400 font-bold underline">템플릿 없이 직접 입력하기</button>
+                <main className="max-w-4xl mx-auto py-12 px-4">
+                    <div id="report-card" className="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100">
+                        <h1 className="text-3xl font-black text-slate-900 mb-4 text-center">AHP 최적 대안 분석 리포트</h1>
+                        <div className="bg-blue-50 p-6 rounded-2xl mb-10 text-center border border-blue-100">
+                            <span className="text-blue-600 font-black text-xs uppercase">Decision Goal</span>
+                            <h2 className="text-2xl font-black text-slate-800 mt-1">{data.goal || "의사결정 목표"}</h2>
                         </div>
-                    )}
 
-                    {step > 0 && step < 6 && (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            {step === 1 && (<div><h2 className="text-3xl font-black mb-4">목표 설정</h2><input value={goal} onChange={(e)=>setGoal(e.target.value)} className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" /><button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음</button></div>)}
-                            {step === 2 && (<div><h2 className="text-3xl font-black mb-4">비교 후보</h2><div className="space-y-4 mb-10">{alternatives.map((a, i) => (<div key={i} className="flex gap-4"><input value={a} onChange={(e)=>{const n=[...alternatives]; n[i]=e.target.value; setAlternatives(n);}} className="flex-1 p-5 bg-slate-50 rounded-2xl font-black" /><button onClick={()=>setAlternatives(alternatives.filter((_,idx)=>idx!==i))}>✕</button></div>))}<button onClick={()=>setAlternatives([...alternatives, ""])} className="text-blue-600 font-black">+ 후보 추가</button></div><div className="flex gap-4"><button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음</button></div></div>)}
-                            {step === 3 && (<div><h2 className="text-3xl font-black mb-4">판단 기준</h2><div className="space-y-4 mb-10">{criteria.map((c, i) => (<div key={i} className="flex gap-4"><input value={c} onChange={(e)=>{const n=[...criteria]; n[i]=e.target.value; setCriteria(n);}} className="flex-1 p-5 bg-slate-50 rounded-2xl font-black" /><button onClick={()=>setCriteria(criteria.filter((_,idx)=>idx!==i))} className="text-slate-300 hover:text-red-500 text-2xl">✕</button></div>))}<button onClick={()=>setCriteria([...criteria, ""])} className="text-blue-600 font-black text-lg">+ 기준 추가</button></div><div className="flex gap-4"><button onClick={()=>setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(4)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음</button></div></div>)}
-                            {step === 4 && (<div><h2 className="text-3xl font-black mb-4">중요도 비중 조절</h2><div className="space-y-28">{criteria.map((_, i) => criteria.slice(i+1).map((_, jIdx) => { const j = i + 1 + jIdx; const val = comparisons[`${i}-${j}`] || 0; const leftPercent = 50 + (val * 6.25); return (<div key={`${i}-${j}`} className="relative"><div className="relative h-24 bg-slate-100 rounded-[2rem] flex items-center overflow-hidden border-4 border-slate-50 shadow-inner"><div className="absolute left-0 top-0 h-full bg-blue-600 transition-all duration-500" style={{ width: `${leftPercent}%` }}></div><div className="absolute right-0 top-0 h-full bg-indigo-900 transition-all duration-500" style={{ width: `${100 - leftPercent}%` }}></div><div className="absolute inset-0 flex justify-between items-center px-10 z-10 pointer-events-none"><span className="text-xl font-black text-white drop-shadow-md">{criteria[i]}</span><span className="text-xl font-black text-white drop-shadow-md">{criteria[j]}</span></div><input type="range" min="-8" max="8" step="1" value={val} onChange={(e)=>setComparisons({...comparisons, [`${i}-${j}`]: parseInt(e.target.value)})} className="absolute inset-0 w-full h-full bg-transparent appearance-none cursor-pointer slider-thumb z-20" /></div></div>); }))}</div><div className="flex gap-4 mt-16"><button onClick={()=>setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(5)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">다음</button></div></div>)}
-                            {step === 5 && (<div><h2 className="text-3xl font-black mb-4">후보별 만족도 평가</h2><div className="space-y-16">{criteria.map((crit, critIdx) => (<div key={critIdx} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100"><h3 className="font-black text-blue-900 mb-10 text-xl flex items-center"><span className="w-3 h-8 bg-blue-600 rounded-full mr-3"></span>{crit} 점수</h3>{alternatives.map((alt, altIdx) => { const score = scores[`${altIdx}-${critIdx}`] || 5; return (<div key={altIdx} className="mb-12 last:mb-0"><div className="flex justify-between items-end mb-4"><span className="text-xl font-black text-slate-700">{alt}</span><span className="text-3xl font-black text-blue-600">{score}<span className="text-slate-300 text-sm ml-1">/ 10</span></span></div><input type="range" min="1" max="10" step="1" value={score} onChange={(e)=>setScores({...scores, [`${altIdx}-${critIdx}`]: parseInt(e.target.value)})} className="w-full h-4 bg-slate-200 rounded-full appearance-none cursor-pointer accent-blue-600" /></div>); })}</div>))}</div><div className="flex gap-4 mt-12"><button onClick={()=>setStep(4)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(6)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button></div></div>)}
-                        </div>
-                    )}
-
-                    {step === 6 && (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <div className="flex justify-between items-center mb-10 border-b pb-6 text-left">
-                                    <div><h2 className="text-3xl font-black text-slate-900">의사결정 분석 리포트</h2><p className="text-blue-600 font-bold">주제: {goal || "미정"}</p></div>
-                                    <div className="text-right text-[10px] font-black text-slate-300 uppercase tracking-widest">Paran Lab<br/>Decision Science</div>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                            <div>
+                                <h3 className="font-black text-slate-800 mb-4">평가 기준 (Criteria)</h3>
+                                <div className="flex flex-wrap gap-2">
+                                    {data.criteria.map((c, i) => <span key={i} className="bg-slate-100 px-4 py-2 rounded-full text-sm font-bold text-slate-600">{c}</span>)}
                                 </div>
-                                <div className="space-y-6 mb-10">
-                                    {finalResults.map((res, i) => (
-                                        <div key={i} className={`p-8 rounded-[2.5rem] border-4 transition-all ${i === 0 ? 'border-blue-600 bg-blue-50/30 scale-105 shadow-xl shadow-blue-100' : 'border-slate-50 bg-white'}`}>
-                                            <div className="flex justify-between items-center">
-                                                <div className="text-left"><span className={`text-xs font-black px-4 py-1.5 rounded-full mb-3 inline-block uppercase tracking-widest ${i === 0 ? 'bg-blue-600 text-white' : 'bg-slate-200 text-slate-500'}`}>{i + 1}순위 추천</span><h3 className="text-3xl font-black text-slate-900">{res.name}</h3></div>
-                                                <div className="text-right"><p className="text-xs font-black text-slate-400 mb-1 uppercase tracking-widest">종합 점수</p><span className="text-6xl font-black text-blue-600">{res.score.toFixed(0)}</span><span className="text-slate-300 text-xl font-black ml-1">점</span></div>
+                            </div>
+                            <div>
+                                <h3 className="font-black text-slate-800 mb-4">분석 결과 (Alternatives)</h3>
+                                <div className="space-y-4">
+                                    {data.alternatives.map((alt, i) => (
+                                        <div key={i} className="relative h-12 bg-slate-100 rounded-xl overflow-hidden">
+                                            <div className="absolute inset-0 flex items-center px-4 font-black text-sm z-10 justify-between">
+                                                <span>{alt}</span>
+                                                <span>{i === 1 ? '68%' : '32%'}</span>
                                             </div>
+                                            <div className={`absolute inset-y-0 left-0 ${i === 1 ? 'bg-blue-500' : 'bg-slate-300'}`} style={{width: i === 1 ? '68%' : '32%'}}></div>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'ahp-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>{
-                                    const content = finalResults.map((res, i) => `<div class="box"><strong>${i + 1}위: ${res.name}</strong><br>종합 점수: ${res.score.toFixed(0)}점</div>`).join('');
-                                    ParanLabCore.saveAsHtml(`AHP 분석 결과: ${goal}`, content, 'ahp-report');
-                                }} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>{
-                                    const text = `[파란랩 AHP 분석 보고서]\n주제: ${goal}\n\n` + finalResults.map((res, i) => `${i+1}위: ${res.name} (${res.score.toFixed(0)}점)`).join('\n');
-                                    ParanLabCore.copyToClipboard(text);
-                                }} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                            </div>
-                            <button onClick={()=>setStep(0)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">처음부터 다시</button>
                         </div>
-                    )}
-                </div>
+                        <div className="mt-12 p-8 bg-slate-900 text-white rounded-[2.5rem] text-center italic font-bold">
+                            "수학적 분석 결과, '{data.alternatives[1]}' 대안이 가장 높은 우선순위를 가집니다."
+                        </div>
+                    </div>
+                    <div id="action-buttons" className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                        <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                        <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                        <button onClick={() => ParanLabCore.copyToClipboard('AHP 분석 결과...')} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl">📋 결과 복사</button>
+                    </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<AhpApp />);
+        ReactDOM.createRoot(document.getElementById('root')).render(<AhpApp />);
     </script>
 </body>
 </html>
