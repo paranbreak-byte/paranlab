@@ -3,65 +3,145 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OKR 목표 설정 가이드 | 구글식 성과 관리 및 목표 달성 도구 | 파란랩</title>
-    <meta name="description" content="가슴 뛰는 목표(Objective)와 수치로 증명되는 핵심 결과(Key Results)를 설계해 보세요. 구글과 인텔이 사용하는 OKR 기법으로 당신의 성과를 극대화할 수 있습니다.">
+    <title>OKR 설정 도구 | 도전적 목표와 핵심 결과 지표 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="okr-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">OKR이란 무엇인가요?</h2>
-            <p><strong>OKR(Objectives and Key Results)</strong>은 조직이나 개인이 도전적인 목표를 설정하고 그 결과를 추적하기 위한 목표 관리 프레임워크입니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>Objective (목표):</strong> 가슴 뛰고 영감을 주는 질적인 목표 (어디로 가고 싶은가?)</li>
-                <li><strong>Key Results (핵심 결과):</strong> 목표 달성을 증명하는 구체적이고 측정 가능한 수치 (어떻게 달성했음을 알 수 있는가?)</li>
-            </ul>
-            <p>단순한 할 일 목록(To-do list)에서 벗어나 진짜 중요한 성과에 집중하게 만드는 것이 OKR의 핵심입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
-        function OkrApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-okr') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [obj, setObj] = useState(saved.obj || "");
-            const [krs, setKrs] = useState(saved.krs || ["", "", ""]);
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-okr', JSON.stringify({ step, obj, krs })); }, [step, obj, krs]);
+        function OkrApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                obj: "",
+                krs: ["", "", ""]
+            });
+
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-okr');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData({
+                            obj: parsed.obj || "",
+                            krs: Array.isArray(parsed.krs) ? parsed.krs : ["", "", ""]
+                        });
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'okr-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 OKR 리포트]\nObjective: ${data.obj}\n도전적인 목표를 향한 지표를 설정했습니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 OKR 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'okr-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">가슴 뛰는 목표(O)</h2>
-                            <textarea value={obj} onChange={(e)=>setObj(e.target.value)} placeholder="예: 우리 팀을 사내 최고의 혁신 조직으로 만든다" className="w-full h-40 p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black resize-none" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">핵심 결과(KR) 정하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-10 text-blue-600">나의 OKR 리포트</h2>
-                            <div className="text-left mb-12">
-                                <div className="p-8 bg-blue-600 text-white rounded-[2.5rem] shadow-xl mb-8"><span className="text-[10px] font-black uppercase opacity-70">Objective</span><h3 className="text-2xl font-black mt-1">{obj}</h3></div>
-                                {krs.map((kr, i) => (
-                                    <div key={i} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 flex items-center gap-4 mb-4">
-                                        <div className="w-10 h-10 bg-white rounded-xl flex items-center justify-center font-black text-blue-600 shadow-sm">KR{i+1}</div>
-                                        <input value={kr} onChange={(e)=>{const n=[...krs]; n[i]=e.target.value; setKrs(n);}} placeholder="수치화된 결과 입력" className="flex-1 bg-transparent outline-none font-bold" />
-                                    </div>
-                                ))}
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">OKR Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">가슴 뛰는 목표(O)와 측정 가능한 결과(KR)</h2>
+                                <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-xl">
+                                    <label className="block text-xs font-black uppercase mb-2 opacity-70 tracking-widest">Objective (목표)</label>
+                                    <input type="text" value={data.obj} onChange={e => setData({...data, obj: e.target.value})} className="w-full bg-transparent border-none outline-none text-3xl font-black placeholder:text-white/30" placeholder="어디로 가고 싶나요? (정성적 목표)" />
+                                </div>
+                                <div className="space-y-6">
+                                    <h3 className="text-xl font-black text-slate-800">Key Results (핵심 결과)</h3>
+                                    {data.krs.map((kr, i) => (
+                                        <div key={i} className="flex gap-4 items-center p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                            <span className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0">{i+1}</span>
+                                            <input type="text" value={kr} onChange={e => {
+                                                const newKrs = [...data.krs]; newKrs[i] = e.target.value; setData({...data, krs: newKrs});
+                                            }} className="flex-1 bg-transparent border-none outline-none text-lg font-bold" placeholder="어떻게 측정할까요? (정량적 지표)" />
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">OKR 리포트 확인하기</button>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Objectives & Key Results</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">나의 OKR 리포트</h2>
+                                </div>
+                                <div className="max-w-3xl mx-auto space-y-12">
+                                    <div className="p-12 bg-blue-600 text-white rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+                                        <div className="absolute -top-10 -right-10 w-40 h-40 bg-white/10 rounded-full"></div>
+                                        <h3 className="text-sm font-black uppercase tracking-widest opacity-70 mb-4">Objective</h3>
+                                        <p className="text-4xl font-black leading-tight">{data.obj || "목표 미설정"}</p>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <h3 className="text-xl font-black text-slate-800 ml-4">Key Results</h3>
+                                        {data.krs.map((kr, i) => kr && (
+                                            <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
+                                                <div className="w-12 h-12 bg-white border-2 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black shrink-0 shadow-sm">{i+1}</div>
+                                                <p className="text-xl font-bold text-slate-700">{kr}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('okr-app')).render(<OkrApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<OkrApp />);
     </script>
 </body>
 </html>
