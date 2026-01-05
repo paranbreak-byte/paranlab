@@ -3,15 +3,16 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>찬반 분석(Pros-Cons) 도구 | 파란랩</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>찬반 분석(Pros-Cons) | 가중치 기반 의사결정 도구 | 파란랩</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    <script src="/core.js" defer></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-slate-50">
     <div id="header-root"></div>
     <div id="root"></div>
     <div id="footer-root"></div>
@@ -20,110 +21,93 @@
         const { useState, useEffect } = React;
 
         function ProsConsApp() {
-            const [topic, setTopic] = useState('');
-            const [pros, setPros] = useState(['']);
-            const [cons, setCons] = useState(['']);
-            const [showResult, setShowResult] = useState(false);
+            const [data, setData] = useState({
+                subject: "",
+                pros: [{text: "", score: 5}],
+                cons: [{text: "", score: 5}]
+            });
+            const [isResultMode, setIsResultMode] = useState(false);
 
             useEffect(() => {
-                const tossedData = localStorage.getItem('paranlab-pros-cons');
-                if (tossedData) {
-                    const data = JSON.parse(tossedData);
-                    setTopic(data.topic || '');
-                    setPros(data.pros || ['']);
-                    setCons(data.cons || ['']);
-                    setShowResult(true);
-                    localStorage.removeItem('paranlab-pros-cons'); // 사용 후 삭제
+                const tossed = localStorage.getItem('paranlab-pros-cons');
+                if (tossed) {
+                    const parsed = JSON.parse(tossed);
+                    setData(parsed);
+                    setIsResultMode(true); // 시나리오 데이터가 있으면 즉시 결과 모드
                 }
             }, []);
 
-            const handleAnalyze = () => setShowResult(true);
+            const totalPros = data.pros.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
+            const totalCons = data.cons.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
+            const diff = totalPros - totalCons;
 
             return (
-                <main class="container mx-auto px-4 py-10 max-w-4xl">
-                    {!showResult ? (
-                        <section class="bg-white p-8 rounded-xl shadow-lg">
-                            <h1 class="text-3xl font-bold mb-6 text-blue-600">찬반 분석 (Pros-Cons)</h1>
-                            <div class="mb-6">
-                                <label class="block text-sm font-semibold mb-2">의사결정 주제</label>
-                                <input type="text" value={topic} onChange={(e)=>setTopic(e.target.value)} class="w-full p-3 border rounded" placeholder="예: 이직을 해야 할까?" />
-                            </div>
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div>
-                                    <h3 class="font-bold text-green-600 mb-2">장점 (Pros)</h3>
-                                    {pros.map((p, i) => (
-                                        <input key={i} value={p} onChange={(e)=>{
-                                            const newPros = [...pros]; newPros[i] = e.target.value; setPros(newPros);
-                                        }} class="w-full p-2 border rounded mb-2" placeholder="장점 입력" />
-                                    ))}
-                                    <button onClick={()=>setPros([...pros, ''])} class="text-sm text-blue-500">+ 항목 추가</button>
-                                </div>
-                                <div>
-                                    <h3 class="font-bold text-red-600 mb-2">단점 (Cons)</h3>
-                                    {cons.map((c, i) => (
-                                        <input key={i} value={c} onChange={(e)=>{
-                                            const newCons = [...cons]; newCons[i] = e.target.value; setCons(newCons);
-                                        }} class="w-full p-2 border rounded mb-2" placeholder="단점 입력" />
-                                    ))}
-                                    <button onClick={()=>setCons([...cons, ''])} class="text-sm text-blue-500">+ 항목 추가</button>
-                                </div>
-                            </div>
-                            <button onClick={handleAnalyze} class="w-full mt-8 bg-blue-600 text-white py-4 rounded-lg font-bold text-xl">분석 리포트 생성</button>
-                        </section>
-                    ) : (
-                        <section>
-                            <div id="report-area" class="bg-white p-10 rounded-xl shadow-lg border-t-8 border-blue-600">
-                                <h2 class="text-2xl font-bold mb-2">의사결정 리포트: {topic}</h2>
-                                <p class="text-gray-500 mb-8 text-sm">분석 일시: {new Date().toLocaleString()}</p>
-                                <div class="grid grid-cols-2 gap-8">
-                                    <div class="bg-green-50 p-6 rounded-lg">
-                                        <h3 class="text-xl font-bold text-green-700 mb-4">PROS</h3>
-                                        <ul class="list-disc pl-5 space-y-2">
-                                            {pros.filter(p => p).map((p, i) => <li key={i}>{p}</li>)}
-                                        </ul>
-                                    </div>
-                                    <div class="bg-red-50 p-6 rounded-lg">
-                                        <h3 class="text-xl font-bold text-red-700 mb-4">CONS</h3>
-                                        <ul class="list-disc pl-5 space-y-2">
-                                            {cons.filter(c => c).map((c, i) => <li key={i}>{c}</li>)}
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div class="mt-10 p-6 bg-blue-50 rounded-lg italic text-center text-blue-800">
-                                    "가장 좋은 결정은 장점의 무게가 단점의 두려움을 압도할 때 내려집니다."
-                                </div>
-                            </div>
-                            <div id="action-buttons"></div>
-                        </section>
-                    )}
+                <main className="max-w-4xl mx-auto py-12 px-4">
+                    <div id="report-card" className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-slate-100">
+                        <h1 className="text-3xl font-black text-slate-900 mb-2 text-center">Pros & Cons 분석 리포트</h1>
+                        <p className="text-center text-slate-500 mb-10 font-bold uppercase tracking-widest text-xs">Decision Science Analysis</p>
+                        
+                        <div className="mb-10 text-center">
+                            <span className="text-blue-600 font-black text-sm uppercase">Subject</span>
+                            <h2 className="text-2xl font-black text-slate-800 mt-1">{data.subject || "주제를 입력하세요"}</h2>
+                        </div>
 
-                    <article class="mt-20 prose max-w-none border-t pt-10">
-                        <h2 class="text-2xl font-bold">찬반 분석(Pros-Cons)의 과학적 근거</h2>
-                        <p>찬반 분석은 벤자민 프랭클린(Benjamin Franklin)이 사용한 '도덕적 대수학(Moral Algebra)'에 뿌리를 두고 있습니다. 인간의 뇌는 한 번에 7개 이상의 정보를 처리하기 어렵기 때문에, 복잡한 선택지를 시각화하여 나열하는 것만으로도 인지적 부하를 줄이고 객관적인 판단을 내릴 수 있습니다.</p>
-                        <h3>활용 팁</h3>
-                        <ul>
-                            <li>각 항목에 1~5점의 가중치를 부여하여 합산해보세요.</li>
-                            <li>단점 항목 중 해결 가능한 대안이 있는지 검토하세요.</li>
-                        </ul>
-                    </article>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                            <div className="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100">
+                                <h3 className="text-xl font-black text-emerald-700 mb-6 flex justify-between">
+                                    <span>PROS (찬성)</span>
+                                    <span>{totalPros}점</span>
+                                </h3>
+                                <ul className="space-y-4">
+                                    {data.pros.map((p, i) => (
+                                        <li key={i} className="flex justify-between items-center bg-white/50 p-3 rounded-2xl text-sm font-bold text-slate-600">
+                                            <span>{p.text}</span>
+                                            <span className="text-emerald-600">+{p.score}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                            <div className="bg-rose-50 p-8 rounded-[2.5rem] border border-rose-100">
+                                <h3 className="text-xl font-black text-rose-700 mb-6 flex justify-between">
+                                    <span>CONS (반대)</span>
+                                    <span>{totalCons}점</span>
+                                </h3>
+                                <ul className="space-y-4">
+                                    {data.cons.map((c, i) => (
+                                        <li key={i} className="flex justify-between items-center bg-white/50 p-3 rounded-2xl text-sm font-bold text-slate-600">
+                                            <span>{c.text}</span>
+                                            <span className="text-rose-600">-{c.score}</span>
+                                        </li>
+                                    ))}
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] text-center">
+                            <h4 className="text-lg font-bold mb-2 opacity-70">최종 분석 결과</h4>
+                            <div className="text-3xl font-black">
+                                {diff > 0 ? `찬성 우세 (+${diff})` : diff < 0 ? `반대 우세 (${diff})` : "팽팽한 대립 (0)"}
+                            </div>
+                            <p className="mt-4 text-sm opacity-60 leading-relaxed">
+                                가중치 분석 결과, {diff > 0 ? "추진하는 것이 논리적으로 타당합니다." : "신중한 재검토가 필요합니다."}
+                            </p>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 no-print">
+                        <button onClick={() => ParanLabCore.saveAsImage('report-card', 'pros-cons-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                        <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                        <button onClick={() => ParanLabCore.copyToClipboard(`[찬반 분석 결과]\n주제: ${data.subject}\n결과: ${diff > 0 ? '찬성 우세' : '반대 우세'}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                    </div>
+
+                    <section className="mt-16 border-t pt-12 text-slate-600 leading-relaxed">
+                        <h3 className="text-2xl font-black text-slate-800 mb-4">학술적 배경: 가중치 찬반 분석</h3>
+                        <p className="mb-4">단순히 찬성과 반대의 개수를 세는 것은 위험합니다. 각 항목이 의사결정자에게 주는 '심리적 무게'가 다르기 때문입니다. 본 도구는 벤자민 프랭클린의 '도덕적 대수학' 이론을 현대적으로 계량화하여, 각 항목에 1~10점의 가중치를 부여함으로써 더 정교한 결론을 도출합니다.</p>
+                    </section>
                 </main>
             );
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<ProsConsApp />);
-
-        // 결과 버튼 주입 로직
-        window.addEventListener('load', () => {
-            const checkBtn = setInterval(() => {
-                const area = document.getElementById('action-buttons');
-                if (area && typeof ParanLabCore !== 'undefined') {
-                    area.appendChild(ParanLabCore.renderActionButtons('report-area'));
-                    clearInterval(checkBtn);
-                }
-            }, 500);
-        });
+        ReactDOM.createRoot(document.getElementById('root')).render(<ProsConsApp />);
     </script>
-    <script src="/core.js"></script>
 </body>
 </html>
