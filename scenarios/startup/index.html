@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>창업 타당성 가이드: 영희의 베이커리 | 파란랩</title>
+    <title>창업 타당성 분석 가이드 | 영희의 베이커리 사례 | 파란랩</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
@@ -38,9 +38,6 @@
                         <p class="text-emerald-700 text-sm font-bold mb-4 leading-relaxed">
                             Michael Porter(1979)의 <strong>'5 Forces 모델'</strong>은 산업의 매력도를 결정하는 5가지 경쟁 압력을 분석하여 신규 진입자가 수익을 낼 수 있는 구조인지 파악합니다.
                         </p>
-                        <div class="text-[10px] text-emerald-400 font-black uppercase tracking-widest border-t border-emerald-200 pt-4">
-                            Reference: Porter, M. E. (1979). Harvard Business Review.
-                        </div>
                     </div>
                 </div>
 
@@ -49,17 +46,14 @@
                     <button onclick="tossData('swot', youngheeSwot)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
                         <div class="text-3xl mb-3">🧩</div>
                         <div class="font-black text-lg mb-1">SWOT 전략</div>
-                        <p class="text-[10px] opacity-60">강점/기회 분석 결과</p>
                     </button>
                     <button onclick="tossData('porter', youngheePorter)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
                         <div class="text-3xl mb-3">🛡️</div>
                         <div class="font-black text-lg mb-1">5 Forces</div>
-                        <p class="text-[10px] opacity-60">시장 경쟁 강도 진단</p>
                     </button>
-                    <button onclick="tossData('3c', younghee3c)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
-                        <div class="text-3xl mb-3">🎯</div>
-                        <div class="font-black text-lg mb-1">3C 분석</div>
-                        <p class="text-[10px] opacity-60">시장/경쟁/자사 진단</p>
+                    <button onclick="tossData('value-chain', youngheeVc)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
+                        <div class="text-3xl mb-3">⛓️</div>
+                        <div class="font-black text-lg mb-1">가치 사슬</div>
                     </button>
                 </div>
             </div>
@@ -73,36 +67,9 @@
             window.location.href = '/' + toolId + '/';
         }
 
-        const youngheeSwot = {
-            step: 3,
-            subject: "영희의 유기농 빵집 전략",
-            data: {
-                s: "바리스타 자격증, 유기농 레시피 보유",
-                w: "초기 자본 부족, 마케팅 경험 전무",
-                o: "신도시 대단지 입주, 건강식 트렌드",
-                t: "인근 대형 프랜차이즈 2곳, 원재료비 상승"
-            },
-            strategies: {
-                so: "유기농 빵과 프리미엄 커피 세트로 신도시 주부층 공략",
-                st: "프랜차이즈가 흉내 낼 수 없는 '당일 생산 당일 판매' 강조",
-                wo: "SNS 마케팅 공부를 통해 오픈 전 온라인 예약제 도입",
-                wt: "고정비 절감을 위해 1인 운영 시스템 및 테이크아웃 특화"
-            }
-        };
-
-        const youngheePorter = {
-            step: 2,
-            scores: { rivalry: 9, entrants: 7, substitutes: 4, suppliers: 8, buyers: 5 }
-        };
-
-        const younghee3c = {
-            step: 2,
-            data: {
-                customer: "건강에 민감한 3040 주부층, 아이를 둔 부모",
-                competitor: "대형 프랜차이즈 (가격 경쟁력 높음, 차별성 낮음)",
-                company: "유기농 전문가 이미지, 소량 생산 고품질 전략"
-            }
-        };
+        const youngheeSwot = { step: 3, subject: "영희의 유기농 빵집 전략", data: { s: "바리스타 자격증, 유기농 레시피 보유", w: "초기 자본 부족, 마케팅 경험 전무", o: "신도시 대단지 입주, 건강식 트렌드", t: "인근 대형 프랜차이즈 2곳, 원재료비 상승" }, strategies: { so: "유기농 빵과 프리미엄 커피 세트로 신도시 주부층 공략", st: "프랜차이즈가 흉내 낼 수 없는 '당일 생산 당일 판매' 강조", wo: "SNS 마케팅 공부를 통해 오픈 전 온라인 예약제 도입", wt: "고정비 절감을 위해 1인 운영 시스템 및 테이크아웃 특화" } };
+        const youngheePorter = { step: 2, subject: "신도시 베이커리 시장", scores: { rivalry: 9, entrants: 7, substitutes: 4, suppliers: 8, buyers: 5 } };
+        const youngheeVc = { data: { inbound: "유기농 밀가루 직거래선 확보", ops: "당일 생산 원칙 고수", outbound: "배달 앱 활용 최소화", marketing: "인스타그램 지역 타겟 광고", service: "포인트 적립 및 단골 관리" } };
     </script>
 </body>
 </html>
