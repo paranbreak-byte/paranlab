@@ -3,111 +3,306 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>찬반 분석(Pros-Cons) | 가중치 기반 의사결정 도구 | 파란랩</title>
+    
+    <!-- [SEO 표준] -->
+    <title>찬반 분석(Pros-Cons) 도구 | 가중치 기반 합리적 의사결정 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="벤자민 프랭클린의 도덕적 대수학을 현대적으로 재해석한 찬반 분석 도구입니다. 이직, 투자, 선택의 기로에서 장단점의 무게를 과학적으로 비교하세요.">
+    <meta name="keywords" content="찬반분석, Pros and Cons, 의사결정방법론, 벤자민프랭클린, 선택도구, 파란랩">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 Pros-Cons 분석 엔진",
+      "applicationCategory": "BusinessApplication",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 3px solid white; box-shadow: 0 2px 5px rgba(0,0,0,0.1); }
+    </style>
 </head>
-<body class="bg-slate-50">
+<body>
     <div id="header-root"></div>
     <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         function ProsConsApp() {
+            const [step, setStep] = useState(1); // 1:주제, 2:항목입력, 3:가중치설정, 4:결과
+            const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 subject: "",
-                pros: [{text: "", score: 5}],
-                cons: [{text: "", score: 5}]
+                pros: [{ text: "", score: 5 }],
+                cons: [{ text: "", score: 5 }],
+                scenarioContext: null
             });
-            const [isResultMode, setIsResultMode] = useState(false);
 
+            // [표준] 데이터 수신 및 매핑
             useEffect(() => {
-                const tossed = localStorage.getItem('paranlab-pros-cons');
-                if (tossed) {
-                    const parsed = JSON.parse(tossed);
-                    setData(parsed);
-                    setIsResultMode(true); // 시나리오 데이터가 있으면 즉시 결과 모드
-                }
+                try {
+                    const tossed = localStorage.getItem('paranlab-pros-cons');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData({
+                            subject: parsed.subject || "",
+                            pros: Array.isArray(parsed.pros) ? parsed.pros : [{ text: "", score: 5 }],
+                            cons: Array.isArray(parsed.cons) ? parsed.cons : [{ text: "", score: 5 }],
+                            scenarioContext: parsed.scenarioContext || null
+                        });
+                        setStep(4); // 시나리오 데이터는 즉시 결과로
+                    }
+                } catch(e) { console.error(e); }
             }, []);
 
-            const totalPros = data.pros.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
-            const totalCons = data.cons.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
-            const diff = totalPros - totalCons;
+            // --- [표준] 연산 엔진 ---
+            const results = useMemo(() => {
+                const totalPros = data.pros.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
+                const totalCons = data.cons.reduce((acc, cur) => acc + Number(cur.score || 0), 0);
+                const diff = totalPros - totalCons;
+                const ratio = totalPros + totalCons > 0 ? (totalPros / (totalPros + totalCons)) * 100 : 50;
+                return { totalPros, totalCons, diff, ratio };
+            }, [data]);
+
+            // --- [표준] 공유 로직 ---
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'pros-cons-report.png', { type: 'image/png' });
+                        const verdict = results.diff > 0 ? "추진 권장" : "재검토 필요";
+                        const shareText = `[파란랩 찬반 분석 리포트]\n주제: ${data.subject}\n결론: ${verdict}\n\n상세 보기: https://paranlab.com`;
+                        navigator.clipboard.writeText(shareText);
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 분석 결과', text: shareText });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'pros-cons-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                            alert('이미지가 저장되었습니다. 복사된 링크와 함께 공유하세요!');
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
+            const resetAll = () => { if (confirm("모든 데이터를 초기화하시겠습니까?")) { localStorage.removeItem('paranlab-pros-cons'); location.reload(); } };
 
             return (
-                <main className="max-w-4xl mx-auto py-12 px-4">
-                    <div id="report-card" className="bg-white p-8 md:p-12 rounded-[3rem] shadow-2xl border border-slate-100">
-                        <h1 className="text-3xl font-black text-slate-900 mb-2 text-center">Pros & Cons 분석 리포트</h1>
-                        <p className="text-center text-slate-500 mb-10 font-bold uppercase tracking-widest text-xs">Decision Science Analysis</p>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    {/* [표준] 상단 컨트롤 바 */}
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
+                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                        </div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Pros-Cons Engine v6.0</div>
+                    </div>
+
+                    {/* [표준] 단계 네비게이션 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
+                        {['분석 주제', '항목 입력', '가중치 설정', '최종 결과'].map((name, i) => (
+                            <div key={i} className={`pb-4 text-xs md:text-sm font-black ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         
-                        <div className="mb-10 text-center">
-                            <span className="text-blue-600 font-black text-sm uppercase">Subject</span>
-                            <h2 className="text-2xl font-black text-slate-800 mt-1">{data.subject || "주제를 입력하세요"}</h2>
-                        </div>
+                        {/* STEP 1: 주제 설정 */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <h2 className="text-3xl font-black text-slate-900">1. 어떤 결정을 내리고 싶으신가요?</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-2 border-transparent focus:border-blue-500 outline-none text-2xl font-black shadow-inner" placeholder="예: 스타트업으로 이직을 해야 할까?" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl mt-10">다음: 장단점 나열하기</button>
+                            </div>
+                        )}
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
-                            <div className="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100">
-                                <h3 className="text-xl font-black text-emerald-700 mb-6 flex justify-between">
-                                    <span>PROS (찬성)</span>
-                                    <span>{totalPros}점</span>
-                                </h3>
-                                <ul className="space-y-4">
-                                    {data.pros.map((p, i) => (
-                                        <li key={i} className="flex justify-between items-center bg-white/50 p-3 rounded-2xl text-sm font-bold text-slate-600">
-                                            <span>{p.text}</span>
-                                            <span className="text-emerald-600">+{p.score}</span>
-                                        </li>
-                                    ))}
-                                </ul>
+                        {/* STEP 2: 항목 입력 */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900">2. 생각나는 모든 장단점을 적어보세요.</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="space-y-4">
+                                        <h3 className="text-xl font-black text-emerald-600">PROS (장점)</h3>
+                                        {data.pros.map((p, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input type="text" value={p.text} onChange={e => { const newP = [...data.pros]; newP[i].text = e.target.value; setData({...data, pros: newP}); }} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold border border-slate-100" placeholder="장점 입력" />
+                                                <button onClick={() => setData({...data, pros: data.pros.filter((_, idx) => idx !== i)})} className="text-slate-300 hover:text-red-500">X</button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, pros: [...data.pros, {text: "", score: 5}]})} className="text-emerald-600 font-bold text-sm">+ 장점 추가</button>
+                                    </div>
+                                    <div className="space-y-4">
+                                        <h3 className="text-xl font-black text-rose-600">CONS (단점)</h3>
+                                        {data.cons.map((c, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input type="text" value={c.text} onChange={e => { const newC = [...data.cons]; newC[i].text = e.target.value; setData({...data, cons: newC}); }} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold border border-slate-100" placeholder="단점 입력" />
+                                                <button onClick={() => setData({...data, cons: data.cons.filter((_, idx) => idx !== i)})} className="text-slate-300 hover:text-red-500">X</button>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, cons: [...data.cons, {text: "", score: 5}]})} className="text-rose-600 font-bold text-sm">+ 단점 추가</button>
+                                    </div>
+                                </div>
+                                <div className="flex gap-6">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">다음: 중요도 설정</button>
+                                </div>
                             </div>
-                            <div className="bg-rose-50 p-8 rounded-[2.5rem] border border-rose-100">
-                                <h3 className="text-xl font-black text-rose-700 mb-6 flex justify-between">
-                                    <span>CONS (반대)</span>
-                                    <span>{totalCons}점</span>
-                                </h3>
-                                <ul className="space-y-4">
-                                    {data.cons.map((c, i) => (
-                                        <li key={i} className="flex justify-between items-center bg-white/50 p-3 rounded-2xl text-sm font-bold text-slate-600">
-                                            <span>{c.text}</span>
-                                            <span className="text-rose-600">-{c.score}</span>
-                                        </li>
-                                    ))}
-                                </ul>
-                            </div>
-                        </div>
+                        )}
 
-                        <div className="bg-slate-900 text-white p-8 rounded-[2.5rem] text-center">
-                            <h4 className="text-lg font-bold mb-2 opacity-70">최종 분석 결과</h4>
-                            <div className="text-3xl font-black">
-                                {diff > 0 ? `찬성 우세 (+${diff})` : diff < 0 ? `반대 우세 (${diff})` : "팽팽한 대립 (0)"}
+                        {/* STEP 3: 가중치 설정 */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in space-y-12">
+                                <h2 className="text-3xl font-black text-slate-900">3. 각 항목이 얼마나 중요한가요?</h2>
+                                <p className="text-slate-500 font-bold">나에게 더 치명적이거나 중요한 항목에 높은 점수(10점)를 주세요.</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                    <div className="space-y-8">
+                                        <h3 className="text-xl font-black text-emerald-600">PROS 가중치</h3>
+                                        {data.pros.map((p, i) => (
+                                            <div key={i} className="p-6 bg-emerald-50 rounded-2xl border border-emerald-100">
+                                                <div className="flex justify-between font-black mb-4"><span>{p.text}</span><span className="text-emerald-600">{p.score}점</span></div>
+                                                <input type="range" min="1" max="10" step="1" value={p.score} onChange={e => { const newP = [...data.pros]; newP[i].score = e.target.value; setData({...data, pros: newP}); }} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="space-y-8">
+                                        <h3 className="text-xl font-black text-rose-600">CONS 가중치</h3>
+                                        {data.cons.map((c, i) => (
+                                            <div key={i} className="p-6 bg-rose-50 rounded-2xl border border-rose-100">
+                                                <div className="flex justify-between font-black mb-4"><span>{c.text}</span><span className="text-rose-600">{c.score}점</span></div>
+                                                <input type="range" min="1" max="10" step="1" value={c.score} onChange={e => { const newC = [...data.cons]; newC[i].score = e.target.value; setData({...data, cons: newC}); }} />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="flex gap-6">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-slate-900 text-white rounded-2xl font-black text-xl shadow-2xl">최종 분석 결과 확인</button>
+                                </div>
                             </div>
-                            <p className="mt-4 text-sm opacity-60 leading-relaxed">
-                                가중치 분석 결과, {diff > 0 ? "추진하는 것이 논리적으로 타당합니다." : "신중한 재검토가 필요합니다."}
+                        )}
+
+                        {/* STEP 4: 결과 리포트 */}
+                        {step === 4 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Decision Balance Report</span>
+                                    <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "의사결정 분석 결과"}</h2>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+                                    <div className="p-10 bg-emerald-50 rounded-[3rem] border border-emerald-100 relative overflow-hidden">
+                                        <h3 className="font-black text-emerald-800 mb-8 text-xl">PROS (Total: {results.totalPros})</h3>
+                                        <div className="space-y-4">
+                                            {data.pros.map((p, i) => (
+                                                <div key={i} className="flex justify-between items-center bg-white/60 p-4 rounded-2xl">
+                                                    <span className="font-bold text-slate-700">{p.text}</span>
+                                                    <span className="font-black text-emerald-600">+{p.score}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="p-10 bg-rose-50 rounded-[3rem] border border-rose-100 relative overflow-hidden">
+                                        <h3 className="font-black text-rose-800 mb-8 text-xl">CONS (Total: {results.totalCons})</h3>
+                                        <div className="space-y-4">
+                                            {data.cons.map((c, i) => (
+                                                <div key={i} className="flex justify-between items-center bg-white/60 p-4 rounded-2xl">
+                                                    <span className="font-bold text-slate-700">{c.text}</span>
+                                                    <span className="font-black text-rose-600">-{c.score}</span>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[3.5rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="relative z-10">
+                                        <p className="text-blue-400 font-black text-sm uppercase tracking-widest mb-4">Final Verdict</p>
+                                        <h4 className="text-3xl md:text-4xl font-black mb-6">
+                                            {results.diff > 0 ? `추진하는 것이 유리합니다 (+${results.diff})` : results.diff < 0 ? `신중한 재검토가 필요합니다 (${results.diff})` : "장단점의 무게가 동일합니다 (0)"}
+                                        </h4>
+                                        <div className="w-full bg-white/10 h-4 rounded-full overflow-hidden mb-4">
+                                            <div className="h-full bg-blue-500 transition-all duration-1000" style={{ width: results.ratio + "%" }}></div>
+                                        </div>
+                                        <p className="text-sm opacity-60 font-medium">가중치 합산 결과, 긍정적 요인이 전체의 {results.ratio.toFixed(1)}%를 차지합니다.</p>
+                                    </div>
+                                </div>
+
+                                <div className="mt-10 pt-6 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* [표준] 하단 액션 버튼 세트 */}
+                    {step === 4 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        </div>
+                    )}
+
+                    {/* [표준] 학술적 근거 섹션 (SEO) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">찬반 분석(Pros-Cons)의 과학적 근거</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                찬반 분석은 인류 역사상 가장 오래되고 검증된 의사결정 도구입니다. 특히 미국의 건국 아버지 중 한 명인 **벤자민 프랭클린(Benjamin Franklin)**이 1772년 조셉 프리스틀리에게 보낸 편지에서 언급한 **'도덕적 대수학(Prudential Algebra)'**에 그 뿌리를 두고 있습니다.
                             </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">인지적 부하 감소</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간의 단기 기억력은 한 번에 7개 이상의 정보를 처리하기 어렵습니다. 장단점을 시각적으로 나열하는 것만으로도 뇌의 인지적 부하를 줄여 더 객관적인 판단을 내릴 수 있게 합니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">가중치 부여의 중요성</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">모든 장단점의 가치는 동일하지 않습니다. 본 도구는 각 항목에 1~10점의 가중치를 부여함으로써, 사소한 장점 여러 개가 치명적인 단점 하나를 가리는 오류를 방지합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Franklin, B. (1772). *Letter to Joseph Priestley on "Prudential Algebra"*.</li>
+                                    <li>• Janis, I. L., & Mann, L. (1977). *Decision making: A psychological analysis of conflict, choice, and commitment*. Free Press.</li>
+                                    <li>• Tversky, A., & Kahneman, D. (1974). "Judgment under Uncertainty: Heuristics and Biases". *Science*.</li>
+                                </ul>
+                            </div>
                         </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 no-print">
-                        <button onClick={() => ParanLabCore.saveAsImage('report-card', 'pros-cons-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                        <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                        <button onClick={() => ParanLabCore.copyToClipboard(`[찬반 분석 결과]\n주제: ${data.subject}\n결과: ${diff > 0 ? '찬성 우세' : '반대 우세'}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                    </div>
-
-                    <section className="mt-16 border-t pt-12 text-slate-600 leading-relaxed">
-                        <h3 className="text-2xl font-black text-slate-800 mb-4">학술적 배경: 가중치 찬반 분석</h3>
-                        <p className="mb-4">단순히 찬성과 반대의 개수를 세는 것은 위험합니다. 각 항목이 의사결정자에게 주는 '심리적 무게'가 다르기 때문입니다. 본 도구는 벤자민 프랭클린의 '도덕적 대수학' 이론을 현대적으로 계량화하여, 각 항목에 1~10점의 가중치를 부여함으로써 더 정교한 결론을 도출합니다.</p>
                     </section>
                 </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('root')).render(<ProsConsApp />);
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ProsConsApp />);
     </script>
 </body>
 </html>
