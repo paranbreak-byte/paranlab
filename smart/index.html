@@ -3,89 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SMART 목표 설정 | 구체적이고 실행 가능한 계획 세우기 | 파란랩</title>
-    <meta name="description" content="막연한 목표는 실패하기 쉽습니다. SMART 기법을 통해 구체적(S), 측정 가능(M), 달성 가능(A), 연관성(R), 기한(T)이 명확한 성공적인 목표를 설계해 보세요.">
+    <title>SMART 목표 설정 도구 | 구체적인 목표 달성 엔진 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">성공하는 목표의 5가지 조건 (SMART)</h2>
-            <p>목표를 세울 때 다음 5가지 필터를 통과하면 달성 확률이 비약적으로 높아집니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>Specific (구체적):</strong> 누가, 무엇을, 어떻게 할지 명확해야 합니다.</li>
-                <li><strong>Measurable (측정 가능):</strong> 숫자로 성공 여부를 확인할 수 있어야 합니다.</li>
-                <li><strong>Achievable (달성 가능):</strong> 현재 나의 자원으로 실현 가능한 범위여야 합니다.</li>
-                <li><strong>Relevant (연관성):</strong> 나의 가치관이나 장기 계획과 맞닿아 있어야 합니다.</li>
-                <li><strong>Time-bound (기한 설정):</strong> 언제까지 끝낼지 마감 기한이 있어야 합니다.</li>
-            </ul>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
+
         function SmartApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-smart') || '{}');
-            const [step, setStep] = useState(saved.step || 0);
-            const [goal, setGoal] = useState(saved.goal || "");
-            const [data, setData] = useState(saved.data || { s: "", m: "", a: "", r: "", t: "" });
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                goal: "",
+                s: "", m: "", a: "", r: "", t: ""
+            });
 
-            useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-smart', JSON.stringify({ step, goal, data }));
-                }
-            }, [step, goal, data]);
-
-            const steps = [
-                { id: 's', title: 'Specific (구체성)', q: '누가, 무엇을, 어디서, 어떻게 할 것인지 구체적으로 적어보세요.' },
-                { id: 'm', title: 'Measurable (측정 가능)', q: '성공했는지 어떻게 알 수 있나요? 숫자를 포함해보세요.' },
-                { id: 'a', title: 'Achievable (달성 가능)', q: '현실적으로 가능한 일인가요? 필요한 자원은 무엇인가요?' },
-                { id: 'r', title: 'Relevant (연관성)', q: '이 목표가 당신의 삶에 왜 중요한가요?' },
-                { id: 't', title: 'Time-bound (기한 설정)', q: '언제까지 이 목표를 달성할 것인가요?' }
+            const smartFields = [
+                { k: 's', n: 'Specific (구체성)', d: '누가, 무엇을, 어떻게 하고 싶나요?', c: 'bg-blue-500' },
+                { k: 'm', n: 'Measurable (측정 가능성)', d: '성공을 어떻게 수치로 증명할까요?', c: 'bg-slate-800' },
+                { k: 'a', n: 'Achievable (달성 가능성)', d: '현재 자원으로 실현 가능한가요?', c: 'bg-emerald-600' },
+                { k: 'r', n: 'Relevant (적절성)', d: '이 목표가 당신의 비전과 연결되나요?', c: 'bg-indigo-600' },
+                { k: 't', n: 'Time-bound (기한)', d: '언제까지 완료할 예정인가요?', c: 'bg-rose-500' }
             ];
 
-            const handleSaveHtml = () => {
-                const content = steps.map(s => `<div class="box"><strong>${s.title}:</strong> ${data[s.id]}</div>`).join('');
-                ParanLabCore.saveAsHtml(`SMART 목표 설계도`, content, 'smart-report');
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-smart');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData({
+                            goal: parsed.goal || "",
+                            s: parsed.data?.s || parsed.s || "",
+                            m: parsed.data?.m || parsed.m || "",
+                            a: parsed.data?.a || parsed.a || "",
+                            r: parsed.data?.r || parsed.r || "",
+                            t: parsed.data?.t || parsed.t || ""
+                        });
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'smart-goal.png', { type: 'image/png' });
+                        const shareText = `[파란랩 SMART 목표 리포트]\n목표: ${data.goal}\n성공을 위한 구체적 지도를 완성했습니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 SMART 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'smart-goal.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
             };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step <= 5 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            {step === 0 ? (
-                                <div><h2 className="text-3xl font-black mb-4">이루고 싶은 목표는?</h2><input value={goal} onChange={(e)=>setGoal(e.target.value)} placeholder="예: 다이어트 성공하기" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" /><button onClick={()=>setStep(1)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">목표 구체화 시작</button></div>
-                            ) : (
-                                <div><div className="flex items-center gap-4 mb-6"><span className="w-12 h-12 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center font-black text-xl">{step}</span><h2 className="text-2xl font-black">{steps[step-1].title}</h2></div><p className="text-slate-600 mb-8 font-bold text-lg">{steps[step-1].q}</p><textarea value={data[steps[step-1].id]} onChange={(e)=>setData({...data, [steps[step-1].id]: e.target.value})} className="w-full h-40 p-6 bg-slate-50 border-2 border-slate-100 focus:border-blue-500 rounded-2xl outline-none text-lg font-medium resize-none" /><div className="flex gap-4 mt-10"><button onClick={()=>setStep(step-1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(step+1)} className="flex-1 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">{step === 5 ? "완료" : "다음"}</button></div></div>
-                            )}
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-4xl font-black text-blue-600 mb-12">SMART 목표 설계도</h2>
-                                <div className="space-y-4 mb-12 text-left">
-                                    {steps.map((s, i) => (<div key={i} className="p-6 bg-slate-50 rounded-2xl border border-slate-100"><span className="text-[10px] font-black text-blue-400 uppercase tracking-widest">{s.title}</span><p className="text-slate-800 font-bold mt-1">{data[s.id] || "미작성"}</p></div>))}
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">SMART Goal Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">막연한 다짐을 SMART한 목표로 바꾸세요.</h2>
+                                <div className="max-w-2xl mx-auto">
+                                    <label className="block text-xs font-black text-slate-400 mb-2 uppercase">Main Goal</label>
+                                    <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="예: 영어 회화 마스터하기" />
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div className="grid grid-cols-1 gap-6">
+                                    {smartFields.map(f => (
+                                        <div key={f.k} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex flex-col md:flex-row gap-6 items-start">
+                                            <div className={`${f.c} text-white w-12 h-12 rounded-xl flex items-center justify-center font-black shrink-0 shadow-md`}>{f.k.toUpperCase()}</div>
+                                            <div className="flex-1 w-full">
+                                                <h3 className="font-black text-slate-800 mb-1">{f.n}</h3>
+                                                <p className="text-xs text-slate-400 mb-4">{f.d}</p>
+                                                <textarea value={data[f.k]} onChange={e => setData({...data, [f.k]: e.target.value})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" placeholder="내용을 입력하세요..." />
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">SMART 리포트 확인하기</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'smart-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[SMART 목표]\n목표: ${goal}\n구체적: ${data.s}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Goal Optimization Report</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.goal || "나의 SMART 목표"}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
+                                    {smartFields.map(f => (
+                                        <div key={f.k} className="flex flex-col h-full">
+                                            <div className={`${f.c} text-white p-4 rounded-t-3xl text-center font-black text-xl shadow-md`}>{f.k.toUpperCase()}</div>
+                                            <div className="flex-1 p-6 bg-slate-50 rounded-b-3xl border-x border-b border-slate-100">
+                                                <h4 className="text-[10px] font-black text-slate-400 uppercase mb-2">{f.n.split(' ')[0]}</h4>
+                                                <p className="text-sm font-bold text-slate-700 leading-relaxed">{data[f.k] || "미입력"}</p>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
+                                    <h4 className="text-xl font-black mb-4">"측정할 수 없다면 관리할 수 없고, 관리할 수 없다면 개선할 수 없다."</h4>
+                                    <p className="text-sm opacity-60 leading-relaxed">
+                                        피터 드러커의 명언처럼, 구체화된 목표는 이미 절반의 성공입니다.<br/>
+                                        이제 설정하신 기한 <strong>[{data.t}]</strong>까지 매일의 성과를 측정하세요.
+                                    </p>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(0)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<SmartApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SmartApp />);
     </script>
 </body>
 </html>
