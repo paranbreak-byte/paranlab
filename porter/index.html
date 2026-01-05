@@ -28,7 +28,7 @@
         const { useState, useEffect, useMemo } = React;
 
         function PorterApp() {
-            const [step, setStep] = useState(1); // 1:평가, 2:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 subject: "",
@@ -102,10 +102,6 @@
                                             </div>
                                             <p className="text-xs text-slate-400 mb-6">{f.d}</p>
                                             <input type="range" min="1" max="10" value={data.scores[f.k]} onChange={e => setData({...data, scores: {...data.scores, [f.k]: parseInt(e.target.value)}})} />
-                                            <div className="flex justify-between text-[10px] mt-2 font-bold text-slate-300 uppercase">
-                                                <span>Low Pressure</span>
-                                                <span>High Pressure</span>
-                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -137,14 +133,14 @@
                                         <p className="text-blue-400 font-black text-xs uppercase mb-2">Average Pressure</p>
                                         <h4 className="text-5xl font-black mb-6">{avgScore}</h4>
                                         <p className="text-sm opacity-60 leading-relaxed font-medium">
-                                            {avgScore > 7 ? "경쟁 압력이 매우 높아 수익을 내기 어려운 시장입니다. 강력한 차별화 전략이 필수적입니다." : 
-                                             avgScore > 4 ? "보통 수준의 경쟁 환경입니다. 핵심 역량을 바탕으로 우위를 점할 수 있습니다." : 
-                                             "매우 매력적인 시장입니다. 선점 효과를 극대화하여 시장을 장악하세요."}
+                                            {avgScore > 7 ? "경쟁 압력이 매우 높아 수익을 내기 어려운 시장입니다." : 
+                                             avgScore > 4 ? "보통 수준의 경쟁 환경입니다." : 
+                                             "매우 매력적인 시장입니다."}
                                         </p>
                                     </div>
                                 </div>
                                 <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
@@ -160,6 +156,34 @@
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    {/* [보강] 학술적 근거 섹션 */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">Porter's 5 Forces: 산업 분석의 정석</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                5 Forces 모델은 하버드 경영대학원의 **마이클 포터(Michael Porter)** 교수가 1979년에 발표한 산업 구조 분석 프레임워크입니다. 기업이 직면한 5가지 핵심 경쟁 압력을 분석하여 해당 산업의 수익 잠재력과 매력도를 정량적으로 평가합니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">수익 구조의 결정 요인</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">포터는 개별 기업의 역량보다 '산업의 구조'가 수익성을 결정하는 더 큰 요인이라고 보았습니다. 5가지 압력이 강할수록 산업 내 평균 수익률은 낮아지며, 이를 파악하는 것이 전략 수립의 첫걸음입니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">전략적 포지셔닝</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">이 도구는 단순히 위협을 측정하는 데 그치지 않고, 기업이 어디에 위치해야 경쟁 압력을 최소화하고 초과 수익을 달성할 수 있는지에 대한 방향성을 제시합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Porter, M. E. (1979). "How Competitive Forces Shape Strategy". *Harvard Business Review*.</li>
+                                    <li>• Porter, M. E. (1980). *Competitive Strategy: Techniques for Analyzing Industries and Competitors*. Free Press.</li>
+                                    <li>• Porter, M. E. (2008). "The Five Competitive Forces That Shape Strategy". *Harvard Business Review*.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
