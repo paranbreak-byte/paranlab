@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이키가이(Ikigai) 찾기 | 나만의 직업과 삶의 목적 발견 도구 | 파란랩</title>
-    <meta name="description" content="내가 좋아하는 일, 잘하는 일, 세상이 필요로 하는 일, 돈이 되는 일의 교집합을 찾아보세요. 이키가이 분석을 통해 당신의 진정한 삶의 의미를 발견할 수 있습니다.">
+    <title>이키가이(Ikigai) 분석 도구 | 삶의 목적 발견 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,69 +12,143 @@
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-        .venn-circle { mix-blend-mode: multiply; transition: all 0.5s ease; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .ikigai-circle { width: 300px; height: 300px; border-radius: 50%; position: absolute; mix-blend-mode: multiply; opacity: 0.6; display: flex; align-items: center; justify-content: center; padding: 40px; text-align: center; font-weight: 900; font-size: 14px; }
+        .c-love { background-color: #f87171; top: 0; left: 50%; transform: translateX(-50%); }
+        .c-good { background-color: #60a5fa; top: 150px; left: 0; }
+        .c-paid { background-color: #fbbf24; top: 300px; left: 50%; transform: translateX(-50%); }
+        .c-need { background-color: #34d399; top: 150px; right: 0; }
+        .ikigai-center { position: absolute; top: 220px; left: 50%; transform: translateX(-50%); z-index: 10; background: white; padding: 10px 20px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,0.1); font-weight: 900; color: #1e293b; }
     </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-3xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">이키가이(Ikigai)란?</h2>
-            <p><strong>이키가이</strong>는 좋아하는 것, 잘하는 것, 세상이 필요한 것, 수익이 되는 것의 교집합을 찾아 삶의 보람을 발견하는 기법입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
-        function IkigaiApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-ikigai') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [data, setData] = useState(saved.data || { love: "", talent: "", need: "", money: "" });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-ikigai', JSON.stringify({ step, data })); }, [step, data]);
+        function IkigaiApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                love: "", good: "", need: "", paid: "", ikigai: ""
+            });
+
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-ikigai');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(parsed);
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'ikigai.png', { type: 'image/png' });
+                        const shareText = `[파란랩 이키가이 리포트]\n나의 삶의 목적: ${data.ikigai}\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 이키가이', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'ikigai.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-8 text-center">4가지 핵심 질문</h2>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                                {[{id:'love',t:'좋아하는 것',c:'bg-rose-100'},{id:'talent',t:'잘하는 것',c:'bg-blue-100'},{id:'need',t:'세상이 필요한 것',c:'bg-emerald-100'},{id:'money',t:'수익이 되는 것',c:'bg-amber-100'}].map(s => (
-                                    <div key={s.id} className={`${s.c} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
-                                        <h3 className="font-black mb-2">{s.t}</h3>
-                                        <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} placeholder="내용을 입력하세요..." className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" />
-                                    </div>
-                                ))}
-                            </div>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-rose-600 text-white rounded-[2rem] font-black text-xl shadow-xl">이키가이 확인하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-4xl font-black text-slate-900 mb-12 text-rose-600">나의 이키가이 지도</h2>
-                                <div className="relative w-full max-w-md mx-auto mb-12 aspect-square">
-                                    <svg viewBox="0 0 400 400" className="w-full h-full">
-                                        <circle cx="200" cy="150" r="100" fill="#fecdd3" className="venn-circle" />
-                                        <circle cx="150" cy="230" r="100" fill="#bfdbfe" className="venn-circle" />
-                                        <circle cx="250" cy="230" r="100" fill="#a7f3d0" className="venn-circle" />
-                                        <circle cx="200" cy="280" r="100" fill="#fde68a" className="venn-circle" />
-                                        <text x="200" y="235" textAnchor="middle" className="text-[14px] font-black fill-slate-800">IKIGAI</text>
-                                    </svg>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Ikigai Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 존재 이유를 찾아서</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="p-6 bg-rose-50 rounded-3xl">
+                                        <h3 className="font-black text-rose-600 mb-2">What you LOVE</h3>
+                                        <textarea value={data.love} onChange={e => setData({...data, love: e.target.value})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm" placeholder="당신이 사랑하는 일은?" />
+                                    </div>
+                                    <div className="p-6 bg-blue-50 rounded-3xl">
+                                        <h3 className="font-black text-blue-600 mb-2">What you are GOOD AT</h3>
+                                        <textarea value={data.good} onChange={e => setData({...data, good: e.target.value})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm" placeholder="당신이 잘하는 일은?" />
+                                    </div>
+                                    <div className="p-6 bg-emerald-50 rounded-3xl">
+                                        <h3 className="font-black text-emerald-600 mb-2">What the world NEEDS</h3>
+                                        <textarea value={data.need} onChange={e => setData({...data, need: e.target.value})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm" placeholder="세상이 필요로 하는 일은?" />
+                                    </div>
+                                    <div className="p-6 bg-amber-50 rounded-3xl">
+                                        <h3 className="font-black text-amber-600 mb-2">What you can be PAID FOR</h3>
+                                        <textarea value={data.paid} onChange={e => setData({...data, paid: e.target.value})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm" placeholder="수익을 창출할 수 있는 일은?" />
+                                    </div>
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div className="max-w-xl mx-auto">
+                                    <h3 className="text-xl font-black text-slate-900 mb-4 text-center">최종적인 나의 '이키가이'</h3>
+                                    <input type="text" value={data.ikigai} onChange={e => setData({...data, ikigai: e.target.value})} className="w-full p-5 bg-slate-900 text-white rounded-2xl font-black text-center" placeholder="이 모든 것의 교집합은 무엇인가요?" />
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">이키가이 맵 확인하기</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'ikigai-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`이키가이 결과`, ``, 'ikigai-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[이키가이 결과]\n좋아하는 것: ${data.love}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Purpose of Life</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">나의 이키가이(Ikigai) 리포트</h2>
+                                </div>
+                                <div className="relative h-[650px] w-[600px] mx-auto mb-20 hidden md:block">
+                                    <div className="ikigai-circle c-love text-white">{data.love}</div>
+                                    <div className="ikigai-circle c-good text-white">{data.good}</div>
+                                    <div className="ikigai-circle c-need text-white">{data.need}</div>
+                                    <div className="ikigai-circle c-paid text-slate-900">{data.paid}</div>
+                                    <div className="ikigai-center">IKIGAI: {data.ikigai}</div>
+                                </div>
+                                <div className="md:hidden space-y-4 mb-10">
+                                    <div className="p-6 bg-rose-50 rounded-2xl font-bold text-rose-700">LOVE: {data.love}</div>
+                                    <div className="p-6 bg-blue-50 rounded-2xl font-bold text-blue-700">GOOD: {data.good}</div>
+                                    <div className="p-6 bg-emerald-50 rounded-2xl font-bold text-emerald-700">NEED: {data.need}</div>
+                                    <div className="p-6 bg-amber-50 rounded-2xl font-bold text-amber-700">PAID: {data.paid}</div>
+                                    <div className="p-8 bg-slate-900 text-white rounded-2xl font-black text-center">IKIGAI: {data.ikigai}</div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<IkigaiApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<IkigaiApp />);
     </script>
 </body>
 </html>
