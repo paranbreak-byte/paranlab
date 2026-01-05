@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>창업 타당성 분석 가이드 | 영희의 베이커리 사례 | 파란랩</title>
-    <meta name="description" content="레드오션에서 살아남는 법, Michael Porter의 5 Forces 모델로 분석합니다. 창업 전 반드시 체크해야 할 시장 경쟁력을 진단하세요.">
+    <title>창업 타당성 가이드: 영희의 베이커리 | 파란랩</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
@@ -28,10 +27,10 @@
                     <div>
                         <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">📊 핵심 분석 데이터</h3>
                         <ul class="space-y-4 text-slate-500 font-bold">
-                            <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>임대료: 월 350만원</li>
-                            <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>원가율: 일반 대비 3배</li>
-                            <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>경쟁사: 대형 프랜차이즈 2개</li>
-                            <li class="flex items-center gap-3"><span class="w-1.5 h-1.5 bg-emerald-600 rounded-full"></span>차별화: 유기농/글루텐 프리</li>
+                            <li>• 임대료: 월 350만원 (고정비 높음)</li>
+                            <li>• 원가율: 일반 대비 3배 (프리미엄 전략)</li>
+                            <li>• 경쟁사: 대형 프랜차이즈 2개 인접</li>
+                            <li>• 기회 요인: 신도시 건강식 트렌드 확산</li>
                         </ul>
                     </div>
                     <div class="bg-emerald-50 p-8 rounded-[2.5rem] border border-emerald-100">
@@ -45,21 +44,65 @@
                     </div>
                 </div>
 
-                <h3 class="text-2xl font-black text-slate-900 mb-8 text-center">추천 해결 도구</h3>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <a href="/swot/" class="p-8 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
+                <h3 class="text-2xl font-black text-slate-900 mb-8 text-center">영희의 데이터로 도구 활용하기</h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <button onclick="tossData('swot', youngheeSwot)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
                         <div class="text-3xl mb-3">🧩</div>
-                        <div class="font-black text-xl mb-1">SWOT 전략</div>
-                        <p class="text-xs opacity-60">강점과 기회를 연결하는 전략 수립</p>
-                    </a>
-                    <a href="/porter/" class="p-8 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
+                        <div class="font-black text-lg mb-1">SWOT 전략</div>
+                        <p class="text-[10px] opacity-60">강점/기회 분석 결과</p>
+                    </button>
+                    <button onclick="tossData('porter', youngheePorter)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
                         <div class="text-3xl mb-3">🛡️</div>
-                        <div class="font-black text-xl mb-1">5 Forces 분석</div>
-                        <p class="text-xs opacity-60">시장의 경쟁 강도와 수익성 측정</p>
-                    </a>
+                        <div class="font-black text-lg mb-1">5 Forces</div>
+                        <p class="text-[10px] opacity-60">시장 경쟁 강도 진단</p>
+                    </button>
+                    <button onclick="tossData('3c', younghee3c)" class="p-6 bg-slate-50 hover:bg-emerald-600 hover:text-white rounded-3xl border border-slate-100 transition-all text-center group">
+                        <div class="text-3xl mb-3">🎯</div>
+                        <div class="font-black text-lg mb-1">3C 분석</div>
+                        <p class="text-[10px] opacity-60">시장/경쟁/자사 진단</p>
+                    </button>
                 </div>
             </div>
         </section>
     </div>
+
+    <script>
+        function tossData(toolId, data) {
+            localStorage.setItem('paranlab-' + toolId, JSON.stringify(data));
+            localStorage.setItem('paranlab-autosave', 'true');
+            window.location.href = '/' + toolId + '/';
+        }
+
+        const youngheeSwot = {
+            step: 3,
+            subject: "영희의 유기농 빵집 전략",
+            data: {
+                s: "바리스타 자격증, 유기농 레시피 보유",
+                w: "초기 자본 부족, 마케팅 경험 전무",
+                o: "신도시 대단지 입주, 건강식 트렌드",
+                t: "인근 대형 프랜차이즈 2곳, 원재료비 상승"
+            },
+            strategies: {
+                so: "유기농 빵과 프리미엄 커피 세트로 신도시 주부층 공략",
+                st: "프랜차이즈가 흉내 낼 수 없는 '당일 생산 당일 판매' 강조",
+                wo: "SNS 마케팅 공부를 통해 오픈 전 온라인 예약제 도입",
+                wt: "고정비 절감을 위해 1인 운영 시스템 및 테이크아웃 특화"
+            }
+        };
+
+        const youngheePorter = {
+            step: 2,
+            scores: { rivalry: 9, entrants: 7, substitutes: 4, suppliers: 8, buyers: 5 }
+        };
+
+        const younghee3c = {
+            step: 2,
+            data: {
+                customer: "건강에 민감한 3040 주부층, 아이를 둔 부모",
+                competitor: "대형 프랜차이즈 (가격 경쟁력 높음, 차별성 낮음)",
+                company: "유기농 전문가 이미지, 소량 생산 고품질 전략"
+            }
+        };
+    </script>
 </body>
 </html>
