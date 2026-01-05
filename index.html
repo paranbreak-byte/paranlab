@@ -4,10 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>파란랩(Paran Lab) | 의사결정 과학 연구소</title>
-    
-    <!-- [구글 애드센스 코드] -->
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
     <style>
@@ -40,11 +37,12 @@
         <!-- 2. 고민 해결사 위저드 -->
         <section class="max-w-5xl mx-auto px-6 mb-24">
             <div id="wizard-container" class="bg-slate-900 rounded-[3.5rem] p-8 md:p-16 text-white shadow-2xl relative overflow-hidden border border-white/10">
+                <div class="absolute -top-24 -right-24 w-96 h-96 bg-blue-600/20 rounded-full blur-[100px]"></div>
                 <div id="wizard-start" class="wizard-step active relative z-10 text-center">
                     <div class="text-5xl mb-6">🔮</div>
                     <h2 class="text-3xl md:text-4xl font-black mb-4">어떤 도구가 필요하신가요?</h2>
                     <p class="text-slate-400 mb-10 font-medium text-lg">당신의 상황을 분석하여 최적의 도구를 추천해 드립니다.</p>
-                    <button onclick="startWizard()" class="px-12 py-6 bg-blue-600 hover:bg-blue-500 text-white rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-blue-900/40 hover:scale-105">내게 맞는 도구 찾기</button>
+                    <button onclick="startWizard()" class="px-12 py-6 bg-blue-600 hover:bg-blue-50 text-white rounded-[2rem] font-black text-xl transition-all shadow-2xl shadow-blue-900/40 hover:scale-105">내게 맞는 도구 찾기</button>
                 </div>
                 <div id="step-1" class="wizard-step relative z-10">
                     <div class="flex items-center gap-3 mb-8"><span class="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center font-black text-sm">01</span><h2 class="text-2xl md:text-3xl font-black">지금 어떤 상황에 놓여 있나요?</h2></div>
@@ -65,7 +63,7 @@
                     <div class="w-24 h-24 bg-blue-600 rounded-full flex items-center justify-center text-4xl mx-auto mb-8 shadow-2xl shadow-blue-600/50">🎯</div>
                     <h2 class="text-3xl font-black mb-2">당신을 위한 최적의 도구</h2>
                     <p id="recommended-tool-name" class="text-blue-400 text-4xl font-black mb-12 tracking-tight"></p>
-                    <div class="flex flex-col md:row justify-center gap-4">
+                    <div class="flex flex-col md:flex-row justify-center gap-4">
                         <a id="recommended-tool-link" href="#" class="px-12 py-6 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xl transition-all shadow-xl">지금 바로 사용하기</a>
                         <button onclick="resetWizard()" class="px-12 py-6 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-xl transition-all">다시 찾기</button>
                     </div>
@@ -73,15 +71,25 @@
             </div>
         </section>
 
-        <!-- [AD 1] 상단 배너 -->
-        <div class="max-w-6xl mx-auto px-6 mb-24">
-            <div class="ad-placeholder w-full h-28 rounded-3xl">
-                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
-                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+        <!-- 3. 검색 및 추천 키워드 -->
+        <section class="max-w-4xl mx-auto px-6 mb-24 text-center">
+            <h2 class="text-3xl font-black text-slate-900 mb-8 tracking-tight">직접 도구 찾아보기</h2>
+            <div class="relative group mb-8">
+                <input type="text" id="search-input" placeholder="고민 중인 키워드를 입력하세요..." class="w-full p-6 pl-14 bg-white border-2 border-slate-100 rounded-[2rem] shadow-xl shadow-slate-200/30 outline-none focus:border-blue-500 transition-all font-bold text-lg" />
+                <svg class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-300 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
             </div>
-        </div>
+            <div class="flex flex-wrap justify-center gap-3">
+                <span class="text-slate-400 font-bold text-sm mr-2 py-2">추천 고민:</span>
+                <button onclick="setSearch('이직')" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">#이직</button>
+                <button onclick="setSearch('창업')" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">#창업</button>
+                <button onclick="setSearch('시간관리')" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">#시간관리</button>
+                <button onclick="setSearch('투자')" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">#투자</button>
+                <button onclick="setSearch('다이어트')" class="px-4 py-2 bg-white border border-slate-200 rounded-full text-sm font-bold text-slate-500 hover:border-blue-500 hover:text-blue-600 transition-all shadow-sm">#다이어트</button>
+                <button onclick="setSearch('')" class="px-4 py-2 bg-slate-100 rounded-full text-sm font-bold text-slate-400 hover:bg-slate-200 transition-all">초기화</button>
+            </div>
+        </section>
 
-        <!-- 3. 의사결정 시나리오 (Case Study) -->
+        <!-- 4. 의사결정 시나리오 -->
         <section class="max-w-6xl mx-auto px-6 py-12 mb-24">
             <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-4">
                 <div>
@@ -89,42 +97,23 @@
                     <p class="text-slate-400 font-bold text-lg">실제 시나리오를 통해 도구 활용법을 확인하세요.</p>
                 </div>
             </div>
-            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6" id="scenario-grid">
-                <!-- core.js 데이터 기반 자동 생성 -->
-            </div>
-        </section>
-
-        <!-- 4. 학술적 신뢰 섹션 -->
-        <section class="bg-slate-900 py-32 text-white relative overflow-hidden">
-            <div class="max-w-6xl mx-auto px-6 grid grid-cols-1 md:grid-cols-2 gap-20 items-center relative z-10">
-                <div>
-                    <h2 class="text-4xl md:text-5xl font-black mb-8 leading-[1.2]">검증된 이론,<br>데이터로 증명하는 선택</h2>
-                    <p class="text-slate-400 text-lg mb-12 leading-relaxed font-medium">파란랩의 모든 도구는 하버드, 스탠퍼드 등 세계 유수의 연구진이 검증한 경영학 프레임워크와 심리학 모델을 기반으로 설계되었습니다.</p>
-                </div>
-                <div class="space-y-4">
-                    <div class="p-8 bg-white/5 rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-all">
-                        <h4 class="font-black text-white text-lg mb-2">The Analytic Hierarchy Process</h4>
-                        <p class="text-sm text-slate-500 font-medium italic">Thomas L. Saaty (1980)</p>
-                    </div>
-                    <div class="p-8 bg-white/5 rounded-[2.5rem] border border-white/10 hover:bg-white/10 transition-all">
-                        <h4 class="font-black text-white text-lg mb-2">Prospect Theory: Decision under Risk</h4>
-                        <p class="text-sm text-slate-500 font-medium italic">Kahneman & Tversky (1979)</p>
-                    </div>
-                </div>
-            </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-6" id="scenario-grid"></div>
         </section>
 
         <!-- 5. 전체 도구 라이브러리 -->
-        <section class="max-w-6xl mx-auto px-6 py-32">
-            <div class="flex flex-col md:flex-row justify-between items-center mb-20 gap-8">
-                <h2 class="text-4xl font-black text-slate-900 tracking-tight">전체 도구 라이브러리</h2>
-                <div class="w-full md:w-[400px] relative group">
-                    <input type="text" id="search-input" placeholder="도구 이름이나 키워드 검색..." class="w-full p-5 pl-14 bg-white border-2 border-slate-100 rounded-3xl shadow-xl outline-none focus:border-blue-500 transition-all font-bold text-lg" />
-                    <svg class="absolute left-5 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-300 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-            </div>
+        <section class="max-w-6xl mx-auto px-6 py-12 mb-24">
+            <h2 class="text-3xl font-black text-slate-900 mb-12 text-center">전체 도구 라이브러리</h2>
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="tools-grid"></div>
+            <div id="no-results" class="hidden text-center py-20"><p class="text-slate-300 text-xl font-bold">찾으시는 도구가 없습니다.</p></div>
         </section>
+
+        <!-- [AD] 하단 배너 -->
+        <div class="max-w-6xl mx-auto px-6 pb-32">
+            <div class="ad-placeholder w-full h-64 rounded-[3rem]">
+                <ins class="adsbygoogle" style="display:block" data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                <script>(adsbygoogle = window.adsbygoogle || []).push({});</script>
+            </div>
+        </div>
     </div>
 
     <script>
@@ -139,47 +128,45 @@
         }
         function resetWizard() { document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active')); document.getElementById('wizard-start').classList.add('active'); }
 
-        window.addEventListener('load', () => {
-            // [중요] 시나리오 그리드 생성 로직 수정 (폴더 경로로 연결)
-            const scenarioGrid = document.getElementById('scenario-grid');
-            const scenarios = [
-                { id: "career", title: "커리어 전환", icon: "💼" },
-                { id: "startup", title: "창업 타당성", icon: "🚀" },
-                { id: "shopping", title: "합리적 소비", icon: "💰" },
-                { id: "burnout", title: "번아웃 탈출", icon: "📅" },
-                { id: "goal", title: "목표 달성", icon: "📍" },
-                { id: "problem", title: "문제 해결", icon: "❓" },
-                { id: "creative", title: "창의적 기획", icon: "💡" },
-                { id: "purpose", title: "삶의 목적", icon: "🌸" },
-                { id: "risk", title: "리스크 관리", icon: "🌳" },
-                { id: "team", title: "조직 소통", icon: "🪟" }
-            ];
+        function setSearch(val) {
+            const input = document.getElementById('search-input');
+            input.value = val;
+            input.dispatchEvent(new Event('input'));
+            input.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
 
-            scenarios.forEach(s => {
+        window.addEventListener('load', () => {
+            const scenarioGrid = document.getElementById('scenario-grid');
+            ParanLabCore.scenariosList.forEach(s => {
                 const card = document.createElement('a');
-                card.href = `/scenarios/${s.id}/`; // 실제 폴더 경로로 연결
+                card.href = `/scenarios/?id=${s.id}`;
                 card.className = `scenario-card bg-white p-10 rounded-[3rem] border border-slate-100 shadow-sm flex flex-col items-center text-center group`;
-                card.innerHTML = `
-                    <div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-500">${s.icon}</div>
-                    <h4 class="font-black text-slate-900 text-xl mb-2">${s.title}</h4>
-                    <p class="text-xs text-slate-400 font-black uppercase tracking-widest">${s.id}</p>
-                `;
+                card.innerHTML = `<div class="text-6xl mb-6 group-hover:scale-110 transition-transform duration-500">${s.icon}</div><h4 class="font-black text-slate-900 text-xl mb-2">${s.title}</h4><p class="text-xs text-slate-400 font-black uppercase tracking-widest">${s.id}</p>`;
                 scenarioGrid.appendChild(card);
             });
 
             const tools = ParanLabCore.toolsList;
             const grid = document.getElementById('tools-grid');
             const searchInput = document.getElementById('search-input');
+            const noResults = document.getElementById('no-results');
 
             function renderTools(filter = '') {
                 grid.innerHTML = '';
-                tools.filter(t => t.name.toLowerCase().includes(filter.toLowerCase())).forEach(t => {
-                    const card = document.createElement('a');
-                    card.href = t.href;
-                    card.className = "tool-card bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group";
-                    card.innerHTML = `<div class="text-4xl group-hover:rotate-12 transition-transform">${t.icon}</div><div><div class="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors">${t.name}</div><div class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${t.category}</div></div>`;
-                    grid.appendChild(card);
-                });
+                const filtered = tools.filter(t => 
+                    t.name.toLowerCase().includes(filter.toLowerCase()) || 
+                    t.tags.some(tag => tag.includes(filter))
+                );
+                if (filtered.length === 0) noResults.classList.remove('hidden');
+                else {
+                    noResults.classList.add('hidden');
+                    filtered.forEach(t => {
+                        const card = document.createElement('a');
+                        card.href = t.href;
+                        card.className = "tool-card bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex items-center gap-6 group";
+                        card.innerHTML = `<div class="text-4xl group-hover:rotate-12 transition-transform">${t.icon}</div><div><div class="font-black text-slate-900 text-lg group-hover:text-blue-600 transition-colors">${t.name}</div><div class="text-[10px] text-slate-400 font-black uppercase tracking-widest">${t.category}</div></div>`;
+                        grid.appendChild(card);
+                    });
+                }
             }
             searchInput.addEventListener('input', (e) => renderTools(e.target.value));
             renderTools();
