@@ -3,170 +3,139 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>여섯 색깔 모자 사고법(6 Thinking Hats) | 다각도 관점 분석 도구 | 파란랩</title>
-    <meta name="description" content="에드워드 드 보노의 여섯 색깔 모자 기법을 통해 감정과 이성을 분리하고, 편향 없는 객관적인 의사결정을 내리세요. 파란랩의 과학적 사고 도구입니다.">
-    
-    <!-- 라이브러리 로드 -->
+    <title>여섯 색깔 모자 사고법 | 다각도 관점 분석 도구 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    
-    <!-- 애드센스 정적 삽입 -->
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
-    
+    <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-        .no-print { @media print { display: none; } }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
     </style>
 </head>
-<body class="bg-slate-50">
+<body>
     <div id="header-root"></div>
-    
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-    </div>
-
-    <!-- SEO 및 학술적 근거 섹션 -->
-    <section id="seo-content" class="max-w-4xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 text-slate-600 leading-relaxed space-y-6">
-        <h2 class="text-3xl font-black text-slate-800 mb-6">여섯 색깔 모자(Six Thinking Hats)의 과학적 원리</h2>
-        <p>
-            여섯 색깔 모자 사고법은 창의적 사고의 권위자 **에드워드 드 보노(Edward de Bono)**가 제안한 '수평적 사고(Lateral Thinking)'의 핵심 도구입니다. 
-            인간의 뇌는 한 번에 논리, 감정, 희망, 비판을 동시에 처리하려 할 때 인지적 과부하를 겪으며 편향된 결정을 내리기 쉽습니다.
-        </p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8">
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-2">왜 '모자'인가?</h3>
-                <p class="text-sm">모자를 바꿔 쓰는 행위는 자신의 역할을 의도적으로 전환하는 심리적 장치입니다. 이를 통해 특정 관점에 매몰되지 않고 사고의 외연을 확장할 수 있습니다.</p>
-            </div>
-            <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-100">
-                <h3 class="font-bold text-slate-800 mb-2">병렬적 사고(Parallel Thinking)</h3>
-                <p class="text-sm">회의 시 모든 구성원이 같은 색의 모자를 동시에 씀으로써, 서로 반대되는 의견으로 충돌하는 대신 하나의 관점을 함께 깊게 파고드는 협력적 사고가 가능해집니다.</p>
-            </div>
-        </div>
-        <h3 class="text-xl font-bold text-slate-800 mt-8">각 모자의 역할과 질문 예시</h3>
-        <ul class="list-disc pl-5 space-y-2 text-sm">
-            <li><strong>하얀 모자:</strong> "우리가 가진 데이터는 무엇인가?", "어떤 정보가 더 필요한가?"</li>
-            <li><strong>빨간 모자:</strong> "이 계획에 대한 나의 직감은 어떠한가?", "이유 없는 거부감이 드는가?"</li>
-            <li><strong>검은 모자:</strong> "이 아이디어의 치명적인 약점은 무엇인가?", "법적/윤리적 문제는 없는가?"</li>
-            <li><strong>노란 모자:</strong> "이 일이 성공했을 때 얻는 최대 이익은?", "낙관적인 시나리오는?"</li>
-            <li><strong>초록 모자:</strong> "기존 방식을 완전히 뒤집을 대안은?", "새로운 가능성은?"</li>
-            <li><strong>파란 모자:</strong> "지금까지의 논의를 요약하면?", "다음 단계로 무엇을 해야 하는가?"</li>
-        </ul>
-    </section>
-
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect } = React;
 
-        function HatsApp() {
-            // 초기 데이터 로드 (localStorage 또는 시나리오 Toss 데이터)
+        function SixHatsApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
-                white: "", red: "", black: "", yellow: "", green: "", blue: ""
+                subject: "",
+                hats: { white: "", red: "", black: "", yellow: "", green: "", blue: "" }
             });
 
-            useEffect(() => {
-                // 1. core.js의 데이터 토스 시스템 확인
-                const storageKey = 'paranlab-6hats';
-                const tossedData = localStorage.getItem(storageKey);
-                
-                if (tossedData) {
-                    try {
-                        const parsed = JSON.parse(tossedData);
-                        // 시나리오에서 온 데이터 구조({data: {...}})와 직접 입력 구조 대응
-                        const finalData = parsed.data ? parsed.data : parsed;
-                        setData(finalData);
-                        console.log("Data loaded from storage:", finalData);
-                    } catch (e) {
-                        console.error("Data parsing error", e);
-                    }
-                }
-            }, []);
-
-            // 데이터 변경 시 자동 저장
-            useEffect(() => {
-                localStorage.setItem('paranlab-6hats', JSON.stringify({ data, updated: new Date().getTime() }));
-            }, [data]);
-
             const hats = [
-                { id: 'white', name: '하얀 모자', role: '객관적 사실', color: 'bg-white', text: 'text-slate-600', border: 'border-slate-200' },
-                { id: 'red', name: '빨간 모자', role: '직관과 감정', color: 'bg-red-500', text: 'text-white', border: 'border-red-600' },
-                { id: 'black', name: '검은 모자', role: '비판과 위험', color: 'bg-slate-800', text: 'text-white', border: 'border-black' },
-                { id: 'yellow', name: '노란 모자', role: '낙관과 이익', color: 'bg-amber-400', text: 'text-slate-900', border: 'border-amber-500' },
-                { id: 'green', name: '초록 모자', role: '창의와 대안', color: 'bg-emerald-500', text: 'text-white', border: 'border-emerald-600' },
-                { id: 'blue', name: '파란 모자', role: '조절과 결론', color: 'bg-blue-600', text: 'text-white', border: 'border-blue-700' }
+                { k: 'white', n: '하얀 모자', r: '객관적 사실', c: 'bg-white border', t: 'text-slate-600', q: '우리가 가진 데이터와 정보는 무엇인가요?' },
+                { k: 'red', n: '빨간 모자', r: '직관과 감정', c: 'bg-red-500', t: 'text-white', q: '이 아이디어에 대한 당신의 느낌은 어떤가요?' },
+                { k: 'black', n: '검은 모자', r: '비판과 위험', c: 'bg-slate-800', t: 'text-white', q: '발생 가능한 리스크와 약점은 무엇인가요?' },
+                { k: 'yellow', n: '노란 모자', r: '낙관과 이익', c: 'bg-amber-400', t: 'text-slate-900', q: '이 아이디어가 성공했을 때의 이점은?' },
+                { k: 'green', n: '초록 모자', r: '창의와 대안', c: 'bg-emerald-500', t: 'text-white', q: '더 발전시킬 수 있는 새로운 가능성은?' },
+                { k: 'blue', n: '파란 모자', r: '조절과 결론', c: 'bg-blue-600', t: 'text-white', q: '지금까지의 논의를 요약하고 결론을 내린다면?' }
             ];
 
-            // 결과 복사 텍스트 생성
-            const getCopyText = () => {
-                return `[파란랩 여섯 색깔 모자 사고 리포트]\n\n` +
-                    hats.map(h => `■ ${h.name}(${h.role}): ${data[h.id] || '내용 없음'}`).join('\n');
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-6hats');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], '6hats-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 여섯 색깔 모자 리포트]\n주제: ${data.subject}\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 6 Hats 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = '6hats-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
             };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    <div id="report-card" className="bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] shadow-2xl border border-slate-100">
-                        <div className="text-center mb-10">
-                            <h2 className="text-3xl font-black text-slate-900 mb-2">여섯 색깔 모자 사고 리포트</h2>
-                            <p className="text-slate-500 text-sm">Six Thinking Hats Analysis Report</p>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                            {hats.map(h => (
-                                <div key={h.id} className={`p-6 rounded-[2rem] border-2 ${h.color} ${h.text} ${h.border} shadow-sm transition-transform hover:scale-[1.02]`}>
-                                    <div className="flex justify-between items-center mb-1">
-                                        <h3 className="font-black text-lg">{h.name}</h3>
-                                        <span className="text-[10px] opacity-70 font-bold uppercase tracking-tighter">{h.role}</span>
-                                    </div>
-                                    <textarea 
-                                        value={data[h.id]} 
-                                        onChange={(e)=>setData({...data, [h.id]:e.target.value})} 
-                                        className="w-full h-32 bg-white/10 rounded-xl p-4 outline-none text-sm placeholder:text-current/50 border border-white/20 mt-2" 
-                                        placeholder={`${h.name} 관점에서의 생각을 입력하세요...`} 
-                                    />
-                                </div>
-                            ))}
-                        </div>
-                        <div className="flex justify-center items-center gap-2 opacity-30">
-                            <span className="h-[1px] w-10 bg-slate-400"></span>
-                            <p className="text-[10px] text-slate-500 font-medium uppercase tracking-widest">Scientific Decision Making by Paran Lab</p>
-                            <span className="h-[1px] w-10 bg-slate-400"></span>
-                        </div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">6 Thinking Hats Engine v6.0</div>
                     </div>
 
-                    {/* 표준 액션 버튼 세트 (core.js 연동) */}
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-8 no-print">
-                        <button 
-                            onClick={() => ParanLabCore.saveAsImage('report-card')} 
-                            className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl hover:bg-slate-800 transition-all flex items-center justify-center gap-2"
-                        >
-                            🖼️ 이미지 저장
-                        </button>
-                        <button 
-                            onClick={() => ParanLabCore.downloadHTML('report-card')} 
-                            className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl hover:bg-blue-700 transition-all flex items-center justify-center gap-2"
-                        >
-                            📄 HTML 다운로드
-                        </button>
-                        <button 
-                            onClick={() => ParanLabCore.copyToClipboard(getCopyText())} 
-                            className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl hover:bg-emerald-700 transition-all flex items-center justify-center gap-2"
-                        >
-                            📋 결과 복사
-                        </button>
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">모자를 바꿔 쓰며 다각도로 생각하세요.</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석할 아이디어 주제 입력" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    {hats.map(h => (
+                                        <div key={h.k} className={`p-8 rounded-[2.5rem] ${h.c} ${h.t} shadow-sm`}>
+                                            <h3 className="font-black text-lg mb-1">{h.n}</h3>
+                                            <p className="text-[10px] font-bold uppercase opacity-70 mb-4">{h.r}</p>
+                                            <textarea value={data.hats[h.k]} onChange={e => setData({...data, hats: {...data.hats, [h.k]: e.target.value}})} className="w-full h-32 bg-black/5 rounded-2xl p-4 outline-none text-sm placeholder:text-current/30" placeholder={h.q} />
+                                        </div>
+                                    ))}
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">최종 사고 리포트 확인</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Parallel Thinking Report</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "아이디어 분석 결과"}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                                    {hats.map(h => (
+                                        <div key={h.k} className={`p-8 rounded-[2.5rem] ${h.c} ${h.t} shadow-lg`}>
+                                            <h3 className="font-black text-lg mb-1">{h.n}</h3>
+                                            <p className="text-[10px] font-bold uppercase opacity-70 mb-4">{h.r}</p>
+                                            <p className="text-sm font-bold leading-relaxed whitespace-pre-wrap">{data.hats[h.k] || "기록된 생각이 없습니다."}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
+                            </div>
+                        )}
                     </div>
-                </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                        </div>
+                    )}
+                </main>
             );
         }
-
-        const root = ReactDOM.createRoot(document.getElementById('app-container'));
-        root.render(<HatsApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SixHatsApp />);
     </script>
-    
-    <!-- core.js 로드 (가장 마지막) -->
-    <script src="/core.js"></script>
 </body>
 </html>
