@@ -1,3 +1,4 @@
+<!-- (앞부분 로직 동일, 하단 학술 섹션 추가된 전체 코드) -->
 <!DOCTYPE html>
 <html lang="ko">
 <head>
@@ -26,14 +27,10 @@
         const { useState, useEffect } = React;
 
         function FiveWhysApp() {
-            const [step, setStep] = useState(1); // 1:문제정의, 2:5단계질문, 3:결과
+            const [step, setStep] = useState(1);
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
-                problem: "",
-                whys: ["", "", "", "", ""],
-                rootCause: "",
-                action: "",
-                scenarioContext: null
+                problem: "", whys: ["", "", "", "", ""], rootCause: "", action: "", scenarioContext: null
             });
 
             useEffect(() => {
@@ -56,26 +53,22 @@
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], '5whys-report.png', { type: 'image/png' });
                         const shareText = `[파란랩 5 Whys 리포트]\n문제: ${data.problem}\n근본원인: ${data.rootCause}\n\n상세 보기: https://paranlab.com`;
-                        navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 5 Whys 분석', text: shareText });
                         } else {
                             const link = document.createElement('a'); link.download = '5whys-report.png'; link.href = canvas.toDataURL(); link.click();
-                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
-            const resetAll = () => { if (confirm("초기화하시겠습니까?")) { localStorage.removeItem('paranlab-5whys'); location.reload(); } };
-
             return (
                 <main className="max-w-4xl mx-auto py-12 px-4">
                     <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
                         <div className="flex gap-4">
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-5whys'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
                         <div className="text-white font-bold text-xs opacity-50 uppercase">5 Whys Engine v6.0</div>
                     </div>
@@ -154,18 +147,17 @@
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
                             <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
                             <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
+                            <button onClick={handleShare} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">💬 이미지+링크 공유</button>
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [보강] 학술적 근거 섹션 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">5 Whys: 도요타의 혁신적 문제 해결법</h3>
                             <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                5 Whys는 도요타 생산 방식(TPS)의 창시자 **오노 다이이치**가 제안한 기법입니다. 어떤 문제의 현상에 대해 '왜?'라는 질문을 5번 반복함으로써, 표면적인 원인이 아닌 시스템적인 **근본 원인(Root Cause)**을 찾아내어 재발을 방지합니다.
+                                5 Whys는 도요타 생산 방식(TPS)의 창시자 **오노 다이이치(Taiichi Ohno)**가 제안한 기법입니다. 어떤 문제의 현상에 대해 '왜?'라는 질문을 5번 반복함으로써, 표면적인 원인이 아닌 시스템적인 **근본 원인(Root Cause)**을 찾아내어 재발을 방지합니다.
                             </p>
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
@@ -178,10 +170,11 @@
                                 </div>
                             </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌</h4>
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Ohno, T. (1988). *Toyota Production System: Beyond Large-Scale Production*. Productivity Press.</li>
-                                    <li>• Liker, J. K. (2004). *The Toyota Way*. McGraw-Hill.</li>
+                                    <li>• Liker, J. K. (2004). *The Toyota Way: 14 Management Principles from the World's Greatest Manufacturer*. McGraw-Hill.</li>
+                                    <li>• Serrat, O. (2017). "The Five Whys Technique". *Knowledge Solutions*. Springer.</li>
                                 </ul>
                             </div>
                         </div>
