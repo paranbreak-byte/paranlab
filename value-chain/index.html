@@ -26,13 +26,11 @@
         const { useState, useEffect } = React;
 
         function ValueChainApp() {
-            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 subject: "",
-                activities: {
-                    inbound: "", ops: "", outbound: "", marketing: "", service: ""
-                }
+                activities: { inbound: "", ops: "", outbound: "", marketing: "", service: "" }
             });
 
             const steps = [
@@ -65,7 +63,7 @@
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'value-chain.png', { type: 'image/png' });
-                        const shareText = `[파란랩 가치 사슬 리포트]\n대상: ${data.subject}\n내부 프로세스 최적화 지도를 완성했습니다.\n\n상세 보기: https://paranlab.com`;
+                        const shareText = `[파란랩 가치 사슬 리포트]\n대상: ${data.subject}\n\n상세 보기: https://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 가치 사슬 분석', text: shareText });
                         } else {
@@ -121,12 +119,6 @@
                                         </div>
                                     ))}
                                 </div>
-                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
-                                    <h4 className="text-xl font-black mb-4">"어느 단계에서 가장 큰 가치가 창출되나요?"</h4>
-                                    <p className="text-sm opacity-60 leading-relaxed">
-                                        가치 사슬의 각 단계는 서로 연결되어 있습니다. 특정 단계의 효율성을 높이는 것보다, 전체 사슬의 흐름을 최적화하여 경쟁 우위를 확보하는 것이 중요합니다.
-                                    </p>
-                                </div>
                                 <div className="mt-16 pt-8 border-t border-slate-100 text-center">
                                     <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
                                 </div>
@@ -144,6 +136,34 @@
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    {/* [보강] 학술적 근거 섹션 */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">가치 사슬(Value Chain): 경쟁 우위의 원천</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                가치 사슬은 마이클 포터 교수가 1985년 저서 **'경쟁 우위(Competitive Advantage)'**에서 제안한 모델입니다. 기업이 제품이나 서비스를 생산하여 고객에게 전달하기까지의 모든 활동을 사슬처럼 연결하여 분석함으로써, 어느 단계에서 부가가치가 창출되고 어느 단계에서 비용이 발생하는지 파악하게 합니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">본원적 활동과 지원 활동</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">포터는 기업 활동을 물류, 생산, 마케팅 등 직접적인 가치를 만드는 '본원적 활동'과 인사, 기술 개발 등 이를 뒷받침하는 '지원 활동'으로 나누었습니다. 이 도구는 본원적 활동의 흐름을 최적화하는 데 집중합니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">차별화의 지점 발견</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">경쟁사보다 더 높은 수익을 내기 위해서는 가치 사슬의 특정 단계에서 압도적인 효율성을 갖거나, 고객이 기꺼이 비용을 지불할 만한 독보적인 차별화 요소를 만들어야 합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Porter, M. E. (1985). *Competitive Advantage: Creating and Sustaining Superior Performance*. Free Press.</li>
+                                    <li>• Porter, M. E. (2001). "Strategy and the Internet". *Harvard Business Review*.</li>
+                                    <li>• Stabell, C. B., & Fjeldstad, Ø. D. (1998). "Configuring value for competitive advantage: On chains, shops, and agencies". *Strategic Management Journal*.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
