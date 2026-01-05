@@ -3,8 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인생의 수레바퀴 | 삶의 균형 점검 및 라이프 밸런스 테스트 | 파란랩</title>
-    <meta name="description" content="당신의 삶은 균형 잡혀 있나요? 건강, 재정, 관계 등 8가지 영역의 만족도를 점검하고 시각화된 수레바퀴 그래프를 통해 개선이 필요한 부분을 찾아보세요.">
+    <title>인생 수레바퀴 | 삶의 균형 진단 도구 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,95 +12,130 @@
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; }
-        .radar-grid { stroke: #e2e8f0; stroke-width: 1; fill: none; }
-        .radar-line { stroke: #2563eb; stroke-width: 3; fill: rgba(37, 99, 235, 0.2); transition: all 0.5s ease; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 3px solid white; }
     </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">인생의 수레바퀴로 삶의 질을 높이는 법</h2>
-            <p><strong>인생의 수레바퀴(Wheel of Life)</strong>는 현재 내 삶의 만족도를 시각적으로 한눈에 파악하게 해주는 강력한 코칭 도구입니다. 우리는 종종 일이나 돈 같은 특정 영역에만 매몰되어 건강이나 관계를 놓치곤 합니다. 이 도구는 무너진 밸런스를 찾아내어 더 행복한 삶으로 안내합니다.</p>
-            <h3 class="text-lg font-bold text-slate-700 mt-8">8가지 점검 영역</h3>
-            <p>건강, 커리어, 재정, 인간관계, 즐거움, 개인적 성장, 물리적 환경, 정신 건강 등 삶을 구성하는 8대 핵심 요소를 객관적으로 평가해 보세요. 그래프가 원형에 가까울수록 균형 잡힌 삶을 살고 있다는 증거입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useEffect } = React;
+
         function WheelApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-wheel') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [scores, setScores] = useState(saved.scores || { "건강": 5, "커리어": 5, "재정": 5, "관계": 5, "즐거움": 5, "성장": 5, "환경": 5, "정신": 5 });
+            const [step, setStep] = useState(1); // 1:평가, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [scores, setScores] = useState({
+                "건강": 5, "커리어": 5, "재정": 5, "가족": 5, "관계": 5, "성장": 5, "취미": 5, "환경": 5
+            });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-wheel', JSON.stringify({ step, scores })); }, [step, scores]);
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-wheel');
+                    if (tossed) {
+                        setScores(JSON.parse(tossed));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
 
-            const categories = Object.keys(scores);
-            const points = useMemo(() => {
-                const center = 150, radius = 120;
-                return categories.map((cat, i) => {
-                    const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                    const x = center + radius * (scores[cat] / 10) * Math.cos(angle);
-                    const y = center + radius * (scores[cat] / 10) * Math.sin(angle);
-                    return `${x},${y}`;
-                }).join(" ");
-            }, [scores]);
-
-            const minCategory = useMemo(() => {
-                return categories.reduce((a, b) => scores[a] < scores[b] ? a : b);
-            }, [scores]);
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'life-wheel.png', { type: 'image/png' });
+                        const shareText = `[파란랩 인생 수레바퀴 리포트]\n나의 삶의 균형을 진단했습니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 인생 수레바퀴', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'life-wheel.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-10">영역별 만족도 입력</h2>
-                            <div className="space-y-8 mb-10">
-                                {categories.map(cat => (
-                                    <div key={cat} className="flex flex-col gap-2">
-                                        <div className="flex justify-between font-black text-slate-700"><span>{cat}</span><span className="text-blue-600">{scores[cat]}점</span></div>
-                                        <input type="range" min="1" max="10" value={scores[cat]} onChange={(e)=>setScores({...scores, [cat]: parseInt(e.target.value)})} className="w-full h-2 bg-slate-100 rounded-lg appearance-none cursor-pointer accent-blue-600" />
-                                    </div>
-                                ))}
-                            </div>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 그래프 보기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-3xl font-black text-slate-900 mb-8">나의 인생 밸런스 리포트</h2>
-                                <div className="flex justify-center mb-10">
-                                    <svg width="300" height="300" viewBox="0 0 300 300">
-                                        {[2, 4, 6, 8, 10].map(r => <circle key={r} cx="150" cy="150" r={(120 * r) / 10} className="radar-grid" />)}
-                                        {categories.map((_, i) => {
-                                            const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                                            return <line key={i} x1="150" y1="150" x2={150 + 120 * Math.cos(angle)} y2={150 + 120 * Math.sin(angle)} className="radar-grid" />;
-                                        })}
-                                        <polygon points={points} className="radar-line" />
-                                        {categories.map((cat, i) => {
-                                            const angle = (Math.PI * 2 * i) / categories.length - Math.PI / 2;
-                                            return <text key={cat} x={150 + 140 * Math.cos(angle)} y={150 + 140 * Math.sin(angle)} textAnchor="middle" className="text-[10px] font-black fill-slate-400">{cat}</text>;
-                                        })}
-                                    </svg>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Life Wheel Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 삶은 얼마나 균형 잡혀 있나요?</h2>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    {Object.keys(scores).map(key => (
+                                        <div key={key} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
+                                            <div className="flex justify-between font-black mb-4"><span>{key}</span><span className="text-blue-600">{scores[key]}점</span></div>
+                                            <input type="range" min="1" max="10" value={scores[key]} onChange={e => setScores({...scores, [key]: parseInt(e.target.value)})} />
+                                        </div>
+                                    ))}
                                 </div>
-                                <div className="p-6 bg-blue-50 rounded-2xl border-2 border-dashed border-blue-200 text-left">
-                                    <h4 className="font-black text-blue-900 mb-2">🎯 집중 개선 과제</h4>
-                                    <p className="text-blue-700 font-medium">현재 만족도가 가장 낮은 <strong>[{minCategory}]</strong> 영역을 위해 이번 주에 할 수 있는 작은 일 하나를 정해보세요.</p>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">인생 수레바퀴 확인하기</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Balance of Life</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">인생 수레바퀴 진단 리포트</h2>
                                 </div>
-                                <p className="text-center mt-10 text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
+                                    <div className="space-y-4">
+                                        {Object.keys(scores).map(key => (
+                                            <div key={key} className="flex items-center gap-4">
+                                                <span className="w-20 text-sm font-black text-slate-500">{key}</span>
+                                                <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blue-600" style={{ width: (scores[key] * 10) + "%" }}></div>
+                                                </div>
+                                                <span className="w-8 text-sm font-black text-blue-600">{scores[key]}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
+                                        <h4 className="text-xl font-black mb-4">"수레바퀴가 잘 굴러가고 있나요?"</h4>
+                                        <p className="text-sm opacity-60 leading-relaxed">
+                                            가장 낮은 점수를 기록한 영역이 당신의 삶을 멈추게 하는 원인일 수 있습니다. 균형 잡힌 삶을 위해 이번 달에는 그 영역에 집중해 보세요.
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'wheel-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[인생의 수레바퀴 결과]\n가장 낮은 영역: ${minCategory}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                                <button onClick={()=>setStep(1)} className="py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm">다시 하기</button>
-                            </div>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<WheelApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<WheelApp />);
     </script>
 </body>
 </html>
