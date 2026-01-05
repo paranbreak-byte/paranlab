@@ -3,65 +3,140 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMI 아이디어 평가 | 장점, 단점, 흥미로운 점 분석 도구 | 파란랩</title>
-    <meta name="description" content="새로운 아이디어가 떠올랐나요? PMI 기법을 통해 장점(Plus), 단점(Minus), 그리고 흥미로운 잠재력(Interesting)을 다각도로 분석하여 아이디어의 진짜 가치를 확인하세요.">
+    <title>PMI 평가 도구 | 아이디어의 가치 판단 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">PMI 기법이란 무엇인가요?</h2>
-            <p><strong>PMI(Plus, Minus, Interesting)</strong>는 창의적 사고의 대가 에드워드 드 보노가 제안한 아이디어 평가 도구입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
-        function PmiApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-pmi') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [idea, setIdea] = useState(saved.idea || "");
-            const [data, setData] = useState(saved.data || { p: "", m: "", i: "" });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-pmi', JSON.stringify({ step, idea, data })); }, [step, idea, data]);
+        function PmiApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                subject: "",
+                plus: "", minus: "", interesting: ""
+            });
+
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-pmi');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'pmi-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 PMI 리포트]\n주제: ${data.subject}\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 PMI 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'pmi-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 아이디어를 평가할까요?</h2>
-                            <input value={idea} onChange={(e)=>setIdea(e.target.value)} placeholder="예: 주 4일제 도입" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-amber-500 rounded-[2rem] outline-none text-xl font-black" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-amber-500 text-white rounded-[2rem] font-black text-xl shadow-xl">평가 시작하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">PMI 아이디어 리포트</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-emerald-700 mb-4">Plus</h3><textarea value={data.p} onChange={(e)=>setData({...data, p:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
-                                    <div className="p-6 bg-red-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-red-700 mb-4">Minus</h3><textarea value={data.m} onChange={(e)=>setData({...data, m:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
-                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-white shadow-sm"><h3 className="font-black text-blue-700 mb-4">Interesting</h3><textarea value={data.i} onChange={(e)=>setData({...data, i:e.target.value})} className="w-full h-48 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">PMI Evaluation Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">아이디어의 가치를 냉정하게 평가하세요.</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="평가할 아이디어 주제 입력" />
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
+                                        <h3 className="font-black text-emerald-700 mb-4 text-xl">PLUS (장점)</h3>
+                                        <textarea value={data.plus} onChange={e => setData({...data, plus: e.target.value})} className="w-full h-48 bg-white/50 rounded-2xl p-4 outline-none text-sm font-bold" placeholder="이 아이디어의 좋은 점은?" />
+                                    </div>
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100">
+                                        <h3 className="font-black text-rose-700 mb-4 text-xl">MINUS (단점)</h3>
+                                        <textarea value={data.minus} onChange={e => setData({...data, minus: e.target.value})} className="w-full h-48 bg-white/50 rounded-2xl p-4 outline-none text-sm font-bold" placeholder="이 아이디어의 나쁜 점은?" />
+                                    </div>
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100">
+                                        <h3 className="font-black text-blue-700 mb-4 text-xl">INTERESTING (흥미)</h3>
+                                        <textarea value={data.interesting} onChange={e => setData({...data, interesting: e.target.value})} className="w-full h-48 bg-white/50 rounded-2xl p-4 outline-none text-sm font-bold" placeholder="흥미롭거나 고려할 점은?" />
+                                    </div>
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">최종 PMI 리포트 확인</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'pmi-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`PMI 분석 결과`, `<div class='box'>Plus: ${data.p}</div>`, 'pmi-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[PMI 분석 결과]\nPlus: ${data.p}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Idea Evaluation Report</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "아이디어 분석 결과"}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
+                                    <div className="p-10 bg-emerald-50 rounded-[3rem] border border-emerald-100">
+                                        <h3 className="font-black text-emerald-800 mb-6 text-xl">PLUS</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.plus || "기록 없음"}</p>
+                                    </div>
+                                    <div className="p-10 bg-rose-50 rounded-[3rem] border border-rose-100">
+                                        <h3 className="font-black text-rose-800 mb-6 text-xl">MINUS</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.minus || "기록 없음"}</p>
+                                    </div>
+                                    <div className="p-10 bg-blue-50 rounded-[3rem] border border-blue-100">
+                                        <h3 className="font-black text-blue-800 mb-6 text-xl">INTERESTING</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.interesting || "기록 없음"}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<PmiApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PmiApp />);
     </script>
 </body>
 </html>
