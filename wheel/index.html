@@ -3,20 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>인생 수레바퀴 | 삶의 균형 진단 도구 | 파란랩(Paran Lab)</title>
+    
+    <!-- [SEO 표준] -->
+    <title>인생 수레바퀴 | 삶의 균형 진단 및 라이프 코칭 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="현재 삶의 8가지 핵심 영역에 대한 만족도를 측정하고 균형 잡힌 성장을 위한 인사이트를 얻으세요. 성진 씨의 시나리오와 함께하는 과학적 자기계발 도구입니다.">
+    <meta name="keywords" content="인생수레바퀴, 삶의균형, 라이프코칭, 자기계발, 만족도조사, 휠오브라이프, 파란랩">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 인생 수레바퀴 엔진",
+      "applicationCategory": "LifestyleApplication",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        
+        /* 슬라이더 커스텀 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
-        input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 3px solid white; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -9px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
@@ -25,7 +48,7 @@
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
 
         function WheelApp() {
             const [step, setStep] = useState(1); // 1:평가, 2:결과
@@ -34,106 +57,190 @@
                 "건강": 5, "커리어": 5, "재정": 5, "가족": 5, "관계": 5, "성장": 5, "취미": 5, "환경": 5
             });
 
+            // [표준] 데이터 수신 로직
             useEffect(() => {
                 try {
                     const tossed = localStorage.getItem('paranlab-wheel');
                     if (tossed) {
-                        setScores(JSON.parse(tossed));
-                        setStep(2);
+                        const parsed = JSON.parse(tossed);
+                        // 시나리오 데이터 구조 대응
+                        const source = parsed.scores || parsed;
+                        if (typeof source === 'object') {
+                            setScores(prev => ({ ...prev, ...source }));
+                            setStep(2);
+                        }
                     }
                 } catch(e) { console.error(e); }
             }, []);
 
+            // --- [표준] 공유 로직 ---
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'life-wheel.png', { type: 'image/png' });
-                        const shareText = `[파란랩 인생 수레바퀴 리포트]\n나의 삶의 균형을 진단했습니다.\n\n상세 보기: https://paranlab.com`;
+                        const file = new File([blob], 'life-wheel-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 인생 수레바퀴 리포트]\n나의 삶의 균형을 진단했습니다.\n\n상세 분석 보기: https://paranlab.com`;
+                        
+                        navigator.clipboard.writeText(shareText);
+
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 인생 수레바퀴', text: shareText });
                         } else {
-                            const link = document.createElement('a'); link.download = 'life-wheel.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'life-wheel-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
+            const resetAll = () => { if (confirm("모든 데이터를 초기화하시겠습니까?")) { localStorage.removeItem('paranlab-wheel'); location.reload(); } };
+
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4">
+                    {/* [표준] 상단 컨트롤 바 */}
                     <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
+                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs opacity-50 uppercase">Life Wheel Engine v6.0</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Life Wheel Engine v6.0</div>
                     </div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* STEP 1: 평가 단계 */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 삶은 얼마나 균형 잡혀 있나요?</h2>
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-black text-slate-900">당신의 삶은 얼마나 균형 잡혀 있나요?</h2>
+                                    <p className="text-slate-500 mt-2">8가지 영역에 대해 현재 만족도를 1점부터 10점까지 매겨보세요.</p>
+                                </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     {Object.keys(scores).map(key => (
-                                        <div key={key} className="p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                                            <div className="flex justify-between font-black mb-4"><span>{key}</span><span className="text-blue-600">{scores[key]}점</span></div>
-                                            <input type="range" min="1" max="10" value={scores[key]} onChange={e => setScores({...scores, [key]: parseInt(e.target.value)})} />
+                                        <div key={key} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
+                                            <div className="flex justify-between items-center">
+                                                <h3 className="font-black text-slate-800 text-lg">{key}</h3>
+                                                <span className="text-2xl font-black text-blue-600">{scores[key]}<span className="text-xs text-slate-400 ml-1">/ 10</span></span>
+                                            </div>
+                                            <input 
+                                                type="range" min="1" max="10" step="1" 
+                                                value={scores[key]} 
+                                                onChange={e => setScores({...scores, [key]: parseInt(e.target.value)})} 
+                                            />
+                                            <div className="flex justify-between text-[10px] font-black text-slate-300 uppercase tracking-widest">
+                                                <span>불만족</span>
+                                                <span>매우 만족</span>
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">인생 수레바퀴 확인하기</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">인생 수레바퀴 리포트 생성</button>
                             </div>
                         )}
 
+                        {/* STEP 2: 결과 리포트 */}
                         {step === 2 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Balance of Life</span>
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Balance of Life Audit</span>
                                     <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">인생 수레바퀴 진단 리포트</h2>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-center">
-                                    <div className="space-y-4">
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                                    {/* 시각화 영역 */}
+                                    <div className="space-y-6">
                                         {Object.keys(scores).map(key => (
-                                            <div key={key} className="flex items-center gap-4">
-                                                <span className="w-20 text-sm font-black text-slate-500">{key}</span>
-                                                <div className="flex-1 h-4 bg-slate-100 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-600" style={{ width: (scores[key] * 10) + "%" }}></div>
+                                            <div key={key} className="space-y-2">
+                                                <div className="flex justify-between text-sm font-black">
+                                                    <span className="text-slate-600">{key}</span>
+                                                    <span className="text-blue-600">{scores[key]} / 10</span>
                                                 </div>
-                                                <span className="w-8 text-sm font-black text-blue-600">{scores[key]}</span>
+                                                <div className="h-4 bg-slate-100 rounded-full overflow-hidden shadow-inner">
+                                                    <div 
+                                                        className="h-full bg-blue-600 rounded-full transition-all duration-1000" 
+                                                        style={{ width: (scores[key] * 10) + "%" }}
+                                                    ></div>
+                                                </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
-                                        <h4 className="text-xl font-black mb-4">"수레바퀴가 잘 굴러가고 있나요?"</h4>
-                                        <p className="text-sm opacity-60 leading-relaxed">
-                                            가장 낮은 점수를 기록한 영역이 당신의 삶을 멈추게 하는 원인일 수 있습니다. 균형 잡힌 삶을 위해 이번 달에는 그 영역에 집중해 보세요.
-                                        </p>
+
+                                    {/* 인사이트 영역 */}
+                                    <div className="p-10 bg-slate-900 text-white rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-8 opacity-10 text-8xl font-black">🎡</div>
+                                        <div className="relative z-10">
+                                            <p className="text-blue-400 font-black text-sm uppercase tracking-widest mb-4">Coaching Insight</p>
+                                            <h4 className="text-2xl font-black mb-6">"수레바퀴가 매끄럽게 굴러가고 있나요?"</h4>
+                                            <p className="text-sm opacity-70 leading-relaxed font-medium mb-6">
+                                                수레바퀴의 크기보다 더 중요한 것은 **'균형'**입니다. 특정 영역이 너무 낮으면 수레바퀴는 덜컹거리며 앞으로 나아가지 못합니다.
+                                            </p>
+                                            <div className="p-6 bg-white/10 rounded-2xl border border-white/10">
+                                                <p className="text-xs font-black text-blue-300 uppercase mb-2">Focus Area</p>
+                                                <p className="text-lg font-bold">
+                                                    이번 달에는 점수가 가장 낮은 <strong>[{Object.keys(scores).reduce((a, b) => scores[a] < scores[b] ? a : b)}]</strong> 영역에 집중해 보는 것은 어떨까요?
+                                                </p>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
                                     <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
+                    {/* [표준] 하단 액션 버튼 세트 */}
                     {step === 2 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    {/* [표준] 학술적 근거 섹션 (SEO 및 권위 보강) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">인생 수레바퀴(Wheel of Life): 균형의 과학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                인생 수레바퀴는 1960년대 **폴 J. 마이어(Paul J. Meyer)**에 의해 개발된 라이프 코칭의 핵심 도구입니다. 삶을 구성하는 다양한 영역을 시각화하여 현재의 만족도를 측정하고, 성장이 필요한 지점을 명확히 식별함으로써 삶의 질을 총체적으로 향상시키는 데 목적이 있습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">자기 인식(Self-Awareness)의 힘</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">심리학 연구에 따르면, 자신의 상태를 시각적으로 객관화하는 과정만으로도 스트레스가 감소하고 문제 해결 의지가 높아집니다. 수레바퀴는 막연한 불안감을 구체적인 개선 과제로 변환하는 심리적 장치입니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">전인적 성장(Holistic Growth)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">현대인은 특정 영역(예: 재정, 커리어)의 성공에 매몰되기 쉽습니다. 하지만 긍정 심리학은 모든 영역의 최소한의 균형이 갖춰질 때 비로소 지속 가능한 행복이 가능하다고 강조합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Meyer, P. J. (2003). *The 5 Pillars of Leadership: Strategies to Maximize Your Potential*. Executive Books.</li>
+                                    <li>• Whitworth, L., et al. (2007). *Co-Active Coaching: New Skills for Coaching People Toward Success in Work and Life*. Davies-Black Publishing.</li>
+                                    <li>• Seligman, M. E. P. (2011). *Flourish: A Visionary New Understanding of Happiness and Well-being*. Free Press.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<WheelApp />);
     </script>
