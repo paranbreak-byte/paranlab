@@ -3,43 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- [SEO 표준] -->
-    <title>로직 트리 분석 도구 | MECE 기반 문제 분해 및 해결 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="맥킨지식 사고 기법인 로직 트리를 통해 복잡한 문제를 논리적으로 분해하고 근본 원인을 찾으세요. MECE 원칙을 적용한 과학적 문제 해결 도구입니다.">
-    <meta name="keywords" content="로직트리, Logic Tree, MECE, 맥킨지사고법, 문제해결기법, 전략수립, 파란랩">
-    
-    <!-- [구조화 데이터 표준] -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 로직 트리 엔진",
-      "applicationCategory": "BusinessApplication",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
-    }
-    </script>
-
-    <!-- 라이브러리 로드 -->
+    <title>로직 트리 분석 도구 | MECE 기반 문제 분해 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        
-        /* 로직 트리 시각화 스타일 */
         .tree-node { position: relative; padding-left: 2.5rem; border-left: 2px solid #e2e8f0; margin-left: 1.5rem; }
         .tree-node::before { content: ""; position: absolute; left: 0; top: 1.5rem; width: 1.5rem; height: 2px; background-color: #e2e8f0; }
-        .tree-node:last-child { border-left: 2px solid transparent; }
-        .tree-node:last-child::after { content: ""; position: absolute; left: -2px; top: 0; width: 2px; height: 1.5rem; background-color: #e2e8f0; }
-        
-        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
@@ -48,21 +24,17 @@
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
 
         function LogicTreeApp() {
-            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
-                mainIssue: "해결하고 싶은 핵심 이슈를 입력하세요",
-                branches: [
-                    { id: 1, text: "원인 분류 1", sub: ["상세 원인 A", "상세 원인 B"] },
-                    { id: 2, text: "원인 분류 2", sub: ["상세 원인 C", "상세 원인 D"] }
-                ],
+                mainIssue: "",
+                branches: [{ id: 1, text: "", sub: [""] }],
                 scenarioContext: null
             });
 
-            // [표준] 데이터 수신 로직
             useEffect(() => {
                 try {
                     const tossed = localStorage.getItem('paranlab-logic-tree');
@@ -73,12 +45,11 @@
                             branches: Array.isArray(parsed.branches) ? parsed.branches : [],
                             scenarioContext: parsed.scenarioContext || null
                         });
-                        setStep(2); // 시나리오 데이터는 즉시 결과로
+                        setStep(2);
                     }
                 } catch(e) { console.error(e); }
             }, []);
 
-            // --- [표준] 공유 로직 ---
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
@@ -86,115 +57,99 @@
                 try {
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'logic-tree-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 로직 트리 리포트]\n이슈: ${data.mainIssue}\n논리적 문제 분해를 완료했습니다.\n\n상세 보기: https://paranlab.com`;
-                        
-                        navigator.clipboard.writeText(shareText);
-
+                        const file = new File([blob], 'logic-tree.png', { type: 'image/png' });
+                        const shareText = `[파란랩 로직 트리 리포트]\n이슈: ${data.mainIssue}\n\n상세 보기: https://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 로직 트리 분석', text: shareText });
+                            await navigator.share({ files: [file], title: '파란랩 로직 트리', text: shareText });
                         } else {
-                            const link = document.createElement('a');
-                            link.download = 'logic-tree-report.png';
-                            link.href = canvas.toDataURL();
-                            link.click();
-                            alert('이미지가 저장되었습니다. 복사된 링크와 함께 공유하세요!');
+                            const link = document.createElement('a'); link.download = 'logic-tree.png'; link.href = canvas.toDataURL(); link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
-            const resetAll = () => { if (confirm("모든 데이터를 초기화하시겠습니까?")) { localStorage.removeItem('paranlab-logic-tree'); location.reload(); } };
-
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4">
-                    {/* [표준] 상단 컨트롤 바 */}
                     <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-logic-tree'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Logic Tree Engine v6.0</div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Logic Tree Engine v6.0</div>
                     </div>
 
-                    {/* [표준] 단계 네비게이션 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
-                        {['이슈 정의', '논리적 분해', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-4 text-xs md:text-sm font-black ${step === (i < 2 ? 1 : 2) ? 'step-active' : 'text-slate-300'}`}>
-                                {i + 1}. {name}
-                            </div>
-                        ))}
-                    </nav>
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* STEP 1: 입력 단계 */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
                                 <h2 className="text-3xl font-black text-slate-900">문제를 논리적으로 분해하세요.</h2>
                                 <div className="space-y-6">
                                     <div className="p-8 bg-blue-600 text-white rounded-[2.5rem] shadow-xl">
                                         <label className="block text-[10px] font-black uppercase mb-2 opacity-70 tracking-widest">Main Issue</label>
-                                        <input type="text" value={data.mainIssue} onChange={e => setData({...data, mainIssue: e.target.value})} className="w-full bg-transparent border-none outline-none text-2xl font-black placeholder:text-white/30" placeholder="핵심 이슈를 입력하세요" />
+                                        <input type="text" value={data.mainIssue} onChange={e => setData({...data, mainIssue: e.target.value})} className="w-full bg-transparent border-none outline-none text-2xl font-black placeholder:text-white/30" placeholder="핵심 이슈 입력" />
                                     </div>
-                                    
                                     {data.branches.map((b, i) => (
-                                        <div key={b.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-6">
+                                        <div key={b.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-4">
                                             <div className="flex gap-4 items-center">
-                                                <span className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center text-sm font-black shrink-0">{i+1}</span>
+                                                <span className="w-8 h-8 bg-slate-800 text-white rounded-full flex items-center justify-center text-xs font-black">{i+1}</span>
                                                 <input type="text" value={b.text} onChange={e => {
                                                     const newB = [...data.branches]; newB[i].text = e.target.value; setData({...data, branches: newB});
-                                                }} className="flex-1 bg-transparent border-none outline-none text-xl font-black text-slate-800" placeholder="1단계 원인/분류" />
+                                                }} className="flex-1 bg-transparent border-none outline-none text-xl font-black" placeholder="1단계 원인/분류" />
                                                 <button onClick={() => setData({...data, branches: data.branches.filter(item => item.id !== b.id)})} className="text-red-400 font-bold">삭제</button>
                                             </div>
-                                            <div className="pl-14 space-y-3">
+                                            <div className="pl-12 space-y-2">
                                                 {b.sub.map((s, si) => (
                                                     <div key={si} className="flex gap-2">
                                                         <input type="text" value={s} onChange={e => {
                                                             const newB = [...data.branches]; newB[i].sub[si] = e.target.value; setData({...data, branches: newB});
-                                                        }} className="flex-1 p-4 bg-white rounded-2xl border border-slate-200 text-sm font-bold shadow-sm" placeholder="2단계 상세 원인" />
+                                                        }} className="flex-1 p-3 bg-white rounded-xl border border-slate-200 text-sm font-bold" placeholder="2단계 상세 원인" />
                                                         <button onClick={() => {
                                                             const newB = [...data.branches]; newB[i].sub = b.sub.filter((_, idx) => idx !== si); setData({...data, branches: newB});
-                                                        }} className="text-slate-300 hover:text-red-500">X</button>
+                                                        }} className="text-slate-300">X</button>
                                                     </div>
                                                 ))}
                                                 <button onClick={() => {
                                                     const newB = [...data.branches]; newB[i].sub.push(""); setData({...data, branches: newB});
-                                                }} className="text-blue-600 text-xs font-black hover:underline">+ 하위 항목 추가</button>
+                                                }} className="text-blue-600 text-xs font-bold">+ 하위 항목 추가</button>
                                             </div>
                                         </div>
                                     ))}
-                                    <button onClick={() => setData({...data, branches: [...data.branches, { id: Date.now(), text: "", sub: [""] }]})} className="w-full py-6 border-2 border-dashed border-slate-200 rounded-[2.5rem] text-slate-400 font-black hover:bg-slate-50 transition-all">+ 새로운 논리 가지 추가</button>
+                                    <button onClick={() => setData({...data, branches: [...data.branches, { id: Date.now(), text: "", sub: [""] }]})} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-3xl text-slate-400 font-bold hover:bg-slate-50 transition-all">+ 새로운 가지 추가</button>
                                 </div>
                                 <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">최종 로직 트리 확인</button>
                             </div>
                         )}
 
-                        {/* STEP 2: 결과 리포트 */}
                         {step === 2 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Logical Problem Solving</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">Logic Tree 분석 리포트</h2>
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Logical Problem Solving</span>
+                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">Logic Tree 분석 리포트</h2>
+                                    </div>
+                                    {data.scenarioContext && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
                                 </div>
-                                
                                 <div className="max-w-3xl mx-auto">
                                     <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-2xl mb-16 text-center relative overflow-hidden">
-                                        <div className="absolute top-0 right-0 p-6 opacity-10 text-6xl font-black">?</div>
                                         <h3 className="text-2xl md:text-3xl font-black leading-tight">{data.mainIssue}</h3>
                                     </div>
-                                    
                                     <div className="space-y-16">
                                         {data.branches.map(b => (
                                             <div key={b.id} className="space-y-6">
-                                                <div className="p-6 bg-slate-800 text-white rounded-2xl shadow-lg inline-block min-w-[240px] relative z-10">
+                                                <div className="p-6 bg-slate-800 text-white rounded-2xl shadow-lg inline-block min-w-[240px]">
                                                     <p className="font-black text-lg">{b.text}</p>
                                                 </div>
                                                 <div className="space-y-4">
                                                     {b.sub.map((s, si) => (
                                                         <div key={si} className="tree-node">
-                                                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 font-bold text-slate-700 shadow-sm hover:shadow-md transition-shadow">
+                                                            <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100 font-bold text-slate-700 shadow-sm">
                                                                 {s}
                                                             </div>
                                                         </div>
@@ -204,27 +159,24 @@
                                         ))}
                                     </div>
                                 </div>
-
-                                <div className="mt-20 pt-10 border-t border-slate-100 text-center">
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
                                     <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* [표준] 하단 액션 버튼 세트 */}
                     {step === 2 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
                             <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
                             <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [표준] 학술적 근거 섹션 (SEO 및 권위 보강) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">Logic Tree: 맥킨지식 사고의 정석</h3>
@@ -246,7 +198,6 @@
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Minto, B. (1987). *The Pyramid Principle: Logic in Writing and Thinking*. Financial Times Prentice Hall.</li>
                                     <li>• Rasiel, E. M. (1999). *The McKinsey Way*. McGraw-Hill.</li>
-                                    <li>• Chevallier, A. (2016). *Strategic Thinking in Complex Problem Solving*. Oxford University Press.</li>
                                 </ul>
                             </div>
                         </div>
@@ -254,7 +205,6 @@
                 </main>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<LogicTreeApp />);
     </script>
