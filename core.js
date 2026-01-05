@@ -1,10 +1,10 @@
 /**
- * Paran Lab Core Framework v9.0 (High-Speed AdSense)
- * 소유권 확인을 위해 광고 스크립트를 즉시 주입합니다.
+ * Paran Lab Core Framework v10.0 (Scenario Integrated)
+ * 31개 도구 + 10대 시나리오 + 학술적 근거 통합 관리
  */
 
 const ParanLabCore = {
-    // 1. 도구 데이터베이스 (31개 전체)
+    // 1. 도구 데이터베이스 (기존 31개)
     toolsList: [
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
@@ -39,9 +39,23 @@ const ParanLabCore = {
         { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", desc: "하루 시간 사용의 효율성 및 낭비 점검", tags: ["시간관리", "갓생", "효율"], icon: "⏳", guide: "나의 24시간이 생산적인지, 소모적인지 시각화하여 시간 사용의 우선순위를 조정합니다." }
     ],
 
+    // 2. 10대 시나리오 데이터베이스 (신설)
+    scenariosList: [
+        { id: "career", title: "커리어 전환", desc: "이직 vs 잔류 고민", icon: "💼", tools: ["ahp", "pros-cons", "grow"], academic: "Herzberg(1959) '동기-위생 이론' 기반 직무 만족도 분석" },
+        { id: "startup", title: "창업 타당성", desc: "사업 아이템 검증", icon: "🚀", tools: ["swot", "porter", "3c"], academic: "Michael Porter(1979) '산업 구조 분석론' 기반 경쟁력 진단" },
+        { id: "shopping", title: "합리적 소비", desc: "최선의 구매 선택", icon: "💰", tools: ["ahp", "cba", "weighted"], academic: "Fishbein(1963) '다속성 태도 모델' 기반 소비자 행동 분석" },
+        { id: "burnout", title: "번아웃 탈출", desc: "우선순위 재정립", icon: "📅", tools: ["eisenhower", "time-audit", "payoff"], academic: "Stephen Covey '시간 관리 매트릭스' 기반 생산성 최적화" },
+        { id: "goal", title: "목표 달성", desc: "실행 가능한 계획", icon: "📍", tools: ["smart", "mandalart", "okr"], academic: "Locke & Latham(1990) '목표 설정 이론' 기반 성취도 분석" },
+        { id: "problem", title: "문제 해결", desc: "근본 원인 추적", icon: "❓", tools: ["5whys", "logic-tree", "force-field"], academic: "Taiichi Ohno '도요타 생산 방식(TPS)' 기반 원인 분석" },
+        { id: "creative", title: "창의적 기획", desc: "아이디어 확장", icon: "💡", tools: ["scamper", "6hats", "pmi"], academic: "Edward de Bono(1985) '수평적 사고' 기반 창의성 모델" },
+        { id: "purpose", title: "삶의 목적", desc: "존재 이유 발견", icon: "🌸", tools: ["ikigai", "wheel", "johari"], academic: "Martin Seligman '긍정 심리학(PERMA)' 기반 행복 지수 측정" },
+        { id: "risk", title: "리스크 관리", desc: "불확실성 대비", icon: "🌳", tools: ["tree", "vrio", "pest"], academic: "Kahneman(1979) '전망 이론(Prospect Theory)' 기반 리스크 평가" },
+        { id: "team", title: "조직 소통", desc: "팀워크 갈등 해결", icon: "🪟", tools: ["johari", "affinity", "6hats"], academic: "Luft & Ingham(1955) '대인관계 모델' 기반 커뮤니케이션 진단" }
+    ],
+
     familySites: [{ name: "FactBomber", href: "https://factbomber.kr" }],
 
-    // [중요] 즉시 실행 함수로 변경 (소유권 확인 최적화)
+    // 공통 기능 (AdSense, Privacy, Save 등 기존 로직 유지)
     injectAdSense: function() {
         if (document.querySelector('script[src*="adsbygoogle"]')) return;
         const adScript = document.createElement('script');
@@ -127,7 +141,7 @@ const ParanLabCore = {
     },
 
     render: function() {
-        this.injectAdSense(); // 즉시 실행
+        this.injectAdSense();
         this.initPrivacyGuard();
         this.injectFavicon();
         const root = document.getElementById('root');
@@ -149,6 +163,5 @@ const ParanLabCore = {
     }
 };
 
-// 스크립트 로드 즉시 실행 (window.onload를 기다리지 않음)
 ParanLabCore.injectAdSense();
 window.addEventListener('DOMContentLoaded', () => ParanLabCore.render());
