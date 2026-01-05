@@ -3,79 +3,113 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SWOT 전략 분석 | 창업 및 자기 분석 도구 | 파란랩</title>
-    <meta name="description" content="나의 강점과 약점, 외부의 기회와 위협을 한눈에 분석해 보세요. SWOT 분석 도구를 통해 최적의 비즈니스 전략을 수립할 수 있습니다.">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    <title>SWOT 분석 도구 | 파란랩</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">SWOT 분석이란 무엇인가요?</h2>
-            <p><strong>SWOT 분석</strong>은 내부 요인(강점, 약점)과 외부 요인(기회, 위협)을 결합하여 전략을 도출하는 기법입니다. 단순히 나열하는 것보다 '교차 전략'을 세우는 것이 중요합니다.</p>
-        </section>
-    </div>
+<body class="bg-gray-50">
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
+
         function SwotApp() {
-            const storageKey = 'paranlab-swot';
-            const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [data, setData] = useState(saved.data || { s: "", w: "", o: "", t: "" });
-            const [strategies, setStrategies] = useState(saved.strategies || { so: "", st: "", wo: "", wt: "" });
+            const [data, setData] = useState({ s: '', w: '', o: '', t: '' });
+            const [showResult, setShowResult] = useState(false);
 
             useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem(storageKey, JSON.stringify({ step, subject, data, strategies }));
+                const tossedData = localStorage.getItem('paranlab-swot');
+                if (tossedData) {
+                    setData(JSON.parse(tossedData));
+                    setShowResult(true);
+                    localStorage.removeItem('paranlab-swot');
                 }
-            }, [step, subject, data, strategies]);
-
-            const handleSaveHtml = () => {
-                const content = `<div class="box"><strong>SO 전략:</strong> ${strategies.so}</div><div class="box"><strong>ST 전략:</strong> ${strategies.st}</div>`;
-                ParanLabCore.saveAsHtml(`SWOT 전략 보고서: ${subject}`, content, 'swot-report');
-            };
-
-            const handleCopyText = () => {
-                const text = `[파란랩 SWOT 보고서]\n주제: ${subject}\n1. 강점활용: ${strategies.so}\n\n파란랩(paranlab.com)`;
-                ParanLabCore.copyToClipboard(text);
-            };
+            }, []);
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step < 3 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            {step === 1 && (<div><h2 className="text-3xl font-black mb-4">무엇을 분석할까요?</h2><input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 카페 창업 전략" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-emerald-500 rounded-[2rem] outline-none text-xl font-black" /><button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-xl shadow-xl">시작하기</button></div>)}
-                            {step === 2 && (<div><h2 className="text-2xl font-black mb-6 text-center">현재 상황 진단</h2><div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10"><div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-200"><h3 className="font-black text-emerald-700 mb-1">강점 (S)</h3><textarea value={data.s} onChange={(e)=>setData({...data, s:e.target.value})} className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div><div className="p-6 bg-red-50 rounded-[2rem] border-2 border-red-200"><h3 className="font-black text-red-700 mb-1">약점 (W)</h3><textarea value={data.w} onChange={(e)=>setData({...data, w:e.target.value})} className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div><div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-200"><h3 className="font-black text-blue-700 mb-1">기회 (O)</h3><textarea value={data.o} onChange={(e)=>setData({...data, o:e.target.value})} className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div><div className="p-6 bg-amber-50 rounded-[2rem] border-2 border-amber-200"><h3 className="font-black text-amber-700 mb-1">위협 (T)</h3><textarea value={data.t} onChange={(e)=>setData({...data, t:e.target.value})} className="w-full h-32 bg-white/60 rounded-2xl p-4 outline-none text-sm" /></div></div><div className="flex gap-4"><button onClick={()=>setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">이전</button><button onClick={()=>setStep(3)} className="flex-1 py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-xl shadow-xl">전략 세우기</button></div></div>)}
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <div className="text-center mb-10 border-b pb-6 text-left"><h2 className="text-3xl font-black text-slate-900">SWOT 전략 리포트</h2><p className="text-emerald-600 font-bold">주제: {subject || "미정"}</p></div>
-                                <div className="space-y-6">
-                                    <div className="p-8 bg-emerald-600 rounded-[2.5rem] text-white shadow-xl"><h3 className="text-xl font-black mb-2">1. 강점으로 기회 잡기</h3><textarea value={strategies.so} onChange={(e)=>setStrategies({...strategies, so: e.target.value})} className="w-full h-24 bg-white/10 rounded-2xl p-4 outline-none font-bold" /></div>
-                                    <div className="p-8 bg-blue-600 rounded-[2.5rem] text-white shadow-xl"><h3 className="text-xl font-black mb-2">2. 강점으로 위협 돌파</h3><textarea value={strategies.st} onChange={(e)=>setStrategies({...strategies, st: e.target.value})} className="w-full h-24 bg-white/10 rounded-2xl p-4 outline-none font-bold" /></div>
-                                    <div className="p-8 bg-amber-500 rounded-[2.5rem] text-white shadow-xl"><h3 className="text-xl font-black mb-2">3. 약점 보완하여 기회 잡기</h3><textarea value={strategies.wo} onChange={(e)=>setStrategies({...strategies, wo: e.target.value})} className="w-full h-24 bg-white/10 rounded-2xl p-4 outline-none font-bold" /></div>
-                                    <div className="p-8 bg-slate-800 rounded-[2.5rem] text-white shadow-xl"><h3 className="text-xl font-black mb-2">4. 위험 피하기 및 방어</h3><textarea value={strategies.wt} onChange={(e)=>setStrategies({...strategies, wt: e.target.value})} className="w-full h-24 bg-white/10 rounded-2xl p-4 outline-none font-bold" /></div>
+                <main class="container mx-auto px-4 py-10 max-w-5xl">
+                    {!showResult ? (
+                        <section class="bg-white p-8 rounded-xl shadow-lg">
+                            <h1 class="text-3xl font-bold mb-8 text-blue-600 text-center">SWOT 전략 분석</h1>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                <div>
+                                    <label class="block font-bold text-blue-700 mb-2">Strength (강점)</label>
+                                    <textarea value={data.s} onChange={(e)=>setData({...data, s: e.target.value})} class="w-full h-32 p-3 border rounded" placeholder="내부적인 강점..."></textarea>
                                 </div>
-                                <p className="text-center mt-10 text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <div>
+                                    <label class="block font-bold text-red-700 mb-2">Weakness (약점)</label>
+                                    <textarea value={data.w} onChange={(e)=>setData({...data, w: e.target.value})} class="w-full h-32 p-3 border rounded" placeholder="내부적인 약점..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-green-700 mb-2">Opportunity (기회)</label>
+                                    <textarea value={data.o} onChange={(e)=>setData({...data, o: e.target.value})} class="w-full h-32 p-3 border rounded" placeholder="외부적인 기회..."></textarea>
+                                </div>
+                                <div>
+                                    <label class="block font-bold text-yellow-700 mb-2">Threat (위협)</label>
+                                    <textarea value={data.t} onChange={(e)=>setData({...data, t: e.target.value})} class="w-full h-32 p-3 border rounded" placeholder="외부적인 위협..."></textarea>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'swot-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            <button onClick={()=>setShowResult(true)} class="w-full mt-8 bg-blue-600 text-white py-4 rounded-lg font-bold">전략 매트릭스 생성</button>
+                        </section>
+                    ) : (
+                        <section>
+                            <div id="report-area" class="bg-white p-8 rounded-xl shadow-lg border-4 border-gray-800">
+                                <h2 class="text-3xl font-black text-center mb-10">SWOT ANALYSIS REPORT</h2>
+                                <div class="grid grid-cols-2 gap-0 border-2 border-gray-800">
+                                    <div class="p-6 border-r-2 border-b-2 border-gray-800 bg-blue-50">
+                                        <h3 class="text-2xl font-bold text-blue-800 mb-4">STRENGTHS</h3>
+                                        <p class="whitespace-pre-wrap">{data.s}</p>
+                                    </div>
+                                    <div class="p-6 border-b-2 border-gray-800 bg-red-50">
+                                        <h3 class="text-2xl font-bold text-red-800 mb-4">WEAKNESSES</h3>
+                                        <p class="whitespace-pre-wrap">{data.w}</p>
+                                    </div>
+                                    <div class="p-6 border-r-2 border-gray-800 bg-green-50">
+                                        <h3 class="text-2xl font-bold text-green-800 mb-4">OPPORTUNITIES</h3>
+                                        <p class="whitespace-pre-wrap">{data.o}</p>
+                                    </div>
+                                    <div class="p-6 bg-yellow-50">
+                                        <h3 class="text-2xl font-bold text-yellow-800 mb-4">THREATS</h3>
+                                        <p class="whitespace-pre-wrap">{data.t}</p>
+                                    </div>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(2)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 수정하기</button>
-                        </div>
+                            <div id="action-buttons"></div>
+                        </section>
                     )}
-                </div>
+                    <article class="mt-20 prose max-w-none border-t pt-10">
+                        <h2 class="text-2xl font-bold">SWOT 분석의 전략적 활용</h2>
+                        <p>SWOT 분석은 기업이나 개인의 내부 역량(S, W)과 외부 환경(O, T)을 결합하여 최적의 전략을 도출하는 도구입니다. 단순히 나열하는 것에 그치지 않고 다음과 같은 교차 전략을 세워보세요.</p>
+                        <ul>
+                            <li><strong>SO 전략 (강점+기회):</strong> 강점을 활용해 기회를 선점하는 공격적 전략.</li>
+                            <li><strong>ST 전략 (강점+위협):</strong> 강점을 활용해 위협을 회피하는 방어적 전략.</li>
+                            <li><strong>WO 전략 (약점+기회):</strong> 약점을 보완하여 기회를 포착하는 만회 전략.</li>
+                            <li><strong>WT 전략 (약점+위협):</strong> 약점을 보완하고 위협을 최소화하는 생존 전략.</li>
+                        </ul>
+                    </article>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<SwotApp />);
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<SwotApp />);
+
+        window.addEventListener('load', () => {
+            const checkBtn = setInterval(() => {
+                const area = document.getElementById('action-buttons');
+                if (area && typeof ParanLabCore !== 'undefined') {
+                    area.appendChild(ParanLabCore.renderActionButtons('report-area'));
+                    clearInterval(checkBtn);
+                }
+            }, 500);
+        });
     </script>
+    <script src="/core.js"></script>
 </body>
 </html>
