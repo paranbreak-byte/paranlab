@@ -20,7 +20,7 @@
         input[type=range]:focus { outline: none; }
         input[type=range]::-webkit-slider-runnable-track { 
             width: 100%; height: 14px; cursor: pointer; 
-            background: linear-gradient(to right, #ef4444, #e2e8f0, #3b82f6); 
+            background: linear-gradient(to right, #3b82f6, #e2e8f0, #ef4444); 
             border-radius: 10px; 
         }
         input[type=range]::-webkit-slider-thumb { 
@@ -52,33 +52,36 @@
             });
 
             useEffect(() => {
-                const tossed = localStorage.getItem('paranlab-ahp');
-                if (tossed) {
-                    const parsed = JSON.parse(tossed);
-                    setData(prev => ({ ...prev, ...parsed }));
-                    setStep(5);
-                }
+                try {
+                    const tossed = localStorage.getItem('paranlab-ahp');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(5);
+                    }
+                } catch(e) { console.error(e); }
             }, []);
 
-            // --- 직관적 가이드 로직 ---
+            // --- 직관적 가이드 로직 (오타 수정 완료) ---
             const getComparisonText = (val, itemA, itemB) => {
                 const absVal = Math.abs(val);
-                let intensity = "";
-                if (absVal === 0) return <span>두 요소가 <strong>동등하게 중요</strong>합니다.</span>;
+                if (absVal === 0) return <span>두 요소가 <strong className="text-slate-900">동등하게 중요</strong>합니다.</span>;
                 
+                let intensity = "";
                 if (absVal <= 2) intensity = "약간 더";
                 else if (absVal <= 4) intensity = "확실히 더";
                 else if (absVal <= 6) intensity = "매우 중요하게";
                 else intensity = "절대적으로";
 
+                // val < 0 이면 왼쪽(itemA) 우세, val > 0 이면 오른쪽(itemB) 우세
                 const winner = val < 0 ? itemA : itemB;
-                const loser = val < 0 ? itemB : itemC; // Logic fix for display
+                const loser = val < 0 ? itemB : itemA;
                 
                 return (
                     <span>
                         <strong className={val < 0 ? "text-blue-600" : "text-red-600"}>[{winner}]</strong>이(가) 
-                        [{val < 0 ? itemB : itemA}]보다 
-                        <strong className="ml-1 underline">{intensity} 중요</strong>합니다.
+                        <span className="mx-1 text-slate-400">[{loser}]보다</span> 
+                        <strong className="ml-1 underline decoration-2">{intensity} 중요</strong>합니다.
                     </span>
                 );
             };
@@ -86,12 +89,15 @@
             // --- 수학적 연산 로직 ---
             const getSaatyScale = (val) => {
                 if (val === 0) return 1;
-                if (val > 0) return val + 1;
-                return 1 / (Math.abs(val) + 1);
+                // 슬라이더가 왼쪽(음수)일 때 itemA 우세 -> 1보다 큰 값 반환
+                // 슬라이더가 오른쪽(양수)일 때 itemB 우세 -> 1보다 작은 값 반환
+                if (val < 0) return Math.abs(val) + 1;
+                return 1 / (val + 1);
             };
 
             const calculateWeights = (items, comparisons) => {
                 const n = items.length;
+                if (n === 0) return [];
                 const matrix = Array(n).fill().map(() => Array(n).fill(1));
                 for (let i = 0; i < n; i++) {
                     for (let j = i + 1; j < n; j++) {
@@ -102,7 +108,7 @@
                 }
                 const geometricMeans = matrix.map(row => Math.pow(row.reduce((a, b) => a * b, 1), 1 / n));
                 const sum = geometricMeans.reduce((a, b) => a + b, 0);
-                return geometricMeans.map(v => v / sum);
+                return geometricMeans.map(v => v / (sum || 1));
             };
 
             const results = useMemo(() => {
@@ -144,7 +150,7 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
                             <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.1</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.2</div>
                     </div>
 
                     {/* 단계 표시 */}
@@ -202,7 +208,7 @@
                             </div>
                         )}
 
-                        {/* STEP 3: 기준 쌍대 비교 (직관적 가이드 적용) */}
+                        {/* STEP 3: 기준 쌍대 비교 */}
                         {step === 3 && (
                             <div className="animate-in fade-in">
                                 <h2 className="text-3xl font-black mb-2 text-slate-900">3. 평가 기준 간 중요도 비교</h2>
@@ -214,14 +220,14 @@
                                         const val = data.criteriaComparisons[pairKey] || 0;
                                         return (
                                             <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 relative">
-                                                <div className="text-center mb-8 p-4 bg-white rounded-2xl shadow-sm border border-blue-50">
+                                                <div className="text-center mb-8 p-6 bg-white rounded-3xl shadow-sm border border-blue-50 min-h-[80px] flex items-center justify-center">
                                                     <p className="text-lg font-bold text-slate-700">
                                                         {getComparisonText(val, data.criteria[i], data.criteria[j])}
                                                     </p>
                                                 </div>
                                                 <div className="flex justify-between items-center mb-6 px-4">
-                                                    <span className={`text-2xl font-black transition-all ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
-                                                    <span className={`text-2xl font-black transition-all ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
                                                 </div>
                                                 <input type="range" min="-8" max="8" step="1" value={val} onChange={e => setData({...data, criteriaComparisons: {...data.criteriaComparisons, [pairKey]: parseInt(e.target.value)}})} />
                                             </div>
@@ -235,7 +241,7 @@
                             </div>
                         )}
 
-                        {/* STEP 4: 대안 쌍대 비교 (직관적 가이드 적용) */}
+                        {/* STEP 4: 대안 쌍대 비교 */}
                         {step === 4 && (
                             <div className="animate-in fade-in">
                                 <h2 className="text-3xl font-black mb-2 text-slate-900">4. 대안 간 상대적 우위 평가</h2>
@@ -247,14 +253,14 @@
                                         const val = (data.alternativeComparisons[subStep] || {})[pairKey] || 0;
                                         return (
                                             <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 relative">
-                                                <div className="text-center mb-8 p-4 bg-white rounded-2xl shadow-sm border border-blue-50">
+                                                <div className="text-center mb-8 p-6 bg-white rounded-3xl shadow-sm border border-blue-50 min-h-[80px] flex items-center justify-center">
                                                     <p className="text-lg font-bold text-slate-700">
                                                         {getComparisonText(val, data.alternatives[i], data.alternatives[j])}
                                                     </p>
                                                 </div>
                                                 <div className="flex justify-between items-center mb-6 px-4">
-                                                    <span className={`text-2xl font-black transition-all ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
-                                                    <span className={`text-2xl font-black transition-all ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
                                                 </div>
                                                 <input type="range" min="-8" max="8" step="1" value={val} onChange={e => {
                                                     const newAltComp = {...data.alternativeComparisons};
