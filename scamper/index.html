@@ -3,15 +3,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCAMPER 아이디어 발상 도구 | 파란랩</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>SCAMPER 분석 도구 | 창의적 아이디어 발상 엔진 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    <script src="/core.js" defer></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-gray-50">
+<body>
     <div id="header-root"></div>
     <div id="root"></div>
     <div id="footer-root"></div>
@@ -20,80 +25,134 @@
         const { useState, useEffect } = React;
 
         function ScamperApp() {
-            const [ideas, setIdeas] = useState({ s:'', c:'', a:'', m:'', p:'', e:'', r:'' });
-            const [showResult, setShowResult] = useState(false);
-
-            useEffect(() => {
-                const tossedData = localStorage.getItem('paranlab-scamper');
-                if (tossedData) {
-                    setIdeas(JSON.parse(tossedData));
-                    setShowResult(true);
-                    localStorage.removeItem('paranlab-scamper');
-                }
-            }, []);
+            const [step, setStep] = useState(1); // 1:주제, 2:7가지질문, 3:결과
+            const [activeIdx, setActiveIdx] = useState(0);
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                subject: "",
+                ideas: { s: "", c: "", a: "", m: "", p: "", e: "", r: "" },
+                scenarioContext: null
+            });
 
             const questions = [
-                {k:'s', n:'Substitute (대체)', q:'다른 재료, 사람, 방법으로 바꿀 수 있는가?'},
-                {k:'c', n:'Combine (결합)', q:'다른 기능이나 서비스와 합칠 수 있는가?'},
-                {k:'a', n:'Adapt (응용)', q:'다른 분야의 아이디어를 빌려올 수 있는가?'},
-                {k:'m', n:'Modify (수정/확대)', q:'모양, 색상, 크기를 바꿀 수 있는가?'},
-                {k:'p', n:'Put to another use (용도 변경)', q:'전혀 다른 용도로 사용할 수 있는가?'},
-                {k:'e', n:'Eliminate (제거)', q:'불필요한 부분을 뺄 수 있는가?'},
-                {k:'r', n:'Reverse (역발상)', q:'순서를 바꾸거나 뒤집을 수 있는가?'}
+                { k: 's', n: 'Substitute (대체)', q: '다른 재료, 사람, 방법으로 바꿀 수 있나요?', desc: '기존의 요소를 다른 것으로 교체하여 새로운 가치를 만듭니다.' },
+                { k: 'c', n: 'Combine (결합)', q: '두 가지 이상의 기능을 합칠 수 있나요?', desc: '서로 다른 아이디어나 서비스를 융합하여 시너지를 냅니다.' },
+                { k: 'a', n: 'Adapt (응용)', q: '다른 분야의 아이디어를 빌려올 수 있나요?', desc: '이미 성공한 다른 사례를 현재 문제에 적용해 봅니다.' },
+                { k: 'm', n: 'Modify (수정/확대)', q: '모양, 색상, 크기를 바꿀 수 있나요?', desc: '특정 부분을 강조하거나 형태를 변형하여 가치를 높입니다.' },
+                { k: 'p', n: 'Put to another use (용도 변경)', q: '전혀 다른 용도로 사용할 수 있나요?', desc: '기존 제품을 새로운 시장이나 목적으로 재정의합니다.' },
+                { k: 'e', n: 'Eliminate (제거)', q: '불필요한 부분을 뺄 수 있나요?', desc: '핵심 기능만 남기고 단순화하여 효율성을 극대화합니다.' },
+                { k: 'r', n: 'Reverse (역발상)', q: '순서를 바꾸거나 뒤집을 수 있나요?', desc: '고정관념을 깨고 반대 방향에서 문제를 바라봅니다.' }
             ];
 
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-scamper');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(3);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'scamper-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 SCAMPER 리포트]\n주제: ${data.subject}\n혁신적인 아이디어를 도출했습니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 SCAMPER 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'scamper-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             return (
-                <main class="container mx-auto px-4 py-10 max-w-4xl">
-                    {!showResult ? (
-                        <section class="bg-white p-8 rounded-xl shadow-lg">
-                            <h1 class="text-3xl font-bold mb-4 text-purple-600">SCAMPER 아이디어 발상</h1>
-                            <p class="mb-8 text-gray-600">기존 제품이나 서비스를 혁신하기 위한 7가지 질문에 답해보세요.</p>
-                            {questions.map(item => (
-                                <div key={item.k} class="mb-6">
-                                    <label class="block font-bold text-gray-800">{item.n}</label>
-                                    <p class="text-sm text-gray-500 mb-2">{item.q}</p>
-                                    <textarea value={ideas[item.k]} onChange={(e)=>setIdeas({...ideas, [item.k]: e.target.value})} class="w-full p-3 border rounded h-24"></textarea>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                        </div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">SCAMPER Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <h2 className="text-3xl font-black text-slate-900">1. 혁신이 필요한 주제를 입력하세요.</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black shadow-inner" placeholder="예: 사내 복지 포인트 제도 개선" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">다음: 7가지 질문에 답하기</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="flex flex-wrap gap-2 justify-center">
+                                    {questions.map((q, i) => (
+                                        <button key={q.k} onClick={() => setActiveIdx(i)} className={`w-10 h-10 rounded-full font-black text-sm transition-all ${activeIdx === i ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-slate-100 text-slate-400'}`}>
+                                            {q.k.toUpperCase()}
+                                        </button>
+                                    ))}
                                 </div>
-                            ))}
-                            <button onClick={()=>setShowResult(true)} class="w-full bg-purple-600 text-white py-4 rounded-lg font-bold">아이디어 리포트 생성</button>
-                        </section>
-                    ) : (
-                        <section>
-                            <div id="report-area" class="bg-white p-10 rounded-xl shadow-lg border-t-8 border-purple-600">
-                                <h2 class="text-2xl font-bold mb-8">SCAMPER 혁신 아이디어 리포트</h2>
-                                <div class="space-y-6">
-                                    {questions.map(item => (
-                                        <div key={item.k} class="border-b pb-4">
-                                            <h3 class="font-bold text-purple-700">{item.n}</h3>
-                                            <p class="mt-2 text-gray-800 whitespace-pre-wrap">{ideas[item.k] || '입력된 아이디어가 없습니다.'}</p>
+                                <div className="p-10 bg-blue-50 rounded-[3rem] border border-blue-100 text-center">
+                                    <h3 className="text-2xl font-black text-blue-700 mb-2">{questions[activeIdx].n}</h3>
+                                    <p className="text-blue-900 font-bold text-lg mb-4">"{questions[activeIdx].q}"</p>
+                                    <p className="text-sm text-blue-400 mb-8">{questions[activeIdx].desc}</p>
+                                    <textarea value={data.ideas[questions[activeIdx].k]} onChange={e => setData({...data, ideas: {...data.ideas, [questions[activeIdx].k]: e.target.value}})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-sm" placeholder="아이디어를 자유롭게 적어보세요..." />
+                                </div>
+                                <div className="flex gap-6">
+                                    <button onClick={() => activeIdx > 0 ? setActiveIdx(activeIdx - 1) : setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => activeIdx < 6 ? setActiveIdx(activeIdx + 1) : setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">
+                                        {activeIdx < 6 ? "다음 질문" : "최종 리포트 확인"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {step === 3 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Creative Innovation Report</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "아이디어 발상 결과"}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-12">
+                                    {questions.map(q => (
+                                        <div key={q.k} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                                            <h3 className="font-black text-blue-600 mb-2 text-sm uppercase tracking-widest">{q.n}</h3>
+                                            <p className="text-slate-800 font-bold leading-relaxed whitespace-pre-wrap">{data.ideas[q.k] || "도출된 아이디어가 없습니다."}</p>
                                         </div>
                                     ))}
                                 </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <div id="action-buttons"></div>
-                        </section>
+                        )}
+                    </div>
+
+                    {step === 3 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                        </div>
                     )}
-                    <article class="mt-20 prose max-w-none border-t pt-10">
-                        <h2 class="text-2xl font-bold">SCAMPER 기법이란?</h2>
-                        <p>알렉스 오스본(Alex Osborn)의 브레인스토밍 기법을 밥 에벌(Bob Eberle)이 발전시킨 체크리스트법입니다. 창의성은 무에서 유를 창조하는 것이 아니라, 기존의 것을 변형하는 과정에서 나온다는 전제하에 7가지 관점을 제시합니다.</p>
-                    </article>
                 </main>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<ScamperApp />);
-
-        window.addEventListener('load', () => {
-            const checkBtn = setInterval(() => {
-                const area = document.getElementById('action-buttons');
-                if (area && typeof ParanLabCore !== 'undefined') {
-                    area.appendChild(ParanLabCore.renderActionButtons('report-area'));
-                    clearInterval(checkBtn);
-                }
-            }, 500);
-        });
     </script>
-    <script src="/core.js"></script>
 </body>
 </html>
