@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>의사결정 시나리오 분석 | 파란랩</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="/core.js" defer></script>
+    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+</head>
+<body class="bg-slate-50">
+    <div id="root">
+        <section class="max-w-4xl mx-auto py-16 px-6" id="scenario-content">
+            <!-- 스크립트로 내용이 채워집니다 -->
+        </section>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const scenarioId = urlParams.get('id');
+            const scenario = ParanLabCore.scenariosList.find(s => s.id === scenarioId);
+
+            if (!scenario) {
+                document.getElementById('scenario-content').innerHTML = `<div class="text-center py-20"><h2 class="text-2xl font-bold text-slate-400">시나리오를 찾을 수 없습니다.</h2><a href="/" class="text-blue-600 underline mt-4 inline-block">메인으로 돌아가기</a></div>`;
+                return;
+            }
+
+            const tools = scenario.tools.map(tId => ParanLabCore.toolsList.find(t => t.id === tId));
+
+            document.getElementById('scenario-content').innerHTML = `
+                <div class="bg-white p-10 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 mb-12 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div class="text-6xl mb-8">${scenario.icon}</div>
+                    <span class="text-blue-600 font-black text-sm uppercase tracking-widest mb-2 block">${scenario.title} Case Study</span>
+                    <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">${scenario.subtitle}</h1>
+                    
+                    <div class="prose prose-slate text-slate-600 text-lg leading-relaxed mb-12">
+                        <p class="bg-slate-50 p-8 rounded-3xl border-l-8 border-blue-600 italic">"${scenario.story}"</p>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-12 mb-16">
+                        <div>
+                            <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">📊 핵심 분석 데이터</h3>
+                            <ul class="space-y-4">
+                                ${scenario.data.map(d => `<li class="flex items-center gap-3 text-slate-500 font-bold"><span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>${d}</li>`).join('')}
+                            </ul>
+                        </div>
+                        <div class="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100">
+                            <h3 class="text-xl font-black text-blue-900 mb-4 flex items-center gap-2">🔬 학술적 근거</h3>
+                            <p class="text-blue-700 text-sm font-bold mb-4 leading-relaxed">${scenario.academic.desc}</p>
+                            <div class="text-[10px] text-blue-400 font-black uppercase tracking-widest border-t border-blue-200 pt-4">
+                                Reference: ${scenario.academic.paper}
+                            </div>
+                        </div>
+                    </div>
+
+                    <h3 class="text-2xl font-black text-slate-900 mb-8 text-center">이 고민을 해결할 추천 도구</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        ${tools.map(t => `
+                            <a href="${t.href}" class="p-6 bg-slate-50 hover:bg-blue-600 hover:text-white rounded-2xl border border-slate-100 transition-all group text-center">
+                                <div class="text-3xl mb-3">${t.icon}</div>
+                                <div class="font-black text-lg mb-1">${t.name}</div>
+                                <p class="text-[10px] opacity-60 font-bold uppercase">${t.category} Tool</p>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
+                <div class="text-center">
+                    <a href="/" class="text-slate-400 font-bold hover:text-blue-600 transition-colors">← 다른 시나리오 더 보기</a>
+                </div>
+            `;
+        });
+    </script>
+</body>
+</html>
