@@ -3,78 +3,97 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SCAMPER 아이디어 확장 기법 | 창의적 사고 도구 | 파란랩</title>
-    <meta name="description" content="기존의 아이디어를 뒤집고, 합치고, 바꿔보세요. 7가지 질문을 통해 새로운 혁신을 만드는 SCAMPER 기법으로 창의적인 해결책을 도출할 수 있습니다.">
+    <title>SCAMPER 아이디어 발상 도구 | 파란랩</title>
+    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-    <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-    <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">SCAMPER 기법이란?</h2>
-            <p><strong>SCAMPER</strong>는 브레인스토밍의 대가 알렉스 오스본이 제안하고 밥 에벌이 발전시킨 창의적 사고 도구입니다. 기존의 제품이나 서비스를 7가지 다른 관점에서 질문하여 새로운 아이디어를 강제로 이끌어내는 방식입니다.</p>
-        </section>
-    </div>
+<body class="bg-gray-50">
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect } = React;
-        function ScamperApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-scamper') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [data, setData] = useState(saved.data || { s:"", c:"", a:"", m:"", p:"", e:"", r:"" });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-scamper', JSON.stringify({ step, subject, data })); }, [step, subject, data]);
+        function ScamperApp() {
+            const [ideas, setIdeas] = useState({ s:'', c:'', a:'', m:'', p:'', e:'', r:'' });
+            const [showResult, setShowResult] = useState(false);
+
+            useEffect(() => {
+                const tossedData = localStorage.getItem('paranlab-scamper');
+                if (tossedData) {
+                    setIdeas(JSON.parse(tossedData));
+                    setShowResult(true);
+                    localStorage.removeItem('paranlab-scamper');
+                }
+            }, []);
 
             const questions = [
-                { id: 's', title: 'Substitute (대체)', color: 'bg-red-50', text: 'text-red-700' },
-                { id: 'c', title: 'Combine (결합)', color: 'bg-orange-50', text: 'text-orange-700' },
-                { id: 'a', title: 'Adapt (응용)', color: 'bg-amber-50', text: 'text-amber-700' },
-                { id: 'm', title: 'Modify (수정)', color: 'bg-emerald-50', text: 'text-emerald-700' },
-                { id: 'p', title: 'Put to use (용도변경)', color: 'bg-blue-50', text: 'text-blue-700' },
-                { id: 'e', title: 'Eliminate (제거)', color: 'bg-indigo-50', text: 'text-indigo-700' },
-                { id: 'r', title: 'Reverse (역발상)', color: 'bg-rose-50', text: 'text-rose-700' }
+                {k:'s', n:'Substitute (대체)', q:'다른 재료, 사람, 방법으로 바꿀 수 있는가?'},
+                {k:'c', n:'Combine (결합)', q:'다른 기능이나 서비스와 합칠 수 있는가?'},
+                {k:'a', n:'Adapt (응용)', q:'다른 분야의 아이디어를 빌려올 수 있는가?'},
+                {k:'m', n:'Modify (수정/확대)', q:'모양, 색상, 크기를 바꿀 수 있는가?'},
+                {k:'p', n:'Put to another use (용도 변경)', q:'전혀 다른 용도로 사용할 수 있는가?'},
+                {k:'e', n:'Eliminate (제거)', q:'불필요한 부분을 뺄 수 있는가?'},
+                {k:'r', n:'Reverse (역발상)', q:'순서를 바꾸거나 뒤집을 수 있는가?'}
             ];
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">무엇을 개선해볼까요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 우리 동네 카페 메뉴" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">아이디어 확장 시작</button>
-                        </div>
+                <main class="container mx-auto px-4 py-10 max-w-4xl">
+                    {!showResult ? (
+                        <section class="bg-white p-8 rounded-xl shadow-lg">
+                            <h1 class="text-3xl font-bold mb-4 text-purple-600">SCAMPER 아이디어 발상</h1>
+                            <p class="mb-8 text-gray-600">기존 제품이나 서비스를 혁신하기 위한 7가지 질문에 답해보세요.</p>
+                            {questions.map(item => (
+                                <div key={item.k} class="mb-6">
+                                    <label class="block font-bold text-gray-800">{item.n}</label>
+                                    <p class="text-sm text-gray-500 mb-2">{item.q}</p>
+                                    <textarea value={ideas[item.k]} onChange={(e)=>setIdeas({...ideas, [item.k]: e.target.value})} class="w-full p-3 border rounded h-24"></textarea>
+                                </div>
+                            ))}
+                            <button onClick={()=>setShowResult(true)} class="w-full bg-purple-600 text-white py-4 rounded-lg font-bold">아이디어 리포트 생성</button>
+                        </section>
                     ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-10 text-center">SCAMPER 아이디어 리포트</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
-                                    {questions.map(q => (
-                                        <div key={q.id} className={`${q.color} p-6 rounded-[2rem] border-2 border-white shadow-sm`}>
-                                            <h3 className={`font-black ${q.text} mb-2`}>{q.title}</h3>
-                                            <textarea value={data[q.id]} onChange={(e)=>setData({...data, [q.id]: e.target.value})} className="w-full h-24 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="아이디어를 적으세요..." />
+                        <section>
+                            <div id="report-area" class="bg-white p-10 rounded-xl shadow-lg border-t-8 border-purple-600">
+                                <h2 class="text-2xl font-bold mb-8">SCAMPER 혁신 아이디어 리포트</h2>
+                                <div class="space-y-6">
+                                    {questions.map(item => (
+                                        <div key={item.k} class="border-b pb-4">
+                                            <h3 class="font-bold text-purple-700">{item.n}</h3>
+                                            <p class="mt-2 text-gray-800 whitespace-pre-wrap">{ideas[item.k] || '입력된 아이디어가 없습니다.'}</p>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'scamper-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`SCAMPER 결과`, `<div class='box'>대체: ${data.s}</div>`, 'scamper-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[SCAMPER 결과]\n주제: ${subject}\n대체: ${data.s}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                            </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
-                        </div>
+                            <div id="action-buttons"></div>
+                        </section>
                     )}
-                </div>
+                    <article class="mt-20 prose max-w-none border-t pt-10">
+                        <h2 class="text-2xl font-bold">SCAMPER 기법이란?</h2>
+                        <p>알렉스 오스본(Alex Osborn)의 브레인스토밍 기법을 밥 에벌(Bob Eberle)이 발전시킨 체크리스트법입니다. 창의성은 무에서 유를 창조하는 것이 아니라, 기존의 것을 변형하는 과정에서 나온다는 전제하에 7가지 관점을 제시합니다.</p>
+                    </article>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<ScamperApp />);
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ScamperApp />);
+
+        window.addEventListener('load', () => {
+            const checkBtn = setInterval(() => {
+                const area = document.getElementById('action-buttons');
+                if (area && typeof ParanLabCore !== 'undefined') {
+                    area.appendChild(ParanLabCore.renderActionButtons('report-area'));
+                    clearInterval(checkBtn);
+                }
+            }, 500);
+        });
     </script>
+    <script src="/core.js"></script>
 </body>
 </html>
