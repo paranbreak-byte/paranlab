@@ -62,6 +62,7 @@
 
     <script>
         function tossData(toolId, data) {
+            // [중요] 키 이름을 'paranlab-[폴더명]'으로 고정
             localStorage.setItem('paranlab-' + toolId, JSON.stringify(data));
             localStorage.setItem('paranlab-autosave', 'true');
             window.location.href = '/' + toolId + '/';
