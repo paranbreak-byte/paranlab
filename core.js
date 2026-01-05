@@ -1,10 +1,10 @@
 /**
- * Paran Lab Core Framework v14.0 (Lightweight Edition)
- * 시나리오 상세 데이터를 분리하고 네비게이션 기능에 집중한 버전
+ * Paran Lab Core Framework v14.1 (Lightweight & Data Toss)
+ * 시나리오 데이터를 분리하여 성능을 최적화한 버전
  */
 
 const ParanLabCore = {
-    // 1. 도구 데이터베이스 (전체 페이지 공통 사용)
+    // 도구 리스트 (메뉴 및 검색용)
     toolsList: [
         { id: "ahp", name: "AHP 분석", href: "/ahp/", category: "결정", desc: "여러 후보 중 최선의 선택지를 수학적으로 도출", tags: ["이직", "자동차", "이사"], icon: "📊", guide: "여러 대안을 놓고 고민 중일 때, 주관적 선호를 수치화하여 가장 합리적인 순위를 매겨줍니다." },
         { id: "pros-cons", name: "Pros & Cons", href: "/pros-cons/", category: "결정", desc: "단일 안건의 긍정/부정 요인 가중치 비교", tags: ["투자", "연애", "결혼"], icon: "⚖️", guide: "특정 일을 '할까 말까' 고민될 때, 장점과 단점의 무게를 달아 추진 여부를 결정합니다." },
@@ -39,7 +39,7 @@ const ParanLabCore = {
         { id: "time-audit", name: "시간 기록 분석", href: "/time-audit/", category: "자기계발", desc: "하루 시간 사용의 효율성 및 낭비 점검", tags: ["시간관리", "갓생", "효율"], icon: "⏳", guide: "나의 24시간이 생산적인지, 소모적인지 시각화하여 시간 사용의 우선순위를 조정합니다." }
     ],
 
-    // 2. 시나리오 메타데이터 (메인 화면 구성용 최소 정보)
+    // 시나리오 메타데이터 (메인 화면용)
     scenariosList: [
         { id: "career", title: "커리어 전환", icon: "💼", href: "/scenarios/career/" },
         { id: "startup", title: "창업 타당성", icon: "🚀", href: "/scenarios/startup/" },
@@ -55,7 +55,7 @@ const ParanLabCore = {
 
     familySites: [{ name: "FactBomber", href: "https://factbomber.kr" }],
 
-    // 공통 기능 (AdSense, Privacy, Save, Image 등 기존 로직 유지)
+    // 공통 기능 (AdSense, Privacy, Save, Image 등)
     injectAdSense: function() {
         if (document.querySelector('script[src*="adsbygoogle"]')) return;
         const adScript = document.createElement('script');
@@ -136,7 +136,7 @@ const ParanLabCore = {
                             </div>
                             <div class="relative group">
                                 <button class="flex items-center gap-1 px-4 py-2 bg-slate-900 text-white rounded-xl text-sm font-bold hover:bg-blue-600 transition-all">전체 도구</button>
-                                <div class="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-y-auto max-h-[80vh] z-[10000]">${menuHtml}</div>
+                                <div class="absolute right-0 mt-2 w-64 bg-white border border-slate-100 rounded-2xl shadow-2xl opacity-0 invisible group-hover:opacity-100 group-hover:visible transition-all duration-200 overflow-y-auto max-h-[80vh] z-10000">${menuHtml}</div>
                             </div>
                         </div>
                     </div>
