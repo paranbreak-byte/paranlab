@@ -40,7 +40,7 @@
         function AhpApp() {
             const [step, setStep] = useState(1); 
             const [subStep, setSubStep] = useState(0); 
-            const [isSharing, setIsSharing] = useState(false); // 공유 중 로딩 상태
+            const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 goal: "",
                 criteria: ["임대료", "유동인구", "경쟁강도"],
@@ -61,42 +61,42 @@
                 } catch(e) { console.error(e); }
             }, []);
 
-            // --- [핵심] 리얼 이미지 공유 로직 (v5.4) ---
+            // --- [핵심] 이미지 + 링크 동시 공유 로직 (v5.5) ---
             const handleRealImageShare = async (bestAlt) => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
 
                 setIsSharing(true);
                 try {
-                    // 1. 리포트 영역을 캔버스로 캡처
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     
-                    // 2. 캔버스를 Blob(파일 데이터)으로 변환
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'paranlab-result.png', { type: 'image/png' });
-                        const shareText = `[파란랩 의사결정 리포트]\n목표: ${data.goal}\n최적 대안: "${bestAlt}"`;
+                        
+                        // 공유 텍스트에 홈페이지 링크 포함
+                        const shareText = `[파란랩 의사결정 리포트]\n\n목표: ${data.goal}\n최적 대안: "${bestAlt}"\n\n더 많은 의사결정 도구 보기:\nhttps://paranlab.com`;
 
-                        // 3. Web Share API 지원 여부 확인 (파일 공유 가능 여부)
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({
                                 files: [file],
                                 title: '파란랩 분석 결과',
-                                text: shareText,
+                                text: shareText, // 이미지와 함께 텍스트/링크 전송
                             });
                         } else {
-                            // 지원하지 않는 경우 (데스크톱 등) 이미지 다운로드로 대체
                             const link = document.createElement('a');
                             link.download = 'paranlab-result.png';
                             link.href = canvas.toDataURL();
                             link.click();
-                            alert('이미지가 다운로드되었습니다. 카카오톡에 사진을 첨부해 보세요!');
+                            // 데스크톱 등에서는 링크 복사를 병행 유도
+                            navigator.clipboard.writeText(shareText);
+                            alert('이미지 다운로드 및 공유 문구가 복사되었습니다. 카카오톡에 붙여넣으세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) {
                     console.error('공유 실패:', err);
                     setIsSharing(false);
-                    alert('공유 중 오류가 발생했습니다. 이미지 저장 기능을 이용해 주세요.');
+                    alert('공유 중 오류가 발생했습니다.');
                 }
             };
 
@@ -177,7 +177,7 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
                             <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.4</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.5</div>
                     </div>
 
                     {/* 단계 표시 */}
@@ -342,7 +342,7 @@
                         )}
                     </div>
 
-                    {/* 하단 액션 버튼 (리얼 이미지 공유 기능 탑재) */}
+                    {/* 하단 액션 버튼 (이미지 + 링크 동시 공유) */}
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
                             <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
@@ -353,7 +353,7 @@
                                 disabled={isSharing}
                                 className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}
                             >
-                                {isSharing ? '⌛ 이미지 생성 중...' : '💬 결과 이미지 공유'}
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
 
                             <button onClick={() => ParanLabCore.copyToClipboard(`[AHP 분석 결과]\n목표: ${data.goal}\n최적 대안: ${data.alternatives[results.finalScores.indexOf(Math.max(...results.finalScores))]}`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">📋 결과 복사</button>
