@@ -14,9 +14,21 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        
+        /* 슬라이더 커스텀 디자인 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
-        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -9px; border: 3px solid white; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; height: 14px; cursor: pointer; 
+            background: linear-gradient(to right, #ef4444, #e2e8f0, #3b82f6); 
+            border-radius: 10px; 
+        }
+        input[type=range]::-webkit-slider-thumb { 
+            height: 32px; width: 32px; border-radius: 50%; 
+            background: #ffffff; cursor: pointer; -webkit-appearance: none; 
+            margin-top: -9px; border: 4px solid #1e293b; 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.2); 
+        }
     </style>
 </head>
 <body>
@@ -28,41 +40,59 @@
         const { useState, useEffect, useMemo } = React;
 
         function AhpApp() {
-            const [step, setStep] = useState(1); // 1:목표/기준, 2:대안, 3:기준비교, 4:대안비교, 5:결과
-            const [subStep, setSubStep] = useState(0); // 대안비교 시 어떤 기준을 비교 중인지
+            const [step, setStep] = useState(1); 
+            const [subStep, setSubStep] = useState(0); 
             const [data, setData] = useState({
                 goal: "",
                 criteria: ["임대료", "유동인구", "경쟁강도"],
                 alternatives: ["신도시 상가", "구도심 상가"],
-                criteriaComparisons: {}, // { "0-1": 1 }
-                alternativeComparisons: {}, // { "critIdx": { "0-1": 1 } }
+                criteriaComparisons: {}, 
+                alternativeComparisons: {}, 
                 scenarioContext: null
             });
 
-            // 데이터 로드
             useEffect(() => {
                 const tossed = localStorage.getItem('paranlab-ahp');
                 if (tossed) {
                     const parsed = JSON.parse(tossed);
                     setData(prev => ({ ...prev, ...parsed }));
-                    setStep(5); // 시나리오는 결과로 직행
+                    setStep(5);
                 }
             }, []);
 
-            // --- 수학적 연산 로직 (AHP Core) ---
-            
-            // 9점 척도 변환 함수
+            // --- 직관적 가이드 로직 ---
+            const getComparisonText = (val, itemA, itemB) => {
+                const absVal = Math.abs(val);
+                let intensity = "";
+                if (absVal === 0) return <span>두 요소가 <strong>동등하게 중요</strong>합니다.</span>;
+                
+                if (absVal <= 2) intensity = "약간 더";
+                else if (absVal <= 4) intensity = "확실히 더";
+                else if (absVal <= 6) intensity = "매우 중요하게";
+                else intensity = "절대적으로";
+
+                const winner = val < 0 ? itemA : itemB;
+                const loser = val < 0 ? itemB : itemC; // Logic fix for display
+                
+                return (
+                    <span>
+                        <strong className={val < 0 ? "text-blue-600" : "text-red-600"}>[{winner}]</strong>이(가) 
+                        [{val < 0 ? itemB : itemA}]보다 
+                        <strong className="ml-1 underline">{intensity} 중요</strong>합니다.
+                    </span>
+                );
+            };
+
+            // --- 수학적 연산 로직 ---
             const getSaatyScale = (val) => {
                 if (val === 0) return 1;
                 if (val > 0) return val + 1;
                 return 1 / (Math.abs(val) + 1);
             };
 
-            // 가중치 계산 (기하평균법)
             const calculateWeights = (items, comparisons) => {
                 const n = items.length;
                 const matrix = Array(n).fill().map(() => Array(n).fill(1));
-                
                 for (let i = 0; i < n; i++) {
                     for (let j = i + 1; j < n; j++) {
                         const val = getSaatyScale(comparisons[`${i}-${j}`] || 0);
@@ -70,37 +100,19 @@
                         matrix[j][i] = 1 / val;
                     }
                 }
-
-                const geometricMeans = matrix.map(row => 
-                    Math.pow(row.reduce((a, b) => a * b, 1), 1 / n)
-                );
+                const geometricMeans = matrix.map(row => Math.pow(row.reduce((a, b) => a * b, 1), 1 / n));
                 const sum = geometricMeans.reduce((a, b) => a + b, 0);
                 return geometricMeans.map(v => v / sum);
             };
 
-            // 최종 결과 계산
             const results = useMemo(() => {
                 if (step !== 5) return null;
-                
-                // 1. 기준 가중치 계산
                 const criteriaWeights = calculateWeights(data.criteria, data.criteriaComparisons);
-                
-                // 2. 각 기준별 대안 점수 계산
-                const altScoresPerCrit = data.criteria.map((_, idx) => 
-                    calculateWeights(data.alternatives, data.alternativeComparisons[idx] || {})
-                );
-
-                // 3. 최종 합성 점수
-                const finalScores = data.alternatives.map((_, altIdx) => {
-                    return altScoresPerCrit.reduce((sum, scores, critIdx) => 
-                        sum + (scores[altIdx] * criteriaWeights[critIdx]), 0
-                    );
-                });
-
+                const altScoresPerCrit = data.criteria.map((_, idx) => calculateWeights(data.alternatives, data.alternativeComparisons[idx] || {}));
+                const finalScores = data.alternatives.map((_, altIdx) => altScoresPerCrit.reduce((sum, scores, critIdx) => sum + (scores[altIdx] * criteriaWeights[critIdx]), 0));
                 return { criteriaWeights, finalScores };
             }, [data, step]);
 
-            // --- UI 헬퍼 ---
             const criteriaPairs = useMemo(() => {
                 const pairs = [];
                 for (let i = 0; i < data.criteria.length; i++) {
@@ -132,7 +144,7 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
                             <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.0</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">AHP Professional v5.1</div>
                     </div>
 
                     {/* 단계 표시 */}
@@ -190,22 +202,26 @@
                             </div>
                         )}
 
-                        {/* STEP 3: 기준 쌍대 비교 */}
+                        {/* STEP 3: 기준 쌍대 비교 (직관적 가이드 적용) */}
                         {step === 3 && (
                             <div className="animate-in fade-in">
                                 <h2 className="text-3xl font-black mb-2 text-slate-900">3. 평가 기준 간 중요도 비교</h2>
-                                <p className="text-slate-500 mb-12 font-bold">어떤 기준이 목표 달성에 더 중요한가요?</p>
-                                <div className="space-y-16">
+                                <p className="text-slate-500 mb-12 font-bold">슬라이더를 움직여 더 중요한 쪽을 선택하세요.</p>
+                                <div className="space-y-20">
                                     {criteriaPairs.map((pair) => {
                                         const i = pair[0]; const j = pair[1];
                                         const pairKey = `${i}-${j}`;
                                         const val = data.criteriaComparisons[pairKey] || 0;
                                         return (
                                             <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 relative">
-                                                <div className="flex justify-between items-center mb-10">
-                                                    <span className={`text-2xl font-black ${val < 0 ? 'text-blue-600' : 'text-slate-400'}`}>{data.criteria[i]}</span>
-                                                    <span className="px-4 py-1 bg-white rounded-full border text-xs font-black text-slate-300">VS</span>
-                                                    <span className={`text-2xl font-black ${val > 0 ? 'text-red-600' : 'text-slate-400'}`}>{data.criteria[j]}</span>
+                                                <div className="text-center mb-8 p-4 bg-white rounded-2xl shadow-sm border border-blue-50">
+                                                    <p className="text-lg font-bold text-slate-700">
+                                                        {getComparisonText(val, data.criteria[i], data.criteria[j])}
+                                                    </p>
+                                                </div>
+                                                <div className="flex justify-between items-center mb-6 px-4">
+                                                    <span className={`text-2xl font-black transition-all ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
+                                                    <span className={`text-2xl font-black transition-all ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
                                                 </div>
                                                 <input type="range" min="-8" max="8" step="1" value={val} onChange={e => setData({...data, criteriaComparisons: {...data.criteriaComparisons, [pairKey]: parseInt(e.target.value)}})} />
                                             </div>
@@ -219,7 +235,7 @@
                             </div>
                         )}
 
-                        {/* STEP 4: 대안 쌍대 비교 (기준별로 반복) */}
+                        {/* STEP 4: 대안 쌍대 비교 (직관적 가이드 적용) */}
                         {step === 4 && (
                             <div className="animate-in fade-in">
                                 <h2 className="text-3xl font-black mb-2 text-slate-900">4. 대안 간 상대적 우위 평가</h2>
@@ -231,10 +247,14 @@
                                         const val = (data.alternativeComparisons[subStep] || {})[pairKey] || 0;
                                         return (
                                             <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 relative">
-                                                <div className="flex justify-between items-center mb-10">
-                                                    <span className={`text-2xl font-black ${val < 0 ? 'text-blue-600' : 'text-slate-400'}`}>{data.alternatives[i]}</span>
-                                                    <span className="px-4 py-1 bg-white rounded-full border text-xs font-black text-slate-300">VS</span>
-                                                    <span className={`text-2xl font-black ${val > 0 ? 'text-red-600' : 'text-slate-400'}`}>{data.alternatives[j]}</span>
+                                                <div className="text-center mb-8 p-4 bg-white rounded-2xl shadow-sm border border-blue-50">
+                                                    <p className="text-lg font-bold text-slate-700">
+                                                        {getComparisonText(val, data.alternatives[i], data.alternatives[j])}
+                                                    </p>
+                                                </div>
+                                                <div className="flex justify-between items-center mb-6 px-4">
+                                                    <span className={`text-2xl font-black transition-all ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
+                                                    <span className={`text-2xl font-black transition-all ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
                                                 </div>
                                                 <input type="range" min="-8" max="8" step="1" value={val} onChange={e => {
                                                     const newAltComp = {...data.alternativeComparisons};
@@ -298,7 +318,7 @@
                         </div>
                     )}
 
-                    {/* 학술적 근거 섹션 (SEO 및 권위) */}
+                    {/* 학술적 근거 섹션 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process)의 학술적 토대</h3>
@@ -314,13 +334,6 @@
                                     <h4 className="font-black text-emerald-600 mb-6 text-2xl">일관성 검증(Consistency Check)</h4>
                                     <p className="text-base text-slate-500 leading-relaxed font-medium">사용자의 답변이 논리적으로 모순되지 않는지 수학적으로 검증합니다. 일관성 지수(CI)와 일관성 비율(CR)을 통해 분석의 신뢰성을 보장합니다.</p>
                                 </div>
-                            </div>
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Saaty, T. L. (1980). *The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation*. McGraw-Hill.</li>
-                                    <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". *European Journal of Operational Research*.</li>
-                                </ul>
                             </div>
                         </div>
                     </section>
