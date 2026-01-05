@@ -3,84 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5 Forces 산업 매력도 분석 | 파란랩</title>
-    <meta name="description" content="진입하려는 시장이 레드오션인가요? 마이클 포터의 5 Forces 모델을 통해 시장의 매력도를 측정해 보세요.">
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    <title>5 Forces 분석 도구 | 산업 매력도 진단 엔진 | 파란랩(Paran Lab)</title>
+    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: #e2e8f0; border-radius: 4px; }
+        input[type=range]::-webkit-slider-thumb { height: 24px; width: 24px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 3px solid white; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">5 Forces 분석이란?</h2>
-            <p>마이클 포터 교수가 제안한 이 모델은 산업의 경쟁 강도를 결정하는 5가지 핵심 요인을 분석하여 해당 시장의 수익성을 진단합니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
+
         function PorterApp() {
-            const storageKey = 'paranlab-porter';
-            const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [scores, setScores] = useState(saved.scores || { rivalry:5, entrants:5, substitutes:5, suppliers:5, buyers:5 });
+            const [step, setStep] = useState(1); // 1:평가, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                subject: "",
+                scores: { rivalry: 5, entrants: 5, substitutes: 5, suppliers: 5, buyers: 5 }
+            });
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem(storageKey, JSON.stringify({ step, subject, scores })); }, [step, subject, scores]);
-
-            const totalRisk = useMemo(() => (Object.values(scores).reduce((a,b)=>a+b,0)/50)*100, [scores]);
             const forces = [
-                { id: 'rivalry', title: '기존 경쟁자', color: 'bg-rose-50', text: 'text-rose-700' },
-                { id: 'entrants', title: '신규 진입자', color: 'bg-orange-50', text: 'text-orange-700' },
-                { id: 'substitutes', title: '대체재 위협', color: 'bg-amber-50', text: 'text-amber-700' },
-                { id: 'suppliers', title: '공급자의 힘', color: 'bg-blue-50', text: 'text-blue-700' },
-                { id: 'buyers', title: '구매자의 힘', color: 'bg-indigo-50', text: 'text-indigo-700' }
+                { k: 'rivalry', n: '기존 기업 간 경쟁', d: '시장 내 경쟁자의 수와 강도는 어떠한가?' },
+                { k: 'entrants', n: '신규 진입자의 위협', d: '새로운 경쟁자가 들어오기 쉬운가? (진입장벽)' },
+                { k: 'substitutes', n: '대체재의 위협', d: '우리 제품을 대신할 다른 서비스가 있는가?' },
+                { k: 'suppliers', n: '공급자의 협상력', d: '원재료 공급업체가 가격 주도권을 쥐고 있는가?' },
+                { k: 'buyers', n: '구매자의 협상력', d: '고객이 가격 인하를 요구할 힘이 강한가?' }
             ];
 
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-porter');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const avgScore = useMemo(() => {
+                const vals = Object.values(data.scores);
+                return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
+            }, [data.scores]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'porter-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 5 Forces 리포트]\n대상: ${data.subject}\n산업 경쟁 강도: ${avgScore}/10\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 5 Forces 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'porter-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4 text-center">어떤 시장을 분석할까요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 프리미엄 샐러드 시장" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black mb-10" />
-                            <div className="space-y-8 mb-10">
-                                {forces.map(f => (
-                                    <div key={f.id} className={`${f.color} p-6 rounded-[2rem] border-2 border-white shadow-sm`}>
-                                        <div className="flex justify-between font-black ${f.text} mb-4"><span>{f.title}</span><span>{scores[f.id]}점</span></div>
-                                        <input type="range" min="1" max="10" value={scores[f.id]} onChange={(e)=>setScores({...scores, [f.id]:parseInt(e.target.value)})} className="w-full h-2 bg-white/50 rounded-lg appearance-none cursor-pointer" />
-                                    </div>
-                                ))}
-                            </div>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-3xl font-black text-slate-900 mb-2">시장 매력도 리포트</h2>
-                                <p className="text-blue-600 font-bold mb-10">주제: {subject || "미정"}</p>
-                                <div className="p-10 rounded-[2.5rem] mb-10 border-4 border-rose-500 bg-rose-50">
-                                    <p className="text-slate-500 font-bold mb-2 uppercase tracking-widest">종합 위험도</p>
-                                    <h3 className="text-6xl font-black text-rose-600">{totalRisk.toFixed(0)}%</h3>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">5 Forces Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">산업의 경쟁 압력을 측정하세요.</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석할 산업/시장 입력" />
+                                <div className="space-y-8">
+                                    {forces.map(f => (
+                                        <div key={f.k} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
+                                            <div className="flex justify-between font-black mb-2">
+                                                <span className="text-slate-800">{f.n}</span>
+                                                <span className="text-blue-600">{data.scores[f.k]}점</span>
+                                            </div>
+                                            <p className="text-xs text-slate-400 mb-6">{f.d}</p>
+                                            <input type="range" min="1" max="10" value={data.scores[f.k]} onChange={e => setData({...data, scores: {...data.scores, [f.k]: parseInt(e.target.value)}})} />
+                                            <div className="flex justify-between text-[10px] mt-2 font-bold text-slate-300 uppercase">
+                                                <span>Low Pressure</span>
+                                                <span>High Pressure</span>
+                                            </div>
+                                        </div>
+                                    ))}
                                 </div>
-                                <p className="text-slate-600 font-medium leading-relaxed mb-10">
-                                    {totalRisk >= 70 ? "경쟁이 매우 치열한 레드오션입니다. 진입에 신중을 기해야 합니다." : totalRisk >= 40 ? "적절한 경쟁이 있는 시장입니다. 차별화 전략이 필수적입니다." : "매우 매력적인 블루오션입니다! 빠른 선점이 중요합니다."}
-                                </p>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">산업 매력도 리포트 확인</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'porter-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`5 Forces 결과`, `<div class='box'>위험도: ${totalRisk.toFixed(0)}%</div>`, 'porter-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[5 Forces 결과]\n위험도: ${totalRisk.toFixed(0)}%`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Industry Attractiveness Report</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "산업 구조 분석 결과"}</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
+                                    <div className="space-y-6">
+                                        {forces.map(f => (
+                                            <div key={f.k}>
+                                                <div className="flex justify-between text-sm font-black mb-2">
+                                                    <span className="text-slate-600">{f.n}</span>
+                                                    <span className="text-blue-600">{data.scores[f.k]}/10</span>
+                                                </div>
+                                                <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                                                    <div className="h-full bg-blue-600" style={{ width: (data.scores[f.k] * 10) + "%" }}></div>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
+                                        <p className="text-blue-400 font-black text-xs uppercase mb-2">Average Pressure</p>
+                                        <h4 className="text-5xl font-black mb-6">{avgScore}</h4>
+                                        <p className="text-sm opacity-60 leading-relaxed font-medium">
+                                            {avgScore > 7 ? "경쟁 압력이 매우 높아 수익을 내기 어려운 시장입니다. 강력한 차별화 전략이 필수적입니다." : 
+                                             avgScore > 4 ? "보통 수준의 경쟁 환경입니다. 핵심 역량을 바탕으로 우위를 점할 수 있습니다." : 
+                                             "매우 매력적인 시장입니다. 선점 효과를 극대화하여 시장을 장악하세요."}
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<PorterApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PorterApp />);
     </script>
 </body>
 </html>
