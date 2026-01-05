@@ -25,7 +25,7 @@
         const { useState, useEffect } = React;
 
         function ScamperApp() {
-            const [step, setStep] = useState(1); // 1:주제, 2:7가지질문, 3:결과
+            const [step, setStep] = useState(1); 
             const [activeIdx, setActiveIdx] = useState(0);
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
@@ -35,13 +35,13 @@
             });
 
             const questions = [
-                { k: 's', n: 'Substitute (대체)', q: '다른 재료, 사람, 방법으로 바꿀 수 있나요?', desc: '기존의 요소를 다른 것으로 교체하여 새로운 가치를 만듭니다.' },
-                { k: 'c', n: 'Combine (결합)', q: '두 가지 이상의 기능을 합칠 수 있나요?', desc: '서로 다른 아이디어나 서비스를 융합하여 시너지를 냅니다.' },
-                { k: 'a', n: 'Adapt (응용)', q: '다른 분야의 아이디어를 빌려올 수 있나요?', desc: '이미 성공한 다른 사례를 현재 문제에 적용해 봅니다.' },
-                { k: 'm', n: 'Modify (수정/확대)', q: '모양, 색상, 크기를 바꿀 수 있나요?', desc: '특정 부분을 강조하거나 형태를 변형하여 가치를 높입니다.' },
-                { k: 'p', n: 'Put to another use (용도 변경)', q: '전혀 다른 용도로 사용할 수 있나요?', desc: '기존 제품을 새로운 시장이나 목적으로 재정의합니다.' },
-                { k: 'e', n: 'Eliminate (제거)', q: '불필요한 부분을 뺄 수 있나요?', desc: '핵심 기능만 남기고 단순화하여 효율성을 극대화합니다.' },
-                { k: 'r', n: 'Reverse (역발상)', q: '순서를 바꾸거나 뒤집을 수 있나요?', desc: '고정관념을 깨고 반대 방향에서 문제를 바라봅니다.' }
+                { k: 's', n: 'Substitute (대체)', q: '다른 재료, 사람, 방법으로 바꿀 수 있나요?', desc: '기존 요소를 교체하여 새로운 가치를 창출합니다.' },
+                { k: 'c', n: 'Combine (결합)', q: '두 가지 이상의 기능을 합칠 수 있나요?', desc: '서로 다른 아이디어를 융합하여 시너지를 냅니다.' },
+                { k: 'a', n: 'Adapt (응용)', q: '다른 분야의 아이디어를 빌려올 수 있나요?', desc: '성공한 다른 사례를 현재 문제에 적용해 봅니다.' },
+                { k: 'm', n: 'Modify (수정)', q: '모양, 색상, 크기를 바꿀 수 있나요?', desc: '특정 부분을 변형하여 가치를 높입니다.' },
+                { k: 'p', n: 'Put to use (용도 변경)', q: '전혀 다른 용도로 사용할 수 있나요?', desc: '기존 제품을 새로운 목적으로 재정의합니다.' },
+                { k: 'e', n: 'Eliminate (제거)', q: '불필요한 부분을 뺄 수 있나요?', desc: '핵심 기능만 남기고 단순화하여 효율성을 높입니다.' },
+                { k: 'r', n: 'Reverse (역발상)', q: '순서를 바꾸거나 뒤집을 수 있나요?', desc: '고정관념을 깨고 반대 방향에서 바라봅니다.' }
             ];
 
             useEffect(() => {
@@ -63,7 +63,7 @@
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'scamper-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 SCAMPER 리포트]\n주제: ${data.subject}\n혁신적인 아이디어를 도출했습니다.\n\n상세 보기: https://paranlab.com`;
+                        const shareText = `[파란랩 SCAMPER 리포트]\n주제: ${data.subject}\n\n상세 보기: https://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 SCAMPER 분석', text: shareText });
                         } else {
@@ -88,7 +88,7 @@
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-3xl font-black text-slate-900">1. 혁신이 필요한 주제를 입력하세요.</h2>
-                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black shadow-inner" placeholder="예: 사내 복지 포인트 제도 개선" />
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black shadow-inner" placeholder="예: 사내 복지 구독 서비스 기획" />
                                 <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">다음: 7가지 질문에 답하기</button>
                             </div>
                         )}
@@ -105,7 +105,6 @@
                                 <div className="p-10 bg-blue-50 rounded-[3rem] border border-blue-100 text-center">
                                     <h3 className="text-2xl font-black text-blue-700 mb-2">{questions[activeIdx].n}</h3>
                                     <p className="text-blue-900 font-bold text-lg mb-4">"{questions[activeIdx].q}"</p>
-                                    <p className="text-sm text-blue-400 mb-8">{questions[activeIdx].desc}</p>
                                     <textarea value={data.ideas[questions[activeIdx].k]} onChange={e => setData({...data, ideas: {...data.ideas, [questions[activeIdx].k]: e.target.value}})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-sm" placeholder="아이디어를 자유롭게 적어보세요..." />
                                 </div>
                                 <div className="flex gap-6">
@@ -148,6 +147,34 @@
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    {/* [보강] 학술적 근거 섹션 */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">SCAMPER: 창의적 발상의 체크리스트</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                SCAMPER는 1971년 교육 심리학자 **밥 에벌(Bob Eberle)**이 창안한 아이디어 발상 도구입니다. 광고 전문가 알렉스 오스본이 제안한 브레인스토밍 질문들을 7가지 핵심 키워드로 체계화하여, 누구나 쉽게 기존의 것을 변형하고 혁신적인 대안을 찾을 수 있도록 설계되었습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">강제적 연상 작용</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간의 뇌는 익숙한 경로로만 생각하려는 경향이 있습니다. SCAMPER는 7가지 다른 관점을 강제적으로 제시함으로써 뇌의 새로운 신경망을 자극하고 고정관념을 깨뜨립니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">혁신의 기술화</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">창의성은 타고난 재능이 아니라 훈련 가능한 기술입니다. SCAMPER는 복잡한 문제를 작게 쪼개어 질문에 답하는 과정만으로도 누구나 전문가 수준의 기획안을 도출하게 돕습니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Eberle, B. (1996). *SCAMPER: Creative Games and Activities for Imagination Development*. Prufrock Press.</li>
+                                    <li>• Osborn, A. F. (1953). *Applied Imagination: Principles and Procedures of Creative Problem-Solving*. Charles Scribner's Sons.</li>
+                                    <li>• Michalko, M. (2006). *Thinkertoys: A Handbook of Creative-Thinking Techniques*. Ten Speed Press.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
