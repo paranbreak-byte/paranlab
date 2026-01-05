@@ -5,9 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Pros & Cons 분석 | 할까말까 결정 장애 해결 도구 | 파란랩</title>
     <meta name="description" content="특정 안건을 추진할지 말지 고민되시나요? Pros & Cons(장단점 분석) 도구를 통해 긍정적 요인과 부정적 요인의 무게를 비교해 보세요.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
@@ -24,30 +22,34 @@
     <script type="text/babel">
         const { useState, useMemo, useEffect } = React;
         function PcApp() {
-            // [수정] 키 이름을 폴더명과 일치시킴
-            const saved = JSON.parse(localStorage.getItem('paranlab-pros-cons') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [pros, setPros] = useState(saved.pros || [{ text: "긍정적 요인 1", score: 5 }]);
-            const [cons, setCons] = useState(saved.cons || [{ text: "부정적 요인 1", score: 5 }]);
+            // [중요] 저장 키를 'paranlab-pros-cons'로 고정
+            const storageKey = 'paranlab-pros-cons';
+            const getInitialData = () => {
+                try {
+                    const saved = localStorage.getItem(storageKey);
+                    return saved ? JSON.parse(saved) : null;
+                } catch (e) { return null; }
+            };
+
+            const savedData = getInitialData();
+
+            const [step, setStep] = useState(savedData?.step || 1);
+            const [subject, setSubject] = useState(savedData?.subject || "");
+            const [pros, setPros] = useState(savedData?.pros || [{ text: "긍정적 요인 1", score: 5 }]);
+            const [cons, setCons] = useState(savedData?.cons || [{ text: "부정적 요인 1", score: 5 }]);
 
             useEffect(() => {
                 if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-pros-cons', JSON.stringify({ step, subject, pros, cons }));
+                    localStorage.setItem(storageKey, JSON.stringify({ step, subject, pros, cons }));
                 }
             }, [step, subject, pros, cons]);
 
             const finalScore = useMemo(() => {
-                const totalPros = pros.reduce((acc, p) => acc + p.score, 0);
-                const totalCons = cons.reduce((acc, c) => acc + c.score, 0);
+                const totalPros = pros.reduce((acc, p) => acc + (Number(p.score) || 0), 0);
+                const totalCons = cons.reduce((acc, c) => acc + (Number(c.score) || 0), 0);
                 if (totalPros + totalCons === 0) return 50;
                 return (totalPros / (totalPros + totalCons)) * 100;
             }, [pros, cons]);
-
-            const handleSaveHtml = () => {
-                const content = `<div class="box"><strong>결론: ${finalScore >= 50 ? '추진 권장' : '재고 권장'}</strong><br>긍정 지수: ${finalScore.toFixed(0)}%</div>`;
-                ParanLabCore.saveAsHtml(`Pros & Cons 결과: ${subject}`, content, 'proscons-report');
-            };
 
             return (
                 <div className="animate-in fade-in duration-500">
@@ -67,8 +69,8 @@
                             </div>
                             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
                                 <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'proscons-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 Pros & Cons 보고서]\n주제: ${subject}\n결론: ${finalScore >= 50 ? '추진(GO)' : '재고(STOP)'}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`Pros & Cons 결과`, ``, 'proscons-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 Pros & Cons 결과]\n주제: ${subject}\n결론: ${finalScore >= 50 ? '추진' : '재고'}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
                             </div>
                             <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
