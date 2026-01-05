@@ -25,7 +25,7 @@
         const { useState, useEffect } = React;
 
         function SixHatsApp() {
-            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 subject: "",
@@ -131,6 +131,34 @@
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    {/* [보강] 학술적 근거 섹션 */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">여섯 색깔 모자: 병렬적 사고의 과학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                여섯 색깔 모자(Six Thinking Hats)는 창의적 사고의 대가 **에드워드 드 보노(Edward de Bono)**가 개발한 기법입니다. 인간의 뇌가 한 번에 논리, 감정, 비판, 창의를 동시에 처리하려 할 때 발생하는 혼란을 방지하기 위해, 의도적으로 한 번에 한 가지 관점만 갖도록 강제하는 '병렬적 사고(Parallel Thinking)' 방법론입니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">인지적 과부하 방지</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">심리학적으로 인간은 상충하는 감정과 논리를 동시에 처리할 때 편향된 결정을 내리기 쉽습니다. 모자를 바꿔 쓰는 행위는 뇌의 특정 영역만을 활성화하여 사고의 깊이를 더하고 객관성을 확보하게 합니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">수평적 사고(Lateral Thinking)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">드 보노는 기존의 수직적 논리를 깨는 수평적 사고를 강조했습니다. 이 도구는 비판(검은 모자)과 낙관(노란 모자)을 분리함으로써, 아이디어가 비판에 의해 싹이 잘리는 것을 방지하고 창의적 대안(초록 모자)을 보호합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• De Bono, E. (1985). *Six Thinking Hats: An Essential Approach to Business Management*. Little, Brown and Company.</li>
+                                    <li>• De Bono, E. (1970). *Lateral Thinking: Creativity Step by Step*. Harper & Row.</li>
+                                    <li>• Kivunja, C. (2015). "Using De Bono’s Six Thinking Hats Model to Teach Critical Thinking and Problem Solving Skills". *Creative Education*.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
