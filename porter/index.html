@@ -3,37 +3,33 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>5 Forces 산업 매력도 분석 | 시장 경쟁 강도 및 수익성 진단 | 파란랩</title>
-    <meta name="description" content="진입하려는 시장이 레드오션인가요? 마이클 포터의 5 Forces 모델을 통해 경쟁자, 공급자, 구매자, 대체재, 신규 진입자의 위협을 분석하고 시장의 매력도를 측정해 보세요.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <title>5 Forces 산업 매력도 분석 | 파란랩</title>
+    <meta name="description" content="진입하려는 시장이 레드오션인가요? 마이클 포터의 5 Forces 모델을 통해 시장의 매력도를 측정해 보세요.">
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
     <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
 </head>
 <body class="bg-slate-50">
     <div id="root">
-        <div id="porter-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
+        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
+        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
             <h2 class="text-2xl font-black text-slate-800 mb-6">5 Forces 분석이란?</h2>
-            <p>하버드 경영대학원의 마이클 포터 교수가 제안한 이 모델은 산업의 구조와 경쟁 강도를 결정하는 5가지 핵심 요인을 분석합니다. 이를 통해 해당 산업에서 장기적으로 수익을 낼 수 있는지 판단합니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>기존 경쟁:</strong> 현재 시장 내 업체들 간의 경쟁 정도</li>
-                <li><strong>신규 진입:</strong> 새로운 경쟁자가 들어오기 쉬운 정도(진입 장벽)</li>
-                <li><strong>대체재:</strong> 내 제품을 대신할 다른 서비스의 존재 여부</li>
-                <li><strong>공급자 협상력:</strong> 원재료나 서비스를 공급하는 업체의 힘</li>
-                <li><strong>구매자 협상력:</strong> 고객이 가격이나 품질을 요구할 수 있는 힘</li>
-            </ul>
+            <p>마이클 포터 교수가 제안한 이 모델은 산업의 경쟁 강도를 결정하는 5가지 핵심 요인을 분석하여 해당 시장의 수익성을 진단합니다.</p>
         </section>
     </div>
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
         function PorterApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-porter') || '{}');
+            const storageKey = 'paranlab-porter';
+            const saved = JSON.parse(localStorage.getItem(storageKey) || '{}');
             const [step, setStep] = useState(saved.step || 1);
+            const [subject, setSubject] = useState(saved.subject || "");
             const [scores, setScores] = useState(saved.scores || { rivalry:5, entrants:5, substitutes:5, suppliers:5, buyers:5 });
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-porter', JSON.stringify({ step, scores })); }, [step, scores]);
+
+            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem(storageKey, JSON.stringify({ step, subject, scores })); }, [step, subject, scores]);
+
             const totalRisk = useMemo(() => (Object.values(scores).reduce((a,b)=>a+b,0)/50)*100, [scores]);
             const forces = [
                 { id: 'rivalry', title: '기존 경쟁자', color: 'bg-rose-50', text: 'text-rose-700' },
@@ -42,11 +38,13 @@
                 { id: 'suppliers', title: '공급자의 힘', color: 'bg-blue-50', text: 'text-blue-700' },
                 { id: 'buyers', title: '구매자의 힘', color: 'bg-indigo-50', text: 'text-indigo-700' }
             ];
+
             return (
                 <div className="animate-in fade-in duration-500">
                     {step === 1 ? (
                         <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black text-slate-900 mb-10">5가지 위협 요소 체크 (높을수록 위험)</h2>
+                            <h2 className="text-3xl font-black text-slate-900 mb-4 text-center">어떤 시장을 분석할까요?</h2>
+                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 프리미엄 샐러드 시장" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black mb-10" />
                             <div className="space-y-8 mb-10">
                                 {forces.map(f => (
                                     <div key={f.id} className={`${f.color} p-6 rounded-[2rem] border-2 border-white shadow-sm`}>
@@ -58,16 +56,31 @@
                             <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
                         </div>
                     ) : (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                            <h2 className="text-4xl font-black text-slate-900 mb-2">시장 위험도: <span className="text-rose-600">{totalRisk.toFixed(0)}%</span></h2>
-                            <p className="text-slate-500 mb-10 font-medium">{totalRisk >= 70 ? "경쟁이 매우 치열한 레드오션입니다." : totalRisk >= 40 ? "적절한 경쟁이 있는 시장입니다." : "매우 매력적인 블루오션입니다!"}</p>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">다시 수정하기</button>
+                        <div className="space-y-6">
+                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
+                                <h2 className="text-3xl font-black text-slate-900 mb-2">시장 매력도 리포트</h2>
+                                <p className="text-blue-600 font-bold mb-10">주제: {subject || "미정"}</p>
+                                <div className="p-10 rounded-[2.5rem] mb-10 border-4 border-rose-500 bg-rose-50">
+                                    <p className="text-slate-500 font-bold mb-2 uppercase tracking-widest">종합 위험도</p>
+                                    <h3 className="text-6xl font-black text-rose-600">{totalRisk.toFixed(0)}%</h3>
+                                </div>
+                                <p className="text-slate-600 font-medium leading-relaxed mb-10">
+                                    {totalRisk >= 70 ? "경쟁이 매우 치열한 레드오션입니다. 진입에 신중을 기해야 합니다." : totalRisk >= 40 ? "적절한 경쟁이 있는 시장입니다. 차별화 전략이 필수적입니다." : "매우 매력적인 블루오션입니다! 빠른 선점이 중요합니다."}
+                                </p>
+                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
+                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'porter-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
+                                <button onClick={()=>ParanLabCore.saveAsHtml(`5 Forces 결과`, ``, 'porter-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
+                                <button onClick={()=>ParanLabCore.copyToClipboard(`[5 Forces 결과]\n위험도: ${totalRisk.toFixed(0)}%`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                            </div>
+                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
                         </div>
                     )}
                 </div>
             );
         }
-        ReactDOM.createRoot(document.getElementById('porter-app')).render(<PorterApp />);
+        ReactDOM.createRoot(document.getElementById('app-container')).render(<PorterApp />);
     </script>
 </body>
 </html>
