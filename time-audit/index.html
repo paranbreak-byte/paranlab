@@ -3,75 +3,174 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시간 기록 분석 (Time Audit) | 하루 시간 사용 효율성 점검 도구 | 파란랩</title>
-    <meta name="description" content="당신의 24시간은 어디로 새고 있나요? 시간 기록 분석을 통해 생산적인 활동과 낭비되는 시간을 시각화하고, 더 나은 삶을 위한 시간 관리 전략을 세워보세요.">
+    <title>시간 감사(Time Audit) | 생산성 진단 도구 | 파란랩(Paran Lab)</title>
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="time-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">시간 기록 분석(Time Audit)이란?</h2>
-            <p><strong>시간 기록 분석</strong>은 자신의 하루 일과를 객관적으로 기록하여 시간 사용의 패턴을 파악하는 자기계발 도구입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
-        function TimeApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-time') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [acts, setActs] = useState(saved.acts || [{ id: 1, name: "수면", h: 7, cat: "essential" }, { id: 2, name: "업무", h: 8, cat: "productive" }]);
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-time', JSON.stringify({ step, acts })); }, [step, acts]);
-            const cats = { productive: { label: "생산적", color: "bg-blue-500" }, growth: { label: "자기계발", color: "bg-emerald-500" }, essential: { label: "필수생활", color: "bg-slate-400" }, rest: { label: "휴식", color: "bg-amber-500" }, waste: { label: "낭비", color: "bg-rose-500" } };
-            const totalH = useMemo(() => acts.reduce((a, b) => a + b.h, 0), [acts]);
+
+        function TimeAuditApp() {
+            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isSharing, setIsSharing] = useState(false);
+            const [acts, setActs] = useState([
+                { id: 1, name: "업무", h: 8, cat: "productive" }
+            ]);
+
+            const categories = {
+                productive: { n: "생산적 활동", c: "bg-blue-500" },
+                waste: { n: "낭비되는 시간", c: "bg-rose-500" },
+                growth: { n: "자기계발/성장", c: "bg-emerald-500" },
+                essential: { n: "필수 생활 시간", c: "bg-slate-400" }
+            };
+
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-time-audit');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        if (parsed.acts) setActs(parsed.acts);
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const stats = useMemo(() => {
+                const total = acts.reduce((sum, a) => sum + Number(a.h), 0);
+                const byCat = acts.reduce((acc, a) => {
+                    acc[a.cat] = (acc[a.cat] || 0) + Number(a.h);
+                    return acc;
+                }, {});
+                return { total, byCat };
+            }, [acts]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'time-audit.png', { type: 'image/png' });
+                        const shareText = `[파란랩 시간 감사 리포트]\n총 ${stats.total}시간 중 생산적 활동이 ${(stats.byCat.productive/stats.total*100).toFixed(0)}%입니다.\n\n상세 보기: https://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 시간 감사', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'time-audit.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-8">하루 일과 기록 (24시간)</h2>
-                            {acts.map(a => (
-                                <div key={a.id} className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-slate-50 rounded-2xl">
-                                    <input value={a.name} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, name:e.target.value}:i))} placeholder="활동명" className="flex-1 p-3 rounded-xl border font-bold" />
-                                    <input type="number" value={a.h} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, h:parseFloat(e.target.value)||0}:i))} className="w-20 p-3 rounded-xl border text-center font-black" />
-                                    <select value={a.cat} onChange={(e)=>setActs(acts.map(i=>i.id===a.id?{...i, cat:e.target.value}:i))} className="p-3 rounded-xl border font-bold text-sm">{Object.keys(cats).map(k => <option key={k} value={k}>{cats[k].label}</option>)}</select>
-                                    <button onClick={()=>setActs(acts.filter(i=>i.id!==a.id))} className="text-rose-500 font-black px-2">✕</button>
-                                </div>
-                            ))}
-                            <div className="flex justify-between items-center p-6 bg-blue-50 rounded-2xl mb-8"><span className="font-bold">총 기록 시간</span><span className="text-2xl font-black text-blue-600">{totalH} / 24h</span></div>
-                            <button onClick={()=>setActs([...acts, {id:Date.now(), name:"", h:1, cat:"productive"}])} className="text-blue-600 font-black mb-8">+ 활동 추가</button>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-blue-600">시간 사용 리포트</h2>
-                                <div className="space-y-6 mb-12">
-                                    {Object.keys(cats).map(k => {
-                                        const sum = acts.filter(a => a.cat === k).reduce((a, b) => a + b.h, 0);
-                                        const per = totalH > 0 ? (sum / totalH * 100).toFixed(1) : 0;
-                                        return (<div key={k} className="text-left"><div className="flex justify-between font-bold mb-1"><span>{cats[k].label}</span><span>{sum}h ({per}%)</span></div><div className="w-full h-4 bg-slate-100 rounded-full overflow-hidden"><div className={`${cats[k].color} h-full`} style={{ width: `${per}%` }}></div></div></div>);
-                                    })}
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Time Audit Engine v6.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 24시간은 어디로 사라지나요?</h2>
+                                <div className="space-y-4">
+                                    {acts.map((a, i) => (
+                                        <div key={a.id} className="p-6 bg-slate-50 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
+                                            <input type="text" value={a.name} onChange={e => {
+                                                const newActs = [...acts]; newActs[i].name = e.target.value; setActs(newActs);
+                                            }} className="flex-1 bg-white p-3 rounded-xl border-none font-bold" placeholder="활동 내용" />
+                                            <div className="flex items-center gap-2">
+                                                <input type="number" value={a.h} onChange={e => {
+                                                    const newActs = [...acts]; newActs[i].h = e.target.value; setActs(newActs);
+                                                }} className="w-20 p-3 bg-white rounded-xl border-none font-black text-center" />
+                                                <span className="font-bold text-slate-400">시간</span>
+                                            </div>
+                                            <select value={a.cat} onChange={e => {
+                                                const newActs = [...acts]; newActs[i].cat = e.target.value; setActs(newActs);
+                                            }} className="p-3 bg-white rounded-xl border-none font-bold">
+                                                {Object.keys(categories).map(k => <option key={k} value={k}>{categories[k].n}</option>)}
+                                            </select>
+                                            <button onClick={() => setActs(acts.filter(item => item.id !== a.id))} className="text-rose-400 font-black px-2">X</button>
+                                        </div>
+                                    ))}
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <button onClick={() => setActs([...acts, { id: Date.now(), name: "", h: 1, cat: "productive" }])} className="text-blue-600 font-black text-sm">+ 활동 추가</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">시간 감사 리포트 확인</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'time-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`시간 기록 결과`, ``, 'time-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[시간 기록 결과]\n총 시간: ${totalH}h`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Time Usage Audit</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">시간 사용 진단 리포트</h2>
+                                </div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
+                                    <div className="space-y-6">
+                                        {Object.keys(categories).map(k => {
+                                            const val = stats.byCat[k] || 0;
+                                            const pct = stats.total > 0 ? (val / stats.total * 100).toFixed(0) : 0;
+                                            return (
+                                                <div key={k}>
+                                                    <div className="flex justify-between text-sm font-black mb-2">
+                                                        <span className="text-slate-600">{categories[k].n}</span>
+                                                        <span className="text-slate-900">{val}시간 ({pct}%)</span>
+                                                    </div>
+                                                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
+                                                        <div className={`h-full ${categories[k].c}`} style={{ width: pct + "%" }}></div>
+                                                    </div>
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl flex flex-col justify-center text-center">
+                                        <h4 className="text-2xl font-black mb-4">"시간은 가장 희소한 자원입니다."</h4>
+                                        <p className="text-sm opacity-60 leading-relaxed">
+                                            총 <strong>{stats.total}시간</strong>의 기록 중 낭비되는 시간이 <strong>{stats.byCat.waste || 0}시간</strong>입니다.<br/>
+                                            이 시간을 자기계발(Growth)로 전환한다면 당신의 미래는 어떻게 바뀔까요?
+                                        </p>
+                                    </div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('time-app')).render(<TimeApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<TimeAuditApp />);
     </script>
 </body>
 </html>
