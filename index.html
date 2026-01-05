@@ -3,142 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파란랩(Paran Lab) | 전문 의사결정 도구 플랫폼</title>
-    
-    <!-- [애드센스 소유권 확인용 코드 - 정적 삽입] -->
+    <title>파란랩(Paran Lab) | 의사결정 과학 연구소</title>
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
-
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; scroll-behavior: smooth; }
-        .tool-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
-        .tool-card:hover { transform: translateY(-5px); box-shadow: 0 20px 25px -5px rgb(0 0 0 / 0.05), 0 8px 10px -6px rgb(0 0 0 / 0.05); }
-        .tag-btn.active { background-color: #2563eb; color: white; border-color: #2563eb; }
-        .wizard-step { display: none; }
-        .wizard-step.active { display: block; animation: fadeIn 0.5s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+        .scenario-card:hover { transform: translateY(-10px); box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.1); }
+        .scenario-card { transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1); }
     </style>
 </head>
 <body>
     <div id="root">
-        <section class="max-w-6xl mx-auto px-6 py-12 md:py-20">
-            <!-- 위저드 섹션 -->
-            <div id="wizard-container" class="mb-20 bg-slate-900 rounded-[3rem] p-8 md:p-12 text-white shadow-2xl relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-20 opacity-10 text-9xl">🔮</div>
-                <div id="wizard-start" class="wizard-step active relative z-10 text-center">
-                    <h2 class="text-3xl md:text-4xl font-black mb-4">어떤 도구를 써야 할지 모르겠나요?</h2>
-                    <p class="text-slate-400 mb-8 font-medium text-lg">3가지 질문으로 당신의 고민에 딱 맞는 해결책을 찾아드립니다.</p>
-                    <button onclick="startWizard()" class="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xl transition-all shadow-xl shadow-blue-900/20">내게 맞는 도구 찾기 시작</button>
-                </div>
-                <div id="step-1" class="wizard-step relative z-10">
-                    <span class="text-blue-400 font-black text-sm uppercase tracking-widest">Question 01</span>
-                    <h2 class="text-3xl font-black mt-2 mb-10">지금 가장 해결하고 싶은 문제는 무엇인가요?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                        <button onclick="nextStep(1, 'decision')" class="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all group"><div class="text-2xl mb-2">⚖️</div><div class="font-black text-xl group-hover:text-blue-400">선택과 결정</div><p class="text-slate-400 text-sm mt-1">여러 후보 중 하나를 고르거나 추진 여부 결정</p></button>
-                        <button onclick="nextStep(1, 'strategy')" class="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all group"><div class="text-2xl mb-2">🚀</div><div class="font-black text-xl group-hover:text-emerald-400">전략과 기획</div><p class="text-slate-400 text-sm mt-1">사업 아이템 분석이나 새로운 아이디어 확장</p></button>
-                        <button onclick="nextStep(1, 'self')" class="p-6 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all group"><div class="text-2xl mb-2">🌱</div><div class="font-black text-xl group-hover:text-rose-400">자기계발</div><p class="text-slate-400 text-sm mt-1">시간 관리, 목표 설정, 삶의 균형 점검</p></button>
-                    </div>
-                </div>
-                <div id="step-2-decision" class="wizard-step relative z-10">
-                    <span class="text-blue-400 font-black text-sm uppercase tracking-widest">Question 02</span>
-                    <h2 class="text-3xl font-black mt-2 mb-10">어떤 방식의 결정이 필요한가요?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onclick="showResult('/ahp/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">여러 후보 중 최고를 뽑고 싶어요</div><p class="text-slate-400 text-sm">수학적으로 가장 완벽한 1순위를 찾아드립니다.</p></button>
-                        <button onclick="showResult('/pros-cons/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">할지 말지(Yes/No)가 고민이에요</div><p class="text-slate-400 text-sm">장점과 단점의 무게를 비교해 드립니다.</p></button>
-                    </div>
-                </div>
-                <div id="step-2-strategy" class="wizard-step relative z-10">
-                    <span class="text-emerald-400 font-black text-sm uppercase tracking-widest">Question 02</span>
-                    <h2 class="text-3xl font-black mt-2 mb-10">무엇을 분석하고 싶으신가요?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onclick="showResult('/swot/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">나의 경쟁력과 시장 상황 분석</div><p class="text-slate-400 text-sm">강점과 약점을 파악해 전략을 세웁니다.</p></button>
-                        <button onclick="showResult('/5whys/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">문제의 근본 원인 찾기</div><p class="text-slate-400 text-sm">반복되는 실수의 뿌리를 뽑아냅니다.</p></button>
-                    </div>
-                </div>
-                <div id="step-2-self" class="wizard-step relative z-10">
-                    <span class="text-rose-400 font-black text-sm uppercase tracking-widest">Question 02</span>
-                    <h2 class="text-3xl font-black mt-2 mb-10">어떤 변화를 원하시나요?</h2>
-                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <button onclick="showResult('/wheel/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">삶의 균형을 점검하고 싶어요</div><p class="text-slate-400 text-sm">8가지 영역의 만족도를 시각화합니다.</p></button>
-                        <button onclick="showResult('/eisenhower/')" class="p-8 bg-white/5 hover:bg-white/10 border border-white/10 rounded-2xl text-left transition-all"><div class="font-black text-xl mb-2">업무 우선순위를 정하고 싶어요</div><p class="text-slate-400 text-sm">긴급도와 중요도로 할 일을 분류합니다.</p></button>
-                    </div>
-                </div>
-                <div id="wizard-result" class="wizard-step relative z-10 text-center">
-                    <div class="text-6xl mb-6">🎯</div>
-                    <h2 class="text-3xl font-black mb-4">당신에게 딱 맞는 도구를 찾았습니다!</h2>
-                    <p id="recommended-tool-name" class="text-blue-400 text-2xl font-black mb-10"></p>
-                    <div class="flex justify-center gap-4">
-                        <a id="recommended-tool-link" href="#" class="px-10 py-5 bg-blue-600 hover:bg-blue-500 text-white rounded-2xl font-black text-xl transition-all shadow-xl">지금 바로 사용하기</a>
-                        <button onclick="resetWizard()" class="px-10 py-5 bg-white/10 hover:bg-white/20 text-white rounded-2xl font-black text-xl transition-all">다시 찾기</button>
-                    </div>
+        <!-- Hero Section -->
+        <section class="max-w-6xl mx-auto px-6 pt-20 pb-16 text-center">
+            <span class="inline-block px-4 py-1.5 bg-blue-50 text-blue-600 rounded-full text-xs font-black uppercase tracking-widest mb-6">Decision Science Lab</span>
+            <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-8 tracking-tighter leading-tight">
+                막연한 선택 대신,<br><span class="text-blue-600">과학적으로 결정하세요.</span>
+            </h1>
+            <p class="text-slate-500 text-xl font-medium max-w-2xl mx-auto leading-relaxed">
+                파란랩은 경영학 이론과 심리학 논문을 기반으로 당신의 인생 난제에 대한 명쾌한 해답을 설계합니다.
+            </p>
+        </section>
+
+        <!-- 10대 시나리오 섹션 -->
+        <section class="max-w-6xl mx-auto px-6 py-20">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900 mb-2">인생의 10대 결정 시나리오</h2>
+                    <p class="text-slate-400 font-bold">당신의 상황에 맞는 가이드를 선택하세요.</p>
                 </div>
             </div>
 
-            <!-- 검색 및 필터 섹션 -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6" id="scenario-grid">
+                <!-- 시나리오 카드가 스크립트로 생성됩니다 -->
+            </div>
+        </section>
+
+        <!-- 학술적 신뢰 섹션 -->
+        <section class="bg-slate-900 py-24 text-white overflow-hidden relative">
+            <div class="max-w-6xl mx-auto px-6 relative z-10">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
+                    <div>
+                        <h2 class="text-4xl font-black mb-6 leading-tight">왜 파란랩의 도구를<br>신뢰할 수 있나요?</h2>
+                        <p class="text-slate-400 text-lg mb-10 leading-relaxed">
+                            우리가 제공하는 모든 도구는 하버드, 스탠퍼드 등 세계 유수의 연구진이 검증한 경영학 프레임워크와 심리학 모델을 기반으로 합니다. 주관적인 직관을 객관적인 데이터로 변환하는 검증된 로직을 경험해 보세요.
+                        </p>
+                        <div class="space-y-4">
+                            <div class="flex items-center gap-3 text-sm font-bold text-blue-400">
+                                <span class="w-5 h-5 bg-blue-400/20 rounded-full flex items-center justify-center">✓</span>
+                                1970년대부터 검증된 AHP 의사결정 모델 적용
+                            </div>
+                            <div class="flex items-center gap-3 text-sm font-bold text-emerald-400">
+                                <span class="w-5 h-5 bg-emerald-400/20 rounded-full flex items-center justify-center">✓</span>
+                                마이클 포터의 산업 구조 분석론 기반 전략 수립
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white/5 p-10 rounded-[3rem] border border-white/10 backdrop-blur-xl">
+                        <h4 class="text-xl font-black mb-6">주요 참고 문헌 및 이론</h4>
+                        <ul class="space-y-6 text-sm text-slate-400">
+                            <li><strong class="text-white block mb-1">The Analytic Hierarchy Process</strong> Thomas L. Saaty (1980)</li>
+                            <li><strong class="text-white block mb-1">Competitive Strategy</strong> Michael E. Porter (1980)</li>
+                            <li><strong class="text-white block mb-1">Goal Setting Theory</strong> Locke & Latham (1990)</li>
+                            <li><strong class="text-white block mb-1">Thinking, Fast and Slow</strong> Daniel Kahneman (2011)</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 전체 도구 라이브러리 (기존 검색 기능 유지) -->
+        <section class="max-w-6xl mx-auto px-6 py-24">
             <div class="text-center mb-16">
-                <h1 class="text-4xl md:text-5xl font-black text-slate-900 mb-6 tracking-tight">직접 도구 <span class="text-blue-600">찾아보기</span></h1>
+                <h2 class="text-3xl font-black text-slate-900 mb-4">전체 도구 라이브러리</h2>
                 <div class="max-w-2xl mx-auto relative group">
-                    <input type="text" id="search-input" placeholder="고민 키워드를 입력하세요..." class="w-full p-6 pl-14 bg-white border-2 border-slate-100 rounded-[2rem] shadow-xl shadow-slate-200/50 outline-none focus:border-blue-500 transition-all text-lg font-bold" />
-                    <svg class="absolute left-6 top-1/2 -translate-y-1/2 w-6 h-6 text-slate-300 group-focus-within:text-blue-500 transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                </div>
-                <div class="flex flex-wrap justify-center gap-2 mt-8" id="filter-tags">
-                    <button class="tag-btn active px-5 py-2 rounded-full border-2 border-slate-100 bg-white text-sm font-bold text-slate-400 hover:border-blue-200 transition-all" data-filter="all">전체</button>
-                    <button class="tag-btn px-5 py-2 rounded-full border-2 border-slate-100 bg-white text-sm font-bold text-slate-400 hover:border-blue-200 transition-all" data-filter="결정">#선택과결정</button>
-                    <button class="tag-btn px-5 py-2 rounded-full border-2 border-slate-100 bg-white text-sm font-bold text-slate-400 hover:border-blue-200 transition-all" data-filter="전략">#비즈니스전략</button>
-                    <button class="tag-btn px-5 py-2 rounded-full border-2 border-slate-100 bg-white text-sm font-bold text-slate-400 hover:border-blue-200 transition-all" data-filter="기획">#아이디어기획</button>
-                    <button class="tag-btn px-5 py-2 rounded-full border-2 border-slate-100 bg-white text-sm font-bold text-slate-400 hover:border-blue-200 transition-all" data-filter="자기계발">#자기계발</button>
+                    <input type="text" id="search-input" placeholder="도구 이름이나 키워드 검색..." class="w-full p-5 pl-14 bg-white border-2 border-slate-100 rounded-2xl shadow-lg outline-none focus:border-blue-500 transition-all font-bold" />
                 </div>
             </div>
-
             <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6" id="tools-grid"></div>
-            <div id="no-results" class="hidden text-center py-20"><p class="text-slate-300 text-xl font-bold">찾으시는 도구가 없습니다.</p></div>
         </section>
     </div>
 
     <script>
-        function startWizard() { document.getElementById('wizard-start').classList.remove('active'); document.getElementById('step-1').classList.add('active'); }
-        function nextStep(current, choice) { document.getElementById(`step-${current}`).classList.remove('active'); document.getElementById(`step-2-${choice}`).classList.add('active'); }
-        function showResult(url) {
-            const tool = ParanLabCore.toolsList.find(t => t.href === url);
-            document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active'));
-            document.getElementById('wizard-result').classList.add('active');
-            document.getElementById('recommended-tool-name').innerText = tool.name;
-            document.getElementById('recommended-tool-link').href = tool.href;
-        }
-        function resetWizard() { document.querySelectorAll('.wizard-step').forEach(s => s.classList.remove('active')); document.getElementById('wizard-start').classList.add('active'); }
+        const scenarios = [
+            { title: "커리어 전환", desc: "이직 vs 잔류 고민", icon: "💼", link: "/ahp/", color: "blue" },
+            { title: "창업 타당성", desc: "사업 아이템 검증", icon: "🚀", link: "/swot/", color: "emerald" },
+            { title: "합리적 소비", desc: "최선의 구매 선택", icon: "💰", link: "/ahp/", color: "amber" },
+            { title: "번아웃 탈출", desc: "우선순위 재정립", icon: "📅", link: "/eisenhower/", color: "rose" },
+            { title: "목표 달성", desc: "실행 가능한 계획", icon: "📍", link: "/smart/", color: "indigo" },
+            { title: "문제 해결", desc: "근본 원인 추적", icon: "❓", link: "/5whys/", color: "violet" },
+            { title: "창의적 기획", desc: "아이디어 확장", icon: "💡", link: "/scamper/", color: "orange" },
+            { title: "삶의 목적", desc: "존재 이유 발견", icon: "🌸", link: "/ikigai/", color: "pink" },
+            { title: "리스크 관리", desc: "불확실성 대비", icon: "🌳", link: "/tree/", color: "cyan" },
+            { title: "조직 소통", desc: "팀워크 갈등 해결", icon: "🪟", link: "/johari/", color: "slate" }
+        ];
 
         window.addEventListener('load', () => {
+            const scenarioGrid = document.getElementById('scenario-grid');
+            scenarios.forEach(s => {
+                const card = document.createElement('a');
+                card.href = s.link;
+                card.className = `scenario-card bg-white p-6 rounded-[2rem] border border-slate-100 shadow-sm flex flex-col items-center text-center`;
+                card.innerHTML = `
+                    <div class="text-4xl mb-4">${s.icon}</div>
+                    <h4 class="font-black text-slate-800 mb-1">${s.title}</h4>
+                    <p class="text-xs text-slate-400 font-bold">${s.desc}</p>
+                `;
+                scenarioGrid.appendChild(card);
+            });
+
+            // 기존 도구 그리드 로직 (core.js 연동)
             const tools = ParanLabCore.toolsList;
             const grid = document.getElementById('tools-grid');
             const searchInput = document.getElementById('search-input');
-            const tagBtns = document.querySelectorAll('.tag-btn');
-            const noResults = document.getElementById('no-results');
-            let currentFilter = 'all';
-            let currentSearch = '';
 
-            function renderTools() {
+            function renderTools(filter = '') {
                 grid.innerHTML = '';
-                const filtered = tools.filter(t => {
-                    const matchesFilter = currentFilter === 'all' || t.category === currentFilter;
-                    const matchesSearch = t.name.toLowerCase().includes(currentSearch.toLowerCase()) || t.desc.toLowerCase().includes(currentSearch.toLowerCase()) || t.tags.some(tag => tag.includes(currentSearch));
-                    return matchesFilter && matchesSearch;
+                tools.filter(t => t.name.includes(filter) || t.desc.includes(filter)).forEach(t => {
+                    const card = document.createElement('a');
+                    card.href = t.href;
+                    card.className = "bg-white p-6 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all flex items-center gap-4";
+                    card.innerHTML = `<div class="text-2xl">${t.icon}</div><div><div class="font-bold text-slate-800">${t.name}</div><div class="text-xs text-slate-400">${t.category}</div></div>`;
+                    grid.appendChild(card);
                 });
-                if (filtered.length === 0) noResults.classList.remove('hidden');
-                else {
-                    noResults.classList.add('hidden');
-                    filtered.forEach(t => {
-                        const card = document.createElement('a');
-                        card.href = t.href;
-                        card.className = "tool-card bg-white p-8 rounded-[2.5rem] border border-slate-100 shadow-sm flex flex-col group";
-                        card.innerHTML = `<div class="flex justify-between items-start mb-6"><div class="text-3xl">${t.icon}</div><span class="text-[10px] font-black text-slate-300 uppercase tracking-widest group-hover:text-blue-500 transition-colors">${t.category}</span></div><h3 class="text-xl font-black text-slate-800 mb-2 group-hover:text-blue-600 transition-colors">${t.name}</h3><p class="text-slate-400 text-sm font-medium leading-relaxed mb-6 flex-grow">${t.desc}</p><div class="flex flex-wrap gap-1">${t.tags.slice(0, 3).map(tag => `<span class="text-[10px] font-bold text-slate-300">#${tag}</span>`).join('')}</div>`;
-                        grid.appendChild(card);
-                    });
-                }
             }
-            searchInput.addEventListener('input', (e) => { currentSearch = e.target.value; renderTools(); });
-            tagBtns.forEach(btn => { btn.addEventListener('click', () => { tagBtns.forEach(b => b.classList.remove('active')); btn.classList.add('active'); currentFilter = btn.dataset.filter; renderTools(); }); });
+            searchInput.addEventListener('input', (e) => renderTools(e.target.value));
             renderTools();
         });
     </script>
