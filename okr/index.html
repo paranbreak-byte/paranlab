@@ -139,4 +139,74 @@
                                     {data.scenarioContext && (
                                         <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
                                             <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="max-w-3xl mx-auto space-y-12">
+                                    <div className="p-12 bg-blue-600 text-white rounded-[3.5rem] shadow-2xl relative overflow-hidden">
+                                        <h3 className="text-sm font-black uppercase tracking-widest opacity-70 mb-4">Objective</h3>
+                                        <p className="text-4xl font-black leading-tight">{data.obj || "목표 미설정"}</p>
+                                    </div>
+                                    <div className="space-y-6">
+                                        <h3 className="text-xl font-black text-slate-800 ml-4">Key Results</h3>
+                                        {data.krs.map((kr, i) => kr && (
+                                            <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
+                                                <div className="w-12 h-12 bg-white border-2 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black shrink-0 shadow-sm">{i+1}</div>
+                                                <p className="text-xl font-bold text-slate-700">{kr}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        </div>
+                    )}
+
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">OKR: 구글을 만든 목표 설정의 과학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                OKR(Objectives and Key Results)은 인텔의 전 CEO **앤디 그로브(Andy Grove)**가 창안하고, 전설적인 투자자 **존 도어(John Doerr)**가 구글에 도입하며 전 세계적으로 확산된 목표 설정 프레임워크입니다. 단순히 할 일을 나열하는 것이 아니라, 가슴 뛰는 목표(O)와 이를 증명하는 수치적 결과(KR)를 연결합니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">도전적 목표 (Moonshot)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">OKR의 목표는 100% 달성이 아닌 70% 달성을 목표로 할 만큼 도전적이어야 합니다. 이는 조직과 개인이 기존의 한계를 넘어 혁신적인 방법을 찾도록 유도하는 심리적 장치입니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">측정 가능한 결과</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">핵심 결과(Key Results)는 반드시 숫자로 측정 가능해야 합니다. "열심히 공부하기"가 아니라 "오픽 AL 등급 획득"과 같이 결과가 명확할 때 실행력이 극대화됩니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Doerr, J. (2018). *Measure What Matters: How Google, Bono, and the Gates Foundation Rock the World with OKRs*. Portfolio.</li>
+                                    <li>• Grove, A. S. (1983). *High Output Management*. Random House.</li>
+                                    <li>• Wodtke, C. R. (2016). *Radical Focus: Achieving Your Most Important Goals with Objectives and Key Results*.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            );
+        }
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<OkrApp />);
+    </script>
+</body>
+</html>
