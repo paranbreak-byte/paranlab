@@ -253,3 +253,121 @@
                                         return (
                                             <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 relative">
                                                 <div className="text-center mb-8 p-6 bg-white rounded-3xl shadow-sm border border-blue-50 min-h-[80px] flex items-center justify-center">
+                                                    <p className="text-lg font-bold text-slate-700">{getComparisonText(val, data.alternatives[i], data.alternatives[j])}</p>
+                                                </div>
+                                                <div className="flex justify-between items-center mb-6 px-4">
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
+                                                    <span className={`text-2xl font-black transition-all duration-300 ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
+                                                </div>
+                                                <input type="range" min="-8" max="8" step="1" value={val} onChange={e => {
+                                                    const newAltComp = {...data.alternativeComparisons};
+                                                    newAltComp[subStep] = {...(newAltComp[subStep] || {}), [pairKey]: parseInt(e.target.value)};
+                                                    setData({...data, alternativeComparisons: newAltComp});
+                                                }} />
+                                            </div>
+                                        );
+                                    })
+                                )}
+                                <div className="flex gap-6">
+                                    <button onClick={() => subStep > 0 ? setSubStep(subStep - 1) : setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => subStep < data.criteria.length - 1 ? setSubStep(subStep + 1) : setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-2xl">
+                                        {subStep < data.criteria.length - 1 ? "다음 기준 비교" : "최종 결과 확인"}
+                                    </button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* STEP 5: 최종 결과 리포트 */}
+                        {step === 5 && results && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">AHP Scientific Report</span>
+                                        <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">{data.goal || "의사결정 분석 결과"}</h2>
+                                    </div>
+                                    {data.scenarioContext && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
+                                    <div className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 shadow-inner">
+                                        <h3 className="font-black text-slate-800 mb-8 flex items-center gap-2 text-lg">📊 기준별 가중치 (Weights)</h3>
+                                        {data.criteria.map((c, i) => (
+                                            <div key={i} className="mb-8">
+                                                <div className="flex justify-between text-sm font-black mb-2 text-slate-600"><span>{c}</span><span>{((results.criteriaWeights[i] || 0) * 100).toFixed(1)}%</span></div>
+                                                <div className="h-2 bg-white rounded-full overflow-hidden shadow-inner"><div className="h-full bg-blue-600" style={{ width: ((results.criteriaWeights[i] || 0) * 100) + "%" }}></div></div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                    <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-2xl shadow-blue-200 relative overflow-hidden">
+                                        <h3 className="font-black mb-10 text-2xl">🏆 최종 우선순위</h3>
+                                        {data.alternatives.map((alt, i) => (
+                                            <div key={i} className="mb-10">
+                                                <div className="flex justify-between font-black mb-3 text-xl"><span>{alt}</span><span>{((results.finalScores[i] || 0) * 100).toFixed(1)}%</span></div>
+                                                <div className="h-6 bg-white/20 rounded-full overflow-hidden p-1.5"><div className="h-full bg-white rounded-full shadow-lg" style={{ width: ((results.finalScores[i] || 0) * 100) + "%" }}></div></div>
+                                            </div>
+                                        ))}
+                                        <div className="mt-10 pt-8 border-t border-white/20 text-sm font-bold italic leading-relaxed">
+                                            * 수학적 고유벡터(Eigenvector) 산출 결과 "{data.alternatives[results.finalScores.indexOf(Math.max(...results.finalScores))]}" 대안이 가장 합리적인 선택으로 도출되었습니다.
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="mt-10 pt-6 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* [표준] 하단 액션 버튼 세트 */}
+                    {step === 5 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        </div>
+                    )}
+
+                    {/* [표준] 학술적 근거 섹션 (SEO) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process)의 학술적 토대</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                본 도구는 펜실베이니아 대학교 와튼스쿨의 **Thomas L. Saaty** 교수가 창안한 계층 분석 과정을 충실히 따릅니다. AHP는 인간의 주관적인 판단을 수학적인 행렬 연산으로 변환하여, 복잡한 다기준 의사결정 상황에서 가장 합리적인 해답을 제시합니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">쌍대 비교(Pairwise Comparison)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간은 여러 요소를 한꺼번에 비교할 때 인지적 오류를 범합니다. AHP는 오직 두 가지 요소만을 일대일로 비교하게 함으로써 판단의 정확도를 극대화합니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">일관성 검증(Consistency Check)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">사용자의 답변이 논리적으로 모순되지 않는지 수학적으로 검증합니다. 일관성 지수(CI)와 일관성 비율(CR)을 통해 분석의 신뢰성을 보장합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Saaty, T. L. (1980). *The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation*. McGraw-Hill.</li>
+                                    <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". *European Journal of Operational Research*.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AhpApp />);
+    </script>
+</body>
+</html>
