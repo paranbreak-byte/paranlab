@@ -3,29 +3,56 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>시간 감사(Time Audit) | 생산성 진단 도구 | 파란랩(Paran Lab)</title>
+    
+    <!-- [SEO 표준] -->
+    <title>시간 감사(Time Audit) | 생산성 진단 및 시간 관리 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="당신의 24시간은 어디로 사라지나요? 시간 감사 도구를 통해 생산적 활동과 낭비되는 시간을 분석하세요. 김 팀장의 번아웃 시나리오와 함께하는 과학적 시간 관리 도구입니다.">
+    <meta name="keywords" content="시간감사, TimeAudit, 시간관리, 생산성향상, 번아웃방지, 피터드러커시간관리, 파란랩">
+    <link rel="canonical" href="https://paranlab.com/time-audit/">
+    
+    <!-- [구조화 데이터] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 시간 감사 엔진",
+      "applicationCategory": "BusinessApplication",
+      "description": "시간 사용 내역을 기록하고 카테고리별로 분석하여 생산성을 높이는 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-500 font-bold">시간 감사 엔진 가동 중...</p>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
         function TimeAuditApp() {
-            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [acts, setActs] = useState([
                 { id: 1, name: "업무", h: 8, cat: "productive" }
@@ -63,10 +90,10 @@
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'time-audit.png', { type: 'image/png' });
-                        const shareText = `[파란랩 시간 감사 리포트]\n총 ${stats.total}시간 중 생산적 활동이 ${(stats.byCat.productive/stats.total*100).toFixed(0)}%입니다.\n\n상세 보기: https://paranlab.com`;
+                        const shareText = `[파란랩 시간 감사 리포트]\n총 ${stats.total}시간 중 생산적 활동이 ${(stats.byCat.productive/stats.total*100).toFixed(0)}%입니다.\nhttps://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 시간 감사', text: shareText });
                         } else {
@@ -84,8 +111,10 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
                             <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs opacity-50 uppercase">Time Audit Engine v6.0</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Time Audit Engine v7.0</div>
                     </div>
+
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {step === 1 && (
@@ -119,9 +148,17 @@
 
                         {step === 2 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Time Usage Audit</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">시간 사용 진단 리포트</h2>
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Time Usage Audit</span>
+                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">시간 사용 진단 리포트</h2>
+                                    </div>
+                                    {localStorage.getItem('paranlab-time-audit') && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">김 팀장의 번아웃 탈출</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
                                     <div className="space-y-6">
@@ -144,8 +181,7 @@
                                     <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl flex flex-col justify-center text-center">
                                         <h4 className="text-2xl font-black mb-4">"시간은 가장 희소한 자원입니다."</h4>
                                         <p className="text-sm opacity-60 leading-relaxed">
-                                            총 <strong>{stats.total}시간</strong>의 기록 중 낭비되는 시간이 <strong>{stats.byCat.waste || 0}시간</strong>입니다.<br/>
-                                            이 시간을 자기계발(Growth)로 전환한다면 당신의 미래는 어떻게 바뀔까요?
+                                            총 <strong>{stats.total}시간</strong>의 기록 중 낭비되는 시간이 <strong>{stats.byCat.waste || 0}시간</strong>입니다.
                                         </p>
                                     </div>
                                 </div>
@@ -158,14 +194,41 @@
 
                     {step === 2 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">시간 감사(Time Audit): 생산성의 기초</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                시간 감사는 자신의 시간을 어디에 사용하고 있는지 객관적으로 기록하고 분석하는 과정입니다. 현대 경영학의 아버지 **피터 드러커(Peter Drucker)**는 "시간을 관리하려면 먼저 시간이 어디에 쓰이는지 기록하라"고 강조했습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">파레토 법칙 (80/20 법칙)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">전체 성과의 80%는 우리가 사용하는 시간의 20%에서 나옵니다. 시간 감사는 이 핵심적인 20%의 활동이 무엇인지 식별하고, 나머지 80%의 낭비 요소를 제거하는 데 목적이 있습니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">에너지 관리와 시간 관리</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순히 시간을 아끼는 것이 아니라, 자신의 에너지가 가장 높은 시간에 가장 중요한 업무(Productive)를 배치하는 전략적 시간 배분이 가능해집니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Drucker, P. F. (1967). *The Effective Executive*. Harper & Row.</li>
+                                    <li>• Koch, R. (1998). *The 80/20 Principle: The Secret to Achieving More with Less*. Currency.</li>
+                                    <li>• Lakein, A. (1973). *How to Get Control of Your Time and Your Life*. Wyden.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
