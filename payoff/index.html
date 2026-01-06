@@ -3,36 +3,49 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Payoff 매트릭스 | 가성비 높은 업무 및 아이디어 선별 도구 | 파란랩</title>
-    <meta name="description" content="노력은 적게 들고 결과는 큰 '가성비' 업무를 찾으세요. Payoff 매트릭스를 통해 Quick Wins 아이템을 선별하고 자원을 효율적으로 배분할 수 있습니다.">
+    <title>Payoff 매트릭스 | 업무 효율 및 가성비 분석 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="노력 대비 성과가 가장 높은 업무를 찾으세요. 페이오프 매트릭스로 Quick Wins 과제를 선별하고 생산성을 극대화하는 과학적 우선순위 도구입니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
+<body>
+    <div id="header-root"></div>
     <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">Payoff 매트릭스란?</h2>
-            <p><strong>Payoff 매트릭스</strong>는 투입되는 '노력(Effort)'과 얻게 될 '결과(Impact)'를 비교하여 우선순위를 정하는 도구입니다.</p>
-        </section>
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center"><div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div><p class="text-slate-500 font-bold">페이오프 엔진 가동 중...</p></div>
+        </div>
     </div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
+
         function PayoffApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-payoff') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [tasks, setTasks] = useState(saved.tasks || [{ id: 1, text: "예시 항목", effort: 5, impact: 5 }]);
+            const [step, setStep] = useState(1); 
+            const [isSharing, setIsSharing] = useState(false);
+            const [tasks, setTasks] = useState([
+                { id: 1, text: "캠페인 기획", effort: 8, impact: 10 }
+            ]);
 
             useEffect(() => {
-                if (ParanLabCore.isAutoSaveEnabled()) {
-                    localStorage.setItem('paranlab-payoff', JSON.stringify({ step, tasks }));
-                }
-            }, [step, tasks]);
+                try {
+                    const tossed = localStorage.getItem('paranlab-payoff');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        if (parsed.tasks) setTasks(parsed.tasks);
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
 
             const quadrants = useMemo(() => {
                 const q = { wins: [], projects: [], fillins: [], thankless: [] };
@@ -45,56 +58,137 @@
                 return q;
             }, [tasks]);
 
-            const handleSaveHtml = () => {
-                const content = `<div class="box"><strong>Quick Wins:</strong> ${quadrants.wins.map(t=>t.text).join(', ')}</div>`;
-                ParanLabCore.saveAsHtml(`Payoff 분석 보고서`, content, 'payoff-report');
-            };
-
-            const handleCopyText = () => {
-                const text = `[파란랩 Payoff 보고서]\nQuick Wins: ${quadrants.wins.map(t=>t.text).join(', ')}\nMajor Projects: ${quadrants.projects.map(t=>t.text).join(', ')}\n\n파란랩(paranlab.com)`;
-                ParanLabCore.copyToClipboard(text);
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'payoff.png', { type: 'image/png' });
+                        const shareText = `[파란랩 Payoff 리포트]\n가장 효율적인 Quick Wins 과제를 찾았습니다.\nhttps://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'payoff.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
             };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black mb-8">가성비 분석 항목 입력</h2>
-                            {tasks.map(t => (
-                                <div key={t.id} className="p-6 bg-slate-50 rounded-[2rem] mb-6 border border-slate-100">
-                                    <input value={t.text} onChange={(e)=>setTasks(tasks.map(i=>i.id===t.id?{...i, text:e.target.value}:i))} placeholder="항목 이름" className="w-full p-3 mb-4 rounded-xl border font-black" />
-                                    <div className="grid grid-cols-2 gap-6">
-                                        <div><label className="text-[10px] font-black text-orange-500 uppercase">노력: {t.effort}</label><input type="range" min="1" max="10" value={t.effort} onChange={(e)=>setTasks(tasks.map(i=>i.id===t.id?{...i, effort:parseInt(e.target.value)}:i))} className="w-full accent-orange-500" /></div>
-                                        <div><label className="text-[10px] font-black text-blue-500 uppercase">결과: {t.impact}</label><input type="range" min="1" max="10" value={t.impact} onChange={(e)=>setTasks(tasks.map(i=>i.id===t.id?{...i, impact:parseInt(e.target.value)}:i))} className="w-full accent-blue-500" /></div>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                        </div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Payoff Engine v7.0</div>
+                    </div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">노력 대비 성과를 분석하세요.</h2>
+                                <div className="space-y-6">
+                                    {tasks.map((t, i) => (
+                                        <div key={t.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-8">
+                                            <div className="flex gap-4 items-center">
+                                                <input type="text" value={t.text} onChange={e => {
+                                                    const newT = [...tasks]; newT[i].text = e.target.value; setTasks(newT);
+                                                }} className="flex-1 p-4 bg-white rounded-2xl border-none font-black text-xl shadow-sm" placeholder="업무/아이디어 이름" />
+                                                <button onClick={() => setTasks(tasks.filter(item => item.id !== t.id))} className="text-red-400 font-black">삭제</button>
+                                            </div>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
+                                                <div>
+                                                    <div className="flex justify-between font-bold mb-2 text-sm"><span>노력/비용 (Effort)</span><span className="text-red-600">{t.effort}점</span></div>
+                                                    <input type="range" min="1" max="10" value={t.effort} onChange={e => {
+                                                        const newT = [...tasks]; newT[i].effort = parseInt(e.target.value); setTasks(newT);
+                                                    }} />
+                                                </div>
+                                                <div>
+                                                    <div className="flex justify-between font-bold mb-2 text-sm"><span>영향력/성과 (Impact)</span><span className="text-blue-600">{t.impact}점</span></div>
+                                                    <input type="range" min="1" max="10" value={t.impact} onChange={e => {
+                                                        const newT = [...tasks]; newT[i].impact = parseInt(e.target.value); setTasks(newT);
+                                                    }} />
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                    <button onClick={() => setTasks([...tasks, { id: Date.now(), text: "", effort: 5, impact: 5 }])} className="text-blue-600 font-black text-sm">+ 분석 항목 추가</button>
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">페이오프 매트릭스 확인</button>
+                            </div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Effort vs Impact Matrix</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">Payoff 분석 리포트</h2>
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 mb-12">
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100 relative">
+                                        <h3 className="font-black text-emerald-700 mb-4 text-xl">🚀 Quick Wins</h3>
+                                        <p className="text-[10px] font-bold text-emerald-400 uppercase mb-4">Low Effort, High Impact</p>
+                                        <ul className="space-y-2">{quadrants.wins.map(t => <li key={t.id} className="bg-white/60 p-3 rounded-xl text-sm font-bold text-slate-700 shadow-sm">✓ {t.text}</li>)}</ul>
+                                    </div>
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100 relative">
+                                        <h3 className="font-black text-blue-700 mb-4 text-xl">🏗️ Major Projects</h3>
+                                        <p className="text-[10px] font-bold text-blue-400 uppercase mb-4">High Effort, High Impact</p>
+                                        <ul className="space-y-2">{quadrants.projects.map(t => <li key={t.id} className="bg-white/60 p-3 rounded-xl text-sm font-bold text-slate-700 shadow-sm">✓ {t.text}</li>)}</ul>
+                                    </div>
+                                    <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100 relative">
+                                        <h3 className="font-black text-slate-700 mb-4 text-xl">🐌 Fill-ins</h3>
+                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-4">Low Effort, Low Impact</p>
+                                        <ul className="space-y-2">{quadrants.fillins.map(t => <li key={t.id} className="bg-white/60 p-3 rounded-xl text-sm font-bold text-slate-700 shadow-sm">✓ {t.text}</li>)}</ul>
+                                    </div>
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100 relative">
+                                        <h3 className="font-black text-rose-700 mb-4 text-xl">🛑 Thankless Tasks</h3>
+                                        <p className="text-[10px] font-bold text-rose-400 uppercase mb-4">High Effort, Low Impact</p>
+                                        <ul className="space-y-2">{quadrants.thankless.map(t => <li key={t.id} className="bg-white/60 p-3 rounded-xl text-sm font-bold text-slate-700 shadow-sm">✓ {t.text}</li>)}</ul>
                                     </div>
                                 </div>
-                            ))}
-                            <button onClick={()=>setTasks([...tasks, {id:Date.now(), text:"", effort:5, impact:5}])} className="text-blue-600 font-black mb-8">+ 항목 추가</button>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 결과 보기</button>
-                        </div>
-                    ) : (
-                        <div className="space-y-8">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">Payoff 분석 결과</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700">🌟 Quick Wins</h3><ul className="text-xs">{quadrants.wins.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-100"><h3 className="font-black text-blue-700">🚀 Major Projects</h3><ul className="text-xs">{quadrants.projects.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                    <div className="p-8 bg-slate-50 rounded-[2.5rem] border-2 border-slate-100"><h3 className="font-black text-slate-700">⏳ Fill-ins</h3><ul className="text-xs">{quadrants.fillins.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border-2 border-rose-100"><h3 className="font-black text-rose-700">🐕 Thankless</h3><ul className="text-xs">{quadrants.thankless.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
                                 </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'payoff-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={handleSaveHtml} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={handleCopyText} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                            </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">💬 이미지+링크 공유</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">Payoff 매트릭스: 가성비 업무의 과학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                페이오프 매트릭스(Payoff Matrix)는 투입되는 노력(Effort) 대비 얻을 수 있는 성과(Impact)를 시각화하여 자원의 효율성을 극대화하는 도구입니다. 이는 **파레토 법칙(80/20 법칙)**에 근거하여, 최소한의 노력으로 최대의 결과를 낼 수 있는 'Quick Wins' 과제를 식별하는 데 목적이 있습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">Quick Wins의 중요성</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">성과는 높지만 노력은 적게 드는 과제들을 먼저 실행함으로써 조직의 사기를 높이고 빠른 성공 경험(Small Wins)을 축적할 수 있습니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-red-600 shadow-sm">
+                                    <h4 className="font-black text-red-600 mb-6 text-2xl">Thankless Tasks의 제거</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">노력은 많이 들지만 성과는 미미한 업무들은 과감히 제거하거나 자동화해야 합니다. 이는 번아웃을 방지하고 핵심 가치에 집중하게 만드는 전략적 포기입니다.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </section>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<PayoffApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<PayoffApp />);
     </script>
 </body>
 </html>
