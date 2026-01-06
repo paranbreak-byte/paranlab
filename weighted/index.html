@@ -3,34 +3,62 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>가중치 결정 매트릭스 | 합리적 대안 선택 도구 | 파란랩(Paran Lab)</title>
+    
+    <!-- [SEO 표준] -->
+    <title>가중치 결정 매트릭스 | 다기준 의사결정 및 대안 평가 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="여러 대안 중 최선의 선택을 내리세요. 각 기준에 가중치를 부여하고 점수를 합산하는 가중치 결정 매트릭스(Weighted Scoring Matrix)를 제공합니다.">
+    <meta name="keywords" content="가중치결정, 의사결정매트릭스, 대안평가, 우선순위결정, 합리적선택, 파란랩">
+    <link rel="canonical" href="https://paranlab.com/weighted/">
+    
+    <!-- [구조화 데이터] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 가중치 결정 엔진",
+      "applicationCategory": "BusinessApplication",
+      "description": "다양한 평가 기준에 가중치를 부여하여 최적의 대안을 선정하는 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-500 font-bold">가중치 엔진 가동 중...</p>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
         function WeightedApp() {
-            const [step, setStep] = useState(1); // 1:설정, 2:평가, 3:결과
+            const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 alts: ["대안 A", "대안 B"],
                 crits: [{ text: "기준 1", w: 5 }, { text: "기준 2", w: 5 }],
-                scores: {} // "altIdx-critIdx": score
+                scores: {},
+                scenarioContext: null
             });
 
             useEffect(() => {
@@ -59,10 +87,10 @@
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'weighted-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 가중치 결정 리포트]\n최적 대안: ${finalResults.sort((a,b)=>b.score-a.score)[0].name}\n\n상세 보기: https://paranlab.com`;
+                        const shareText = `[파란랩 가중치 결정 리포트]\n최적 대안: ${finalResults.sort((a,b)=>b.score-a.score)[0].name}\nhttps://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 가중치 분석', text: shareText });
                         } else {
@@ -80,8 +108,10 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
                             <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs opacity-50 uppercase">Weighted Engine v6.0</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Weighted Engine v7.0</div>
                     </div>
+
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {step === 1 && (
@@ -142,9 +172,17 @@
 
                         {step === 3 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Weighted Decision Matrix</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">가중치 분석 리포트</h2>
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Weighted Decision Matrix</span>
+                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">가중치 분석 리포트</h2>
+                                    </div>
+                                    {data.scenarioContext && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="space-y-8 mb-12">
                                     {finalResults.sort((a,b)=>b.score-a.score).map((res, i) => (
@@ -169,14 +207,40 @@
 
                     {step === 3 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
+
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">가중치 결정 매트릭스: 다기준 의사결정의 정석</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                가중치 결정 매트릭스(Weighted Scoring Matrix)는 여러 대안을 상충하는 다양한 기준에 따라 객관적으로 평가하는 도구입니다. 이는 **다기준 의사결정 분석(MCDA)**의 가장 기초적이면서도 강력한 방법론으로, 주관적인 선호도를 정량적인 수치로 변환하여 최적의 선택을 돕습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">가중치의 심리학</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">모든 평가 기준이 동일한 중요도를 가질 수는 없습니다. 본 도구는 각 기준에 가중치를 부여함으로써, 의사결정자가 가장 중요하게 생각하는 가치가 결과에 정확히 반영되도록 설계되었습니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">합리적 대안 비교</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순한 직관은 특정 요소에 매몰되기 쉽습니다. 매트릭스 구조는 모든 대안을 동일한 잣대로 평가하게 하여, 감정적 편향을 배제하고 논리적인 결론에 도달하게 합니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Belton, V., & Stewart, T. J. (2002). *Multiple Criteria Decision Analysis: An Integrated Approach*. Kluwer Academic Publishers.</li>
+                                    <li>• Keeney, R. L., & Raiffa, H. (1993). *Decisions with Multiple Objectives: Preferences and Value Trade-offs*. Cambridge University Press.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
                 </main>
             );
         }
