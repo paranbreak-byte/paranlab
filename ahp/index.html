@@ -109,13 +109,13 @@
                     }
                 }
                 const geoMeans = matrix.map(row => Math.pow(row.reduce((a, b) => a * b, 1), 1 / n));
-                const sumGeoMeans = geoMeans.reduce((a, b) => a + b, 0);
+                const sumGeoMeans = geoMeans.reduce((a, b) => a + b, 0) || 1;
                 const weights = geoMeans.map(v => v / (sumGeoMeans || 1));
                 let lambdaMax = 0;
                 for (let i = 0; i < n; i++) {
                     let rowSum = 0;
                     for (let j = 0; j < n; j++) rowSum += matrix[i][j] * weights[j];
-                    lambdaMax += rowSum / (weights[i] || 1);
+                    lambdaMax += rowSum / (weights[i] || 1e-10);    
                 }
                 lambdaMax /= n;
                 const ci = (lambdaMax - n) / (n - 1);
