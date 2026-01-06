@@ -3,7 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AHP 분석 도구 | 파란랩 긴급 복구 모드</title>
+    <title>AHP 분석 도구 | 정석 계층화 분석법 의사결정 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="Thomas Saaty의 AHP 이론을 바탕으로 복잡한 문제를 수학적으로 해결하세요. 실제 일관성 지수(CR) 계산을 통해 분석의 신뢰성을 보장합니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -14,69 +15,55 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        #debug-console { position: fixed; bottom: 0; left: 0; right: 0; background: #1e293b; color: #38bdf8; font-family: monospace; font-size: 10px; padding: 10px; z-index: 9999; max-height: 100px; overflow-y: auto; }
+        
+        /* 일반인 최적화 슬라이더 디자인 */
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]:focus { outline: none; }
+        input[type=range]::-webkit-slider-runnable-track { 
+            width: 100%; height: 20px; cursor: pointer; 
+            background: linear-gradient(to right, #3b82f6, #e2e8f0, #ef4444); 
+            border-radius: 10px; border: 1px solid #e2e8f0;
+        }
+        input[type=range]::-webkit-slider-thumb { 
+            height: 40px; width: 40px; border-radius: 50%; 
+            background: #ffffff; cursor: pointer; -webkit-appearance: none; 
+            margin-top: -11px; border: 4px solid #1e293b; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); 
+        }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    
     <div id="root">
         <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
+            <div class="text-center">
                 <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <h2 class="text-2xl font-black text-slate-800">AHP 엔진 초기화 중...</h2>
-                <p id="loading-msg" class="text-slate-400 mt-2 font-bold">Babel 컴파일 대기 중</p>
+                <p class="text-slate-500 font-bold">AHP 분석 엔진 가동 중...</p>
             </div>
         </div>
     </div>
-
-    <!-- 디버그 콘솔 -->
-    <div id="debug-console">System Log: Waiting for initialization...</div>
-
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        // [디버깅 기술 1] 실시간 로그 출력
-        const logger = (msg) => {
-            console.log("[AHP-LOG]", msg);
-            const consoleEl = document.getElementById('debug-console');
-            if (consoleEl) consoleEl.innerHTML += `<div>> ${msg}</div>`;
-            const msgEl = document.getElementById('loading-msg');
-            if (msgEl) msgEl.innerText = msg;
-        };
-
-        // [디버깅 기술 2] 전역 에러 핸들러
-        window.onerror = function(message, source, lineno, colno, error) {
-            document.getElementById('root').innerHTML = `
-                <div class="p-10 m-10 bg-red-50 border-4 border-red-200 rounded-[3rem] text-center">
-                    <h1 class="text-red-600 font-black text-3xl mb-4">시스템 런타임 에러</h1>
-                    <div class="bg-white p-6 rounded-2xl text-left font-mono text-sm text-red-500 mb-6 overflow-auto">
-                        ${message}<br/>Line: ${lineno}
-                    </div>
-                    <button onclick="localStorage.clear(); location.reload();" class="px-8 py-4 bg-red-600 text-white rounded-2xl font-black shadow-lg">데이터 초기화 후 재시도</button>
-                </div>
-            `;
-            return true;
-        };
-
         const { useState, useEffect, useMemo } = React;
 
+        const RI_TABLE = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+
         function AhpApp() {
-            logger("React Component Mounted");
-            const [step, setStep] = useState(1);
-            const [subStep, setSubStep] = useState(0);
+            const [step, setStep] = useState(1); 
+            const [subStep, setSubStep] = useState(0); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 goal: "",
                 criteria: ["임대료", "유동인구", "경쟁강도"],
                 alternatives: ["신도시 상가", "구도심 상가"],
-                criteriaComparisons: {},
-                alternativeComparisons: {},
+                criteriaComparisons: {}, 
+                alternativeComparisons: {}, 
                 scenarioContext: null
             });
 
             useEffect(() => {
-                logger("Checking LocalStorage...");
                 try {
                     const tossed = localStorage.getItem('paranlab-ahp');
                     if (tossed) {
@@ -84,54 +71,44 @@
                         setData(prev => ({
                             ...prev,
                             ...parsed,
-                            criteria: Array.isArray(parsed.criteria) ? parsed.criteria : prev.criteria,
-                            alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : prev.alternatives
+                            criteriaComparisons: parsed.criteriaComparisons || parsed.comparisons || {},
+                            alternativeComparisons: parsed.alternativeComparisons || {}
                         }));
                         setStep(5);
-                        logger("Scenario Data Loaded");
-                    } else {
-                        logger("No saved data found. Starting fresh.");
                     }
-                } catch(e) { logger("Storage Error: " + e.message); }
+                } catch(e) { console.error(e); }
             }, []);
 
-            // --- [안정화] AHP 연산 엔진 ---
-            const RI = [0, 0, 0.58, 0.90, 1.12, 1.24, 1.32, 1.41, 1.45, 1.49];
+            // --- AHP 수학 연산 엔진 ---
             const calculateAHP = (items, comparisons) => {
-                try {
-                    const n = items.length;
-                    if (n <= 1) return { weights: [1], cr: 0 };
-                    const matrix = Array(n).fill().map(() => Array(n).fill(1));
-                    for (let i = 0; i < n; i++) {
-                        for (let j = i + 1; j < n; j++) {
-                            const val = comparisons[i + "-" + j] || 0;
-                            const scale = val < 0 ? Math.abs(val) + 1 : 1 / (val + 1);
-                            matrix[i][j] = scale;
-                            matrix[j][i] = 1 / scale;
-                        }
+                const n = items.length;
+                if (n <= 1) return { weights: [1], cr: 0 };
+                const matrix = Array(n).fill().map(() => Array(n).fill(1));
+                for (let i = 0; i < n; i++) {
+                    for (let j = i + 1; j < n; j++) {
+                        const val = comparisons[i + "-" + j] || 0;
+                        const scale = val < 0 ? Math.abs(val) + 1 : 1 / (val + 1);
+                        matrix[i][j] = scale;
+                        matrix[j][i] = 1 / scale;
                     }
-                    const geoMeans = matrix.map(row => Math.pow(row.reduce((a, b) => a * b, 1), 1 / n));
-                    const sumGeoMeans = geoMeans.reduce((a, b) => a + b, 0);
-                    const weights = geoMeans.map(v => v / (sumGeoMeans || 1));
-                    let lambdaMax = 0;
-                    for (let i = 0; i < n; i++) {
-                        let rowSum = 0;
-                        for (let j = 0; j < n; j++) rowSum += matrix[i][j] * weights[j];
-                        lambdaMax += rowSum / (weights[i] || 1);
-                    }
-                    lambdaMax /= n;
-                    const ci = (lambdaMax - n) / (n - 1);
-                    const cr = n > 2 ? ci / RI[n - 1] : 0;
-                    return { weights, cr };
-                } catch (err) {
-                    logger("Math Error: " + err.message);
-                    return { weights: items.map(() => 1/items.length), cr: 0 };
                 }
+                const geoMeans = matrix.map(row => Math.pow(row.reduce((a, b) => a * b, 1), 1 / n));
+                const sumGeoMeans = geoMeans.reduce((a, b) => a + b, 0);
+                const weights = geoMeans.map(v => v / (sumGeoMeans || 1));
+                let lambdaMax = 0;
+                for (let i = 0; i < n; i++) {
+                    let rowSum = 0;
+                    for (let j = 0; j < n; j++) rowSum += matrix[i][j] * weights[j];
+                    lambdaMax += rowSum / (weights[i] || 1);
+                }
+                lambdaMax /= n;
+                const ci = n > 1 ? (lambdaMax - n) / (n - 1) : 0;
+                const cr = n > 2 ? ci / RI_TABLE[n - 1] : 0;
+                return { weights, cr };
             };
 
             const results = useMemo(() => {
                 if (step !== 5) return null;
-                logger("Calculating Final Results...");
                 const critRes = calculateAHP(data.criteria, data.criteriaComparisons);
                 const altRes = data.criteria.map((_, idx) => calculateAHP(data.alternatives, data.alternativeComparisons[idx] || {}));
                 const finalScores = data.alternatives.map((_, altIdx) => 
@@ -140,36 +117,54 @@
                 return { criteriaWeights: critRes.weights, cr: critRes.cr, finalScores };
             }, [data, step]);
 
+            // --- 공유 및 UI 가이드 ---
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'report.png', { type: 'image/png' });
-                        const shareText = `[파란랩] ${data.goal} 분석 결과\nhttps://paranlab.com`;
+                        const file = new File([blob], 'paranlab-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 의사결정 리포트]\n목표: ${data.goal}\n상세 분석 보기: https://paranlab.com`;
+                        navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: shareText });
+                            await navigator.share({ files: [file], title: '파란랩 분석 결과', text: shareText });
                         } else {
-                            const link = document.createElement('a'); link.download = 'report.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a'); link.download = 'paranlab-report.png'; link.href = canvas.toDataURL(); link.click();
+                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
-            const resetAll = () => { if (confirm("초기화하시겠습니까?")) { localStorage.removeItem('paranlab-ahp'); location.reload(); } };
+            const getComparisonText = (val, itemA, itemB) => {
+                const absVal = Math.abs(val);
+                if (absVal === 0) return <span>두 요소가 <strong className="text-slate-900">동등하게 중요</strong>합니다.</span>;
+                const intensity = absVal <= 2 ? "약간 더" : absVal <= 4 ? "확실히 더" : absVal <= 6 ? "매우 중요하게" : "절대적으로";
+                const winner = val < 0 ? itemA : itemB;
+                const loser = val < 0 ? itemB : itemA;
+                return (
+                    <span className="text-xl md:text-2xl">
+                        <strong className={val < 0 ? "text-blue-600" : "text-red-600"}>[{winner}]</strong>이(가) 
+                        <span className="mx-2 text-slate-400 text-lg">[{loser}]보다</span> 
+                        <strong className="underline decoration-4 underline-offset-8">{intensity} 중요</strong>합니다.
+                    </span>
+                );
+            };
+
+            const resetAll = () => { if (confirm("모든 데이터를 초기화하시겠습니까?")) { localStorage.removeItem('paranlab-ahp'); location.reload(); } };
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                <main className="max-w-5xl mx-auto py-12 px-4">
                     {/* 상단 컨트롤 바 */}
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-8 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm hover:bg-blue-500 transition-all shadow-lg">✏️ 데이터 수정하기</button>
+                            <button onClick={resetAll} className="px-8 py-4 bg-red-600 text-white rounded-2xl font-black text-sm hover:bg-red-500 transition-all shadow-lg">🔄 새로운 분석 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase opacity-50">AHP Master v6.5</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50 hidden md:block">AHP Standard v7.0</div>
                     </div>
 
                     {/* 단계 네비게이션 */}
@@ -184,74 +179,94 @@
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
                         {step === 1 && (
-                            <div className="space-y-8">
+                            <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-3xl font-black text-slate-900">1. 의사결정 목표와 평가 기준</h2>
-                                <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-2 border-transparent focus:border-blue-500 outline-none text-2xl font-black shadow-inner" placeholder="의사결정 목표 입력" />
+                                <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-2 border-transparent focus:border-blue-500 outline-none text-2xl font-black shadow-inner" placeholder="예: 최적의 창업지 선정" />
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                     {data.criteria.map((c, i) => (
                                         <div key={i} className="flex gap-2">
                                             <input type="text" value={c} onChange={e => { const newC = [...data.criteria]; newC[i] = e.target.value; setData({...data, criteria: newC}); }} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold border border-slate-100" placeholder={`기준 ${i+1}`} />
-                                            <button onClick={() => setData({...data, criteria: data.criteria.filter((_, idx) => idx !== i)})} className="text-red-400 font-black">X</button>
+                                            <button onClick={() => setData({...data, criteria: data.criteria.filter((_, idx) => idx !== i)})} className="text-red-400 font-black px-2">X</button>
                                         </div>
                                     ))}
                                 </div>
                                 <button onClick={() => setData({...data, criteria: [...data.criteria, ""]})} className="text-blue-600 font-black text-sm">+ 기준 추가</button>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl mt-10">다음 단계</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl mt-10">다음 단계로</button>
                             </div>
                         )}
 
                         {step === 2 && (
-                            <div className="space-y-6">
-                                <h2 className="text-3xl font-black text-slate-900">2. 비교할 대안 입력</h2>
+                            <div className="animate-in fade-in space-y-6">
+                                <h2 className="text-3xl font-black text-slate-900">2. 비교할 대안(선택지) 입력</h2>
                                 {data.alternatives.map((a, i) => (
                                     <div key={i} className="flex gap-2">
                                         <input type="text" value={a} onChange={e => { const newA = [...data.alternatives]; newA[i] = e.target.value; setData({...data, alternatives: newA}); }} className="flex-1 p-6 bg-slate-50 rounded-3xl border-none font-black text-xl shadow-inner" placeholder={`대안 ${i+1}`} />
-                                        <button onClick={() => setData({...data, alternatives: data.alternatives.filter((_, idx) => idx !== i)})} className="text-red-400 font-black">X</button>
+                                        <button onClick={() => setData({...data, alternatives: data.alternatives.filter((_, idx) => idx !== i)})} className="text-red-400 font-black px-2">X</button>
                                     </div>
                                 ))}
                                 <button onClick={() => setData({...data, alternatives: [...data.alternatives, ""]})} className="text-blue-600 font-black text-sm">+ 대안 추가</button>
                                 <div className="flex gap-6 mt-12">
                                     <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">다음 단계</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">다음 단계로</button>
                                 </div>
                             </div>
                         )}
 
                         {step === 3 && (
-                            <div className="space-y-16">
-                                <h2 className="text-3xl font-black text-slate-900">3. 평가 기준 간 중요도 비교</h2>
+                            <div className="animate-in fade-in space-y-16">
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-black text-slate-900">3. 평가 기준 간 중요도 비교</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">슬라이더를 움직여 더 중요한 쪽을 선택하세요.</p>
+                                </div>
                                 {data.criteria.map((_, i) => data.criteria.map((_, j) => {
                                     if (i >= j) return null;
                                     const pairKey = i + "-" + j;
                                     const val = data.criteriaComparisons[pairKey] || 0;
                                     return (
-                                        <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <span className={`text-2xl font-black ${val < 0 ? 'text-blue-600' : 'text-slate-300'}`}>{data.criteria[i]}</span>
-                                                <span className={`text-2xl font-black ${val > 0 ? 'text-red-600' : 'text-slate-300'}`}>{data.criteria[j]}</span>
+                                        <div key={pairKey} className="p-10 bg-slate-50 rounded-[4rem] border border-slate-100 relative shadow-inner">
+                                            <div className="text-center mb-12 p-8 bg-white rounded-[2.5rem] shadow-sm border-2 border-blue-50 min-h-[120px] flex items-center justify-center">
+                                                <p className="font-black text-slate-800 leading-tight">{getComparisonText(val, data.criteria[i], data.criteria[j])}</p>
+                                            </div>
+                                            <div className="flex justify-between items-center mb-8 px-6">
+                                                <span className={`text-3xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
+                                                <span className={`text-3xl font-black transition-all duration-300 ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
                                             </div>
                                             <input type="range" min="-8" max="8" step="1" value={val} onChange={e => setData({...data, criteriaComparisons: {...data.criteriaComparisons, [pairKey]: parseInt(e.target.value)}})} />
+                                            <div className="flex justify-between text-[10px] mt-6 font-black text-slate-400 uppercase tracking-widest">
+                                                <span>{data.criteria[i]} 절대 우세</span>
+                                                <span>동등함</span>
+                                                <span>{data.criteria[j]} 절대 우세</span>
+                                            </div>
                                         </div>
                                     );
                                 }))}
-                                <button onClick={() => setStep(4)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">다음 단계</button>
+                                <div className="flex gap-6">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-2xl">다음 단계로</button>
+                                </div>
                             </div>
                         )}
 
                         {step === 4 && (
-                            <div className="space-y-16">
-                                <h2 className="text-3xl font-black text-slate-900">4. 대안 간 상대적 우위 평가</h2>
-                                <p className="text-blue-600 font-black text-xl">기준: [{data.criteria[subStep]}]</p>
+                            <div className="animate-in fade-in space-y-16">
+                                <div className="text-center">
+                                    <h2 className="text-3xl font-black text-slate-900">4. 대안 간 상대적 우위 평가</h2>
+                                    <p className="text-blue-600 mt-2 font-black text-2xl underline decoration-4 underline-offset-8">기준: {data.criteria[subStep]}</p>
+                                </div>
                                 {data.alternatives.map((_, i) => data.alternatives.map((_, j) => {
                                     if (i >= j) return null;
                                     const pairKey = i + "-" + j;
                                     const val = (data.alternativeComparisons[subStep] || {})[pairKey] || 0;
                                     return (
-                                        <div key={pairKey} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
-                                            <div className="flex justify-between items-center mb-6">
-                                                <span className={`text-2xl font-black ${val < 0 ? 'text-blue-600' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
-                                                <span className={`text-2xl font-black ${val > 0 ? 'text-red-600' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
+                                        <div key={pairKey} className="p-10 bg-slate-50 rounded-[4rem] border border-slate-100 relative shadow-inner">
+                                            <div className="text-center mb-12 p-8 bg-white rounded-[2.5rem] shadow-sm border-2 border-blue-50 min-h-[120px] flex items-center justify-center">
+                                                <p className="font-black text-slate-800 leading-tight">{getComparisonText(val, data.alternatives[i], data.alternatives[j])}</p>
+                                            </div>
+                                            <div className="flex justify-between items-center mb-8 px-6">
+                                                <span className={`text-3xl font-black transition-all duration-300 ${val < 0 ? 'text-blue-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
+                                                <span className={`text-3xl font-black transition-all duration-300 ${val > 0 ? 'text-red-600 scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
                                             </div>
                                             <input type="range" min="-8" max="8" step="1" value={val} onChange={e => {
                                                 const newAltComp = {...data.alternativeComparisons};
@@ -261,9 +276,12 @@
                                         </div>
                                     );
                                 }))}
-                                <button onClick={() => subStep < data.criteria.length - 1 ? setSubStep(subStep + 1) : setStep(5)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">
-                                    {subStep < data.criteria.length - 1 ? "다음 기준 비교" : "결과 확인"}
-                                </button>
+                                <div className="flex gap-6">
+                                    <button onClick={() => subStep > 0 ? setSubStep(subStep - 1) : setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => subStep < data.criteria.length - 1 ? setSubStep(subStep + 1) : setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-2xl">
+                                        {subStep < data.criteria.length - 1 ? "다음 기준 비교" : "최종 결과 확인"}
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -274,28 +292,35 @@
                                     <h2 className="text-4xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight">{data.goal || "의사결정 분석 결과"}</h2>
                                 </div>
                                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 mb-16">
-                                    <div className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
+                                    <div className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 shadow-inner">
                                         <h3 className="font-black text-slate-800 mb-8 text-lg">📊 기준별 가중치</h3>
                                         {data.criteria.map((c, i) => (
                                             <div key={i} className="mb-8">
                                                 <div className="flex justify-between text-sm font-black mb-2"><span>{c}</span><span>{((results.criteriaWeights[i] || 0) * 100).toFixed(1)}%</span></div>
-                                                <div className="h-2 bg-white rounded-full overflow-hidden"><div className="h-full bg-blue-600" style={{ width: ((results.criteriaWeights[i] || 0) * 100) + "%" }}></div></div>
+                                                <div className="h-3 bg-white rounded-full overflow-hidden"><div className="h-full bg-blue-600" style={{ width: ((results.criteriaWeights[i] || 0) * 100) + "%" }}></div></div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-2xl">
-                                        <h3 className="font-black mb-10 text-2xl">🏆 최종 우선순위</h3>
+                                    <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-2xl relative overflow-hidden">
+                                        <div className="absolute top-0 right-0 p-8 opacity-10 text-8xl font-black">🏆</div>
+                                        <h3 className="font-black mb-10 text-2xl">최종 우선순위</h3>
                                         {data.alternatives.map((alt, i) => (
                                             <div key={i} className="mb-10">
                                                 <div className="flex justify-between font-black mb-3 text-xl"><span>{alt}</span><span>{((results.finalScores[i] || 0) * 100).toFixed(1)}%</span></div>
-                                                <div className="h-6 bg-white/20 rounded-full overflow-hidden"><div className="h-full bg-white" style={{ width: ((results.finalScores[i] || 0) * 100) + "%" }}></div></div>
+                                                <div className="h-6 bg-white/20 rounded-full overflow-hidden p-1.5"><div className="h-full bg-white rounded-full shadow-lg" style={{ width: ((results.finalScores[i] || 0) * 100) + "%" }}></div></div>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="p-10 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100 flex justify-between items-center">
-                                    <p className="font-black text-emerald-800">Consistency Ratio (CR): {results.cr.toFixed(3)}</p>
-                                    <p className="text-xs text-emerald-600 font-bold">{results.cr < 0.1 ? "신뢰도 높음" : "재검토 권장"}</p>
+                                <div className="p-10 bg-emerald-50 rounded-[2.5rem] border-2 border-emerald-100 flex flex-col md:flex-row justify-between items-center gap-6">
+                                    <div className="text-center md:text-left">
+                                        <p className="text-[10px] font-black text-emerald-600 uppercase tracking-widest mb-1">Consistency Ratio (CR)</p>
+                                        <p className="text-3xl font-black text-emerald-800">{results.cr.toFixed(3)} <span className="text-sm font-bold ml-2">({results.cr < 0.1 ? "신뢰도 높음" : "재검토 권장"})</span></p>
+                                    </div>
+                                    <div className="text-center md:text-right text-xs text-emerald-600 font-bold leading-relaxed">Saaty의 일관성 기준(CR < 0.1)을 바탕으로<br/>본 분석의 논리적 타당성을 검증하였습니다.</div>
+                                </div>
+                                <div className="mt-10 pt-6 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
@@ -303,10 +328,12 @@
 
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">💬 이미지+링크 공유</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
+                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
+                            </button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
@@ -315,7 +342,7 @@
                             <h3 className="text-4xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process)의 학술적 토대</h3>
                             <p className="text-xl text-slate-600 leading-relaxed mb-12">본 도구는 펜실베이니아 대학교 와튼스쿨의 **Thomas L. Saaty** 교수가 창안한 계층 분석 과정을 충실히 따릅니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌</h4>
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Saaty, T. L. (1980). *The Analytic Hierarchy Process*. McGraw-Hill.</li>
                                     <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". *European Journal of Operational Research*.</li>
@@ -327,10 +354,8 @@
             );
         }
 
-        logger("Babel Compilation Finished. Mounting React...");
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(<AhpApp />);
-        logger("React Render Called.");
     </script>
 </body>
 </html>
