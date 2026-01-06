@@ -11,34 +11,23 @@
 </head>
 <body class="bg-slate-50">
     <div id="header-root"></div>
-
     <main class="container mx-auto px-6 py-16">
-        <!-- 상단 광고 -->
         <div class="adsbygoogle-placeholder mb-16 flex justify-center"></div>
-
         <section class="text-center mb-20">
             <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tighter">의사결정에도 <span class="text-blue-600">과학</span>이 필요합니다.</h1>
             <p class="text-xl text-slate-500 font-bold">31가지 경영학 도구와 10가지 실전 시나리오로 당신의 문제를 해결하세요.</p>
         </section>
-
-        <!-- 시나리오 섹션 -->
         <section class="mb-24">
             <h2 class="text-2xl font-black mb-10 flex items-center gap-3">🚀 실전 시나리오 가이드</h2>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-grid"></div>
         </section>
-
-        <!-- 중간 광고 -->
         <div class="adsbygoogle-placeholder mb-24 flex justify-center"></div>
-
-        <!-- 도구 섹션 -->
         <section>
             <h2 class="text-2xl font-black mb-10 flex items-center gap-3">🛠️ 모든 의사결정 도구</h2>
             <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="tool-grid"></div>
         </section>
     </main>
-
     <div id="footer-root"></div>
-
     <script>
         window.addEventListener('load', () => {
             const scenarioGrid = document.getElementById('scenario-grid');
@@ -49,7 +38,6 @@
                     <p class="text-slate-400 mt-3 line-clamp-2 font-medium">${s.story}</p>
                 </a>
             `).join('');
-
             const toolGrid = document.getElementById('tool-grid');
             toolGrid.innerHTML = ParanLabCore.toolsList.map(t => `
                 <a href="${t.href}" class="bg-white p-6 rounded-2xl border border-slate-100 hover:border-blue-600 hover:shadow-md transition-all text-center group">
