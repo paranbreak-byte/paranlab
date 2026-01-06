@@ -3,22 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PMI 평가 도구 | 아이디어의 가치 판단 | 파란랩(Paran Lab)</title>
+    
+    <!-- [SEO 표준 메타 태그] -->
+    <title>PMI 평가 도구 | 아이디어의 장단점과 흥미로운 점 분석 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="에드워드 드 보노의 PMI 기법으로 아이디어를 객관적으로 평가하세요. Plus, Minus, Interesting 세 가지 관점으로 최선의 결정을 돕습니다.">
+    <meta name="keywords" content="PMI기법, 아이디어평가, 의사결정방법론, 창의적사고, 기획서작성, 파란랩">
+    <link rel="canonical" href="https://paranlab.com/pmi/">
+    
+    <!-- [오픈 그래프] -->
+    <meta property="og:title" content="PMI 평가 도구 - 파란랩">
+    <meta property="og:description" content="감정을 배제하고 아이디어의 진짜 가치를 발견하는 PMI 분석 엔진">
+    <meta property="og:url" content="https://paranlab.com/pmi/">
+    <meta property="og:type" content="website">
+
+    <!-- [구조화 데이터] 구글 검색 결과 강화 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 PMI 분석 엔진",
+      "applicationCategory": "BusinessApplication",
+      "operatingSystem": "All",
+      "description": "에드워드 드 보노의 PMI 이론을 바탕으로 한 아이디어 평가 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-500 font-bold">PMI 분석 엔진 가동 중...</p>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
@@ -28,8 +63,8 @@
             const [step, setStep] = useState(1); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
-                subject: "",
-                plus: "", minus: "", interesting: ""
+                subject: "", plus: "", minus: "", interesting: "",
+                scenarioContext: null
             });
 
             useEffect(() => {
@@ -48,14 +83,16 @@
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'pmi-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 PMI 리포트]\n주제: ${data.subject}\n\n상세 보기: https://paranlab.com`;
+                        const shareText = `[파란랩 PMI 리포트]\n주제: ${data.subject}\nhttps://paranlab.com`;
+                        navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             await navigator.share({ files: [file], title: '파란랩 PMI 분석', text: shareText });
                         } else {
                             const link = document.createElement('a'); link.download = 'pmi-report.png'; link.href = canvas.toDataURL(); link.click();
+                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
@@ -67,10 +104,12 @@
                     <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
                         <div className="flex gap-4">
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-pmi'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs opacity-50 uppercase">PMI Evaluation Engine v6.0</div>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">PMI Engine v7.0</div>
                     </div>
+
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {step === 1 && (
@@ -97,9 +136,17 @@
 
                         {step === 2 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Idea Evaluation Report</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "아이디어 분석 결과"}</h2>
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Idea Evaluation Report</span>
+                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "아이디어 분석 결과"}</h2>
+                                    </div>
+                                    {data.scenarioContext && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                                     <div className="p-10 bg-emerald-50 rounded-[3rem] border border-emerald-100">
@@ -124,16 +171,15 @@
 
                     {step === 2 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [보강] 학술적 근거 섹션 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">PMI 기법: 감정을 배제한 객관적 평가</h3>
@@ -153,7 +199,7 @@
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• De Bono, E. (1992). *Serious Creativity: Using the Power of Lateral Thinking to Create New Ideas*. HarperBusiness.</li>
+                                    <li>• De Bono, E. (1992). *Serious Creativity*. HarperBusiness.</li>
                                     <li>• De Bono, E. (1982). *De Bono's Thinking Course*. BBC Books.</li>
                                 </ul>
                             </div>
