@@ -124,14 +124,18 @@
             };
 
             const results = useMemo(() => {
-                if (step !== 5) return null;
-                const critRes = calculateAHP(data.criteria, data.criteriaComparisons);
-                const altRes = data.criteria.map((_, idx) => calculateAHP(data.alternatives, data.alternativeComparisons[idx] || {}));
-                const finalScores = data.alternatives.map((_, altIdx) => 
-                    altRes.reduce((sum, res, critIdx) => sum + (res.weights[altIdx] * critRes.weights[critIdx]), 0)
-                );
-                return { criteriaWeights: critRes.weights, cr: critRes.cr, finalScores };
-            }, [data, step]);
+    if (step !== 5) return null;
+    try {
+        // 기존 계산 코드 그대로
+        const critRes = calculateAHP(data.criteria, data.criteriaComparisons);
+        if (!critRes || critRes.cr === Infinity || isNaN(critRes.cr)) return null;  // 추가: 오류 시 null
+        // ... 나머지
+        return { ... };
+    } catch (err) {
+        console.error("Calculation Error", err);
+        return null;  // 오류 시 결과 안 보여주고 안전하게
+    }
+}, [data, step]);
 
             // --- 공유 및 가이드 ---
             const handleShare = async () => {
