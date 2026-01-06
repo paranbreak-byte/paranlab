@@ -3,77 +3,214 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>안소프 성장 전략 매트릭스 | 비즈니스 확장 경로 진단 | 파란랩</title>
-    <meta name="description" content="사업을 어떻게 키울지 고민이신가요? 안소프 매트릭스를 통해 시장 침투, 제품 개발, 시장 개척, 다각화 중 당신에게 가장 적합한 성장 전략을 찾아보세요.">
+    
+    <!-- [SEO 표준] -->
+    <title>안소프 매트릭스 | 제품-시장 성장 전략 분석 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="이고르 안소프의 성장 벡터 모델로 기업의 확장 전략을 수립하세요. 시장 침투, 제품 개발, 시장 개척, 다각화 전략을 시각화합니다.">
+    <meta name="keywords" content="안소프매트릭스, AnsoffMatrix, 성장전략, 시장확장, 제품개발, 경영전략도구, 파란랩">
+    <link rel="canonical" href="https://paranlab.com/ansoff/">
+    
+    <!-- [구조화 데이터] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 안소프 매트릭스 엔진",
+      "applicationCategory": "BusinessApplication",
+      "description": "제품과 시장의 신규성을 기준으로 기업의 성장 방향을 결정하는 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+    </style>
 </head>
-<body class="bg-slate-50">
+<body>
+    <div id="header-root"></div>
     <div id="root">
-        <div id="ansoff-app" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">안소프 매트릭스(Ansoff Matrix)란?</h2>
-            <p><strong>안소프 매트릭스</strong>는 기업이 어떤 방향으로 성장해야 할지 결정할 때 사용하는 전략 기획 도구입니다. '제품'과 '시장'이라는 두 가지 축을 기준으로 4가지 성장 경로를 제시합니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>시장 침투:</strong> 기존 시장에서 기존 제품의 점유율을 높이는 가장 안전한 전략</li>
-                <li><strong>제품 개발:</strong> 기존 고객에게 새로운 제품을 선보이는 전략</li>
-                <li><strong>시장 개척:</strong> 기존 제품을 새로운 시장이나 고객층에 판매하는 전략</li>
-                <li><strong>다각화:</strong> 새로운 시장에서 새로운 제품으로 도전하는 가장 위험하지만 잠재력이 큰 전략</li>
-            </ul>
-        </section>
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <p class="text-slate-500 font-bold">안소프 엔진 가동 중...</p>
+            </div>
+        </div>
     </div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
+
         function AnsoffApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-ansoff') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [ideas, setIdeas] = useState(saved.ideas || [{ id: 1, text: "", type: "penetration" }]);
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-ansoff', JSON.stringify({ step, subject, ideas })); }, [step, subject, ideas]);
-            const quadrants = useMemo(() => ({
-                penetration: ideas.filter(i => i.type === "penetration"),
-                marketDev: ideas.filter(i => i.type === "marketDev"),
-                productDev: ideas.filter(i => i.type === "productDev"),
-                diversification: ideas.filter(i => i.type === "diversification")
-            }), [ideas]);
+            const [step, setStep] = useState(1); 
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState({
+                subject: "",
+                strategies: { penetration: "", marketDev: "", productDev: "", diversification: "" },
+                scenarioContext: null
+            });
+
+            useEffect(() => {
+                try {
+                    const tossed = localStorage.getItem('paranlab-ansoff');
+                    if (tossed) {
+                        const parsed = JSON.parse(tossed);
+                        setData(prev => ({ ...prev, ...parsed }));
+                        setStep(2);
+                    }
+                } catch(e) { console.error(e); }
+            }, []);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'ansoff-report.png', { type: 'image/png' });
+                        const shareText = `[파란랩 안소프 매트릭스 리포트]\n성장 전략: ${data.subject}\nhttps://paranlab.com`;
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], title: '파란랩 안소프 분석', text: shareText });
+                        } else {
+                            const link = document.createElement('a'); link.download = 'ansoff-report.png'; link.href = canvas.toDataURL(); link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 비즈니스를 키워볼까요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 나의 온라인 쇼핑몰 성장 전략" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">전략 구상 시작</button>
+                <main className="max-w-5xl mx-auto py-12 px-4">
+                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-ansoff'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-8">
-                            <div className="bg-white p-8 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-6">아이디어 분류</h2>
-                                {ideas.map(idea => (
-                                    <div key={idea.id} className="flex flex-col md:flex-row gap-4 mb-4 p-4 bg-slate-50 rounded-2xl">
-                                        <input value={idea.text} onChange={(e)=>setIdeas(ideas.map(i=>i.id===idea.id?{...i, text:e.target.value}:i))} placeholder="아이디어 내용" className="flex-1 p-3 rounded-xl border outline-none font-bold" />
-                                        <select value={idea.type} onChange={(e)=>setIdeas(ideas.map(i=>i.id===idea.id?{...i, type:e.target.value}:i))} className="p-3 rounded-xl border font-bold text-sm">
-                                            <option value="penetration">시장 침투</option><option value="productDev">제품 개발</option><option value="marketDev">시장 개척</option><option value="diversification">다각화</option>
-                                        </select>
-                                        <button onClick={()=>setIdeas(ideas.filter(i=>i.id!==idea.id))} className="text-rose-500 font-black px-2">✕</button>
+                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Ansoff Engine v7.0</div>
+                    </div>
+
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <h2 className="text-3xl font-black text-slate-900 text-center">기업의 성장 방향을 결정하세요.</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석할 비즈니스 주제 입력" />
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100">
+                                        <h3 className="font-black text-blue-700 mb-2">시장 침투 (Market Penetration)</h3>
+                                        <p className="text-xs text-blue-400 mb-4">기존 시장에서 기존 제품의 점유율을 높이는 방법은?</p>
+                                        <textarea value={data.strategies.penetration} onChange={e => setData({...data, strategies: {...data.strategies, penetration: e.target.value}})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" />
                                     </div>
-                                ))}
-                                <button onClick={()=>setIdeas([...ideas, {id:Date.now(), text:"", type:"penetration"}])} className="text-blue-600 font-black">+ 아이디어 추가</button>
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
+                                        <h3 className="font-black text-emerald-700 mb-2">제품 개발 (Product Development)</h3>
+                                        <p className="text-xs text-emerald-400 mb-4">기존 시장에 새로운 제품을 출시한다면?</p>
+                                        <textarea value={data.strategies.productDev} onChange={e => setData({...data, strategies: {...data.strategies, productDev: e.target.value}})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" />
+                                    </div>
+                                    <div className="p-8 bg-amber-50 rounded-[2.5rem] border border-amber-100">
+                                        <h3 className="font-black text-amber-700 mb-2">시장 개척 (Market Development)</h3>
+                                        <p className="text-xs text-amber-400 mb-4">기존 제품으로 새로운 시장(지역, 타겟)에 진출한다면?</p>
+                                        <textarea value={data.strategies.marketDev} onChange={e => setData({...data, strategies: {...data.strategies, marketDev: e.target.value}})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" />
+                                    </div>
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100">
+                                        <h3 className="font-black text-rose-700 mb-2">다각화 (Diversification)</h3>
+                                        <p className="text-xs text-rose-400 mb-4">새로운 시장에 새로운 제품으로 도전한다면?</p>
+                                        <textarea value={data.strategies.diversification} onChange={e => setData({...data, strategies: {...data.strategies, diversification: e.target.value}})} className="w-full h-24 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" />
+                                    </div>
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">성장 매트릭스 확인</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700 mb-2">시장 침투</h3><ul className="text-sm space-y-1">{quadrants.penetration.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
-                                <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700 mb-2">제품 개발</h3><ul className="text-sm space-y-1">{quadrants.productDev.map(i=><li key={i.id}>• {i.text}</li>)}</ul></div>
+                        )}
+
+                        {step === 2 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="flex justify-between items-start mb-16">
+                                    <div>
+                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Product-Market Growth Matrix</span>
+                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "성장 전략 분석 결과"}</h2>
+                                    </div>
+                                    {data.scenarioContext && (
+                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
+                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
+                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
+                                        </div>
+                                    )}
+                                </div>
+                                <div className="grid grid-cols-2 gap-4 mb-12">
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100">
+                                        <h3 className="font-black text-blue-800 mb-4 uppercase text-xs tracking-widest">Market Penetration</h3>
+                                        <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.penetration || "기록 없음"}</p>
+                                    </div>
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
+                                        <h3 className="font-black text-emerald-800 mb-4 uppercase text-xs tracking-widest">Product Development</h3>
+                                        <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.productDev || "기록 없음"}</p>
+                                    </div>
+                                    <div className="p-8 bg-amber-50 rounded-[2.5rem] border border-amber-100">
+                                        <h3 className="font-black text-amber-800 mb-4 uppercase text-xs tracking-widest">Market Development</h3>
+                                        <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.marketDev || "기록 없음"}</p>
+                                    </div>
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100">
+                                        <h3 className="font-black text-rose-800 mb-4 uppercase text-xs tracking-widest">Diversification</h3>
+                                        <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.diversification || "기록 없음"}</p>
+                                    </div>
+                                </div>
+                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-6 bg-slate-100 text-slate-400 rounded-[2rem] font-black text-xl">처음부터 다시</button>
+                        )}
+                    </div>
+
+                    {step === 2 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">💬 이미지+링크 공유</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">안소프 매트릭스: 성장의 방향을 결정하는 지도</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
+                                안소프 매트릭스(Ansoff Matrix)는 1957년 '전략 경영의 아버지'라 불리는 **이고르 안소프(Igor Ansoff)**가 제안한 전략 수립 도구입니다. 제품과 시장의 신규성을 기준으로 기업이 나아갈 4가지 성장 경로를 제시하여, 리스크와 기회를 동시에 분석하게 돕습니다.
+                            </p>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">성장 벡터 (Growth Vector)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">안소프는 기업이 단순히 매출을 올리는 것이 아니라, 어떤 '방향'으로 에너지를 집중할 것인지 결정해야 한다고 강조했습니다. 시장 침투에서 다각화로 갈수록 리스크는 커지지만 잠재적 보상 또한 비약적으로 상승합니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">전략적 의사결정의 기초</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">이 도구는 현재 비즈니스 포트폴리오를 진단하고, 미래의 먹거리를 어디서 찾을 것인지에 대한 논리적 근거를 제공합니다. 특히 스타트업의 스케일업 단계에서 필수적으로 활용됩니다.</p>
+                                </div>
+                            </div>
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Ansoff, H. I. (1957). "Strategies for Diversification". *Harvard Business Review*.</li>
+                                    <li>• Ansoff, H. I. (1965). *Corporate Strategy: An Analytic Approach to Business Policy for Growth and Expansion*. McGraw-Hill.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('ansoff-app')).render(<AnsoffApp />);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<AnsoffApp />);
     </script>
 </body>
 </html>
