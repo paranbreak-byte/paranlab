@@ -12,7 +12,7 @@
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         .tree-node { position: relative; padding-left: 2.5rem; border-left: 2px solid #e2e8f0; margin-left: 1.5rem; }
         .tree-node::before { content: ""; position: absolute; left: 0; top: 1.5rem; width: 1.5rem; height: 2px; background-color: #e2e8f0; }
@@ -20,7 +20,14 @@
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h2 class="text-2xl font-black text-slate-800">로직 트리 엔진 초기화 중...</h2>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
@@ -76,7 +83,7 @@
                             <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
                             <button onClick={() => {localStorage.removeItem('paranlab-logic-tree'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs opacity-50 uppercase">Logic Tree Engine v6.0</div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">Logic Tree Engine v6.5</div>
                     </div>
 
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
@@ -170,7 +177,7 @@
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
                             <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
                             <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">
+                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
                                 {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
                             </button>
                             <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
