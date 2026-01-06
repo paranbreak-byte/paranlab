@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>5 Whys 분석 도구 | 근본 원인 추적 엔진 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="도요타의 5 Whys 기법으로 문제의 표면이 아닌 근본 원인을 찾아내세요. 박 사장의 매출 급감 시나리오와 함께하는 과학적 문제 해결 도구입니다.">
     <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -13,22 +12,28 @@
     <script src="/core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         .why-arrow { width: 2px; height: 30px; background: linear-gradient(to bottom, #2563eb, #e2e8f0); margin: 0 auto; }
-        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <div class="flex items-center justify-center min-h-[70vh]">
+            <div class="text-center p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
+                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
+                <h2 class="text-2xl font-black text-slate-800">5 Whys 엔진 초기화 중...</h2>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
 
         function FiveWhysApp() {
-            const [step, setStep] = useState(1); // 1:문제정의, 2:추적, 3:결과
+            const [step, setStep] = useState(1);
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState({
                 problem: "", whys: ["", "", "", "", ""], rootCause: "", action: "",
@@ -57,10 +62,10 @@
                         const shareText = `[파란랩 5 Whys 리포트]\n문제: ${data.problem}\n근본원인: ${data.rootCause}\n\n상세 보기: https://paranlab.com`;
                         navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 5 Whys 분석', text: shareText });
+                            await navigator.share({ files: [file], title: '파란랩 분석 결과', text: shareText });
                         } else {
                             const link = document.createElement('a'); link.download = '5whys-report.png'; link.href = canvas.toDataURL(); link.click();
-                            alert('이미지가 저장되었습니다.');
+                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
@@ -73,10 +78,10 @@
                 <main className="max-w-5xl mx-auto py-12 px-4">
                     <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
+                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">5 Whys Engine v6.0</div>
+                        <div className="text-white font-bold text-xs opacity-50 uppercase">5 Whys Engine v6.5</div>
                     </div>
 
                     <nav className="flex justify-center gap-12 mb-12 no-print border-b-2 border-slate-200">
