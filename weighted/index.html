@@ -6,25 +6,29 @@
     
     <!-- [SEO 표준] -->
     <title>가중치 결정 매트릭스 | 다기준 의사결정 및 대안 평가 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="여러 대안 중 최선의 선택을 내리세요. 각 기준에 가중치를 부여하고 점수를 합산하는 가중치 결정 매트릭스(Weighted Scoring Matrix)를 제공합니다.">
-    <meta name="keywords" content="가중치결정, 의사결정매트릭스, 대안평가, 우선순위결정, 합리적선택, 파란랩">
+    <meta name="description" content="여러 대안 중 최선의 선택을 내리세요. 각 기준에 가중치를 부여하고 점수를 합산하는 가중치 결정 매트릭스(Weighted Scoring Matrix)를 통해 합리적인 의사결정을 내릴 수 있습니다.">
+    <meta name="keywords" content="가중치결정, 의사결정매트릭스, 대안평가, 우선순위결정, 합리적선택, 파란랩, MCDA, 다기준의사결정">
+    <meta property="og:title" content="파란랩 가중치 결정 엔진">
+    <meta property="og:description" content="복잡한 선택의 순간, 기준별 가중치로 정답을 계산하세요.">
+    <meta property="og:type" content="website">
     <link rel="canonical" href="https://paranlab.com/weighted/">
     
-    <!-- [구조화 데이터] -->
+    <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "파란랩 가중치 결정 엔진",
+      "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
-      "description": "다양한 평가 기준에 가중치를 부여하여 최적의 대안을 선정하는 도구",
+      "description": "다양한 평가 기준에 가중치를 부여하여 최적의 대안을 선정하는 의사결정 지원 도구",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
     }
     </script>
 
     <!-- 라이브러리 로드 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -32,54 +36,89 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
+        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .result-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .result-card:hover { transform: translateY(-5px); }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center">
-                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-500 font-bold">가중치 엔진 가동 중...</p>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        function WeightedApp() {
-            const [step, setStep] = useState(1); 
-            const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState({
-                alts: ["대안 A", "대안 B"],
-                crits: [{ text: "기준 1", w: 5 }, { text: "기준 2", w: 5 }],
-                scores: {},
-                scenarioContext: null
-            });
+        // [v7.7] 도구 전용 기본 샘플 (신규 사무실 입지 선정)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "신규 거점 사무실 입지 선정",
+            alts: ["강남역 인근", "판교 테크노밸리", "성수동 카페거리"],
+            crits: [
+                { id: 1, text: "임대료 및 유지비", w: 8 },
+                { id: 2, text: "인재 채용 용이성", w: 10 },
+                { id: 3, text: "주변 편의시설", w: 5 },
+                { id: 4, text: "교통 접근성", w: 9 }
+            ],
+            scores: {
+                "0-0": 4, "0-1": 10, "0-2": 9, "0-3": 10, // 강남
+                "1-0": 6, "1-1": 9, "1-2": 7, "1-3": 8,  // 판교
+                "2-0": 8, "2-1": 7, "2-2": 10, "2-3": 6  // 성수
+            },
+            isDefault: true
+        };
 
+        function WeightedApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(3); // 샘플 우선 노출
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-weighted');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        setData(prev => ({ ...prev, ...parsed }));
-                        setStep(3);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-weighted');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-weighted', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // 최종 결과 계산 로직
             const finalResults = useMemo(() => {
-                return data.alts.map((alt, aIdx) => {
-                    const total = data.crits.reduce((sum, crit, cIdx) => {
-                        const score = data.scores[`${aIdx}-${cIdx}`] || 5;
-                        return sum + (score * crit.w);
-                    }, 0);
-                    return { name: alt, score: total };
-                });
+                const alts = data.alts || [];
+                const crits = data.crits || [];
+                const scores = data.scores || {};
+                
+                return alts.map((alt, aIdx) => {
+                    let total = 0;
+                    let maxPossible = 0;
+                    crits.forEach((crit, cIdx) => {
+                        const score = scores[`${aIdx}-${cIdx}`] || 5;
+                        total += (score * crit.w);
+                        maxPossible += (10 * crit.w);
+                    });
+                    const percentage = maxPossible > 0 ? (total / maxPossible * 100).toFixed(1) : 0;
+                    return { name: alt, total, percentage: Number(percentage) };
+                }).sort((a, b) => b.total - a.total);
             }, [data]);
 
             const handleShare = async () => {
@@ -87,156 +126,270 @@
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'weighted-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 가중치 결정 리포트]\n최적 대안: ${finalResults.sort((a,b)=>b.score-a.score)[0].name}\nhttps://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 가중치 분석', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 가중치 결정 분석 결과: ${data.subject}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'weighted-report.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'weighted-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
+            if (!isLoaded) return null;
+
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-weighted'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Weighted Engine v7.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
+                            <p className="font-bold text-sm">PARAN LAB WEIGHTED v7.7</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['대안 및 기준 설정', '대안별 점수 매기기', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900">1. 비교할 대안과 평가 기준을 정하세요.</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-                                    <div className="space-y-4">
-                                        <h3 className="text-xl font-black text-blue-600">Alternatives (대안)</h3>
-                                        {data.alts.map((a, i) => (
-                                            <input key={i} type="text" value={a} onChange={e => {
-                                                const newAlts = [...data.alts]; newAlts[i] = e.target.value; setData({...data, alts: newAlts});
-                                            }} className="w-full p-4 bg-slate-50 rounded-2xl border-none font-bold" />
-                                        ))}
-                                        <button onClick={() => setData({...data, alts: [...data.alts, ""]})} className="text-blue-600 font-bold text-sm">+ 대안 추가</button>
-                                    </div>
-                                    <div className="space-y-4">
-                                        <h3 className="text-xl font-black text-emerald-600">Criteria & Weights (기준 및 가중치)</h3>
-                                        {data.crits.map((c, i) => (
-                                            <div key={i} className="p-4 bg-slate-50 rounded-2xl space-y-2">
-                                                <input type="text" value={c.text} onChange={e => {
-                                                    const newCrits = [...data.crits]; newCrits[i].text = e.target.value; setData({...data, crits: newCrits});
-                                                }} className="w-full bg-transparent border-none outline-none font-bold" />
-                                                <input type="range" min="1" max="10" value={c.w} onChange={e => {
-                                                    const newCrits = [...data.crits]; newCrits[i].w = parseInt(e.target.value); setData({...data, crits: newCrits});
-                                                }} />
-                                            </div>
-                                        ))}
-                                        <button onClick={() => setData({...data, crits: [...data.crits, {text: "", w: 5}]})} className="text-emerald-600 font-bold text-sm">+ 기준 추가</button>
-                                    </div>
-                                </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">다음: 대안별 점수 매기기</button>
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
                             </div>
                         )}
 
-                        {step === 2 && (
+                        {/* Step 1: Setup */}
+                        {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900">2. 각 대안이 기준을 얼마나 충족하나요?</h2>
+                                <div className="text-center">
+                                    <h2 className="text-4xl font-black text-slate-900">비교할 대안과 평가 기준을 정하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">각 기준의 중요도(가중치)를 1~10점으로 설정합니다.</p>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                    <div className="space-y-6">
+                                        <h3 className="text-2xl font-black text-blue-600 flex items-center gap-2">🏢 Alternatives (대안)</h3>
+                                        {data.alts.map((alt, i) => (
+                                            <div key={i} className="flex gap-2">
+                                                <input 
+                                                    type="text" value={alt} 
+                                                    onChange={e => { const n = [...data.alts]; n[i] = e.target.value; setData({...data, alts: n, isDefault: false}); }}
+                                                    className="flex-1 p-5 bg-slate-50 rounded-2xl font-bold border-none shadow-inner" 
+                                                    placeholder={`대안 ${i+1}`} 
+                                                />
+                                                {data.alts.length > 1 && <button onClick={() => setData({...data, alts: data.alts.filter((_, idx) => idx !== i), isDefault: false})} className="text-red-400 font-black px-2">✕</button>}
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, alts: [...data.alts, ""], isDefault: false})} className="text-blue-600 font-black text-sm">+ 대안 추가</button>
+                                    </div>
+
+                                    <div className="space-y-6">
+                                        <h3 className="text-2xl font-black text-emerald-600 flex items-center gap-2">⚖️ Criteria & Weights</h3>
+                                        {data.crits.map((crit, i) => (
+                                            <div key={i} className="p-6 bg-slate-50 rounded-[2rem] border border-slate-100 space-y-4">
+                                                <div className="flex gap-2">
+                                                    <input 
+                                                        type="text" value={crit.text} 
+                                                        onChange={e => { const n = [...data.crits]; n[i].text = e.target.value; setData({...data, crits: n, isDefault: false}); }}
+                                                        className="flex-1 bg-transparent border-none outline-none font-black text-lg" 
+                                                        placeholder="평가 기준" 
+                                                    />
+                                                    {data.crits.length > 1 && <button onClick={() => setData({...data, crits: data.crits.filter((_, idx) => idx !== i), isDefault: false})} className="text-red-400 font-black px-2">✕</button>}
+                                                </div>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-xs font-black text-emerald-600"><span>가중치(중요도)</span><span>{crit.w}점</span></div>
+                                                    <input type="range" min="1" max="10" value={crit.w} onChange={e => { const n = [...data.crits]; n[i].w = parseInt(e.target.value); setData({...data, crits: n, isDefault: false}); }} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <button onClick={() => setData({...data, crits: [...data.crits, {id: Date.now(), text: "", w: 5}], isDefault: false})} className="text-emerald-600 font-black text-sm">+ 기준 추가</button>
+                                    </div>
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 대안별 점수 매기기</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Scoring */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-12">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Scoring Matrix</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">각 대안이 기준을 얼마나 충족하나요?</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">각 항목에 대해 1~10점 사이의 점수를 부여합니다.</p>
+                                </div>
                                 <div className="space-y-12">
                                     {data.alts.map((alt, aIdx) => (
-                                        <div key={aIdx} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                                            <h3 className="text-2xl font-black text-blue-600 mb-6">{alt}</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                        <div key={aIdx} className="p-10 bg-slate-50 rounded-[3.5rem] border border-slate-100 space-y-8">
+                                            <h3 className="text-3xl font-black text-blue-600 flex items-center gap-4">
+                                                <span className="w-12 h-12 bg-blue-600 text-white rounded-2xl flex items-center justify-center text-xl">{aIdx + 1}</span>
+                                                {alt || "미입력 대안"}
+                                            </h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
                                                 {data.crits.map((crit, cIdx) => (
-                                                    <div key={cIdx}>
-                                                        <div className="flex justify-between font-bold mb-2 text-sm"><span>{crit.text}</span><span>{data.scores[`${aIdx}-${cIdx}`] || 5}점</span></div>
-                                                        <input type="range" min="1" max="10" value={data.scores[`${aIdx}-${cIdx}`] || 5} onChange={e => {
-                                                            setData({...data, scores: {...data.scores, [`${aIdx}-${cIdx}`]: parseInt(e.target.value)}});
-                                                        }} />
+                                                    <div key={cIdx} className="space-y-4">
+                                                        <div className="flex justify-between font-black text-slate-600">
+                                                            <span>{crit.text || "미입력 기준"}</span>
+                                                            <span className="text-blue-600 text-2xl">{data.scores[`${aIdx}-${cIdx}`] || 5}점</span>
+                                                        </div>
+                                                        <input 
+                                                            type="range" min="1" max="10" 
+                                                            value={data.scores[`${aIdx}-${cIdx}`] || 5} 
+                                                            onChange={e => setData({...data, scores: {...data.scores, [`${aIdx}-${cIdx}`]: parseInt(e.target.value)}, isDefault: false})} 
+                                                        />
                                                     </div>
                                                 ))}
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setStep(3)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">최종 분석 결과 확인</button>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                                </div>
                             </div>
                         )}
 
+                        {/* Step 3: Result Report */}
                         {step === 3 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="flex justify-between items-start mb-16">
-                                    <div>
-                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Weighted Decision Matrix</span>
-                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">가중치 분석 리포트</h2>
-                                    </div>
-                                    {data.scenarioContext && (
-                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
-                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
-                                        </div>
-                                    )}
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Weighted Scoring Decision Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        가중치 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "의사결정 분석"}</p>
                                 </div>
-                                <div className="space-y-8 mb-12">
-                                    {finalResults.sort((a,b)=>b.score-a.score).map((res, i) => (
-                                        <div key={i} className={`p-8 rounded-[2.5rem] flex justify-between items-center ${i === 0 ? 'bg-blue-600 text-white shadow-2xl scale-105' : 'bg-slate-50 text-slate-800 border border-slate-100'}`}>
-                                            <div>
-                                                <span className="text-xs font-black uppercase opacity-70">Rank {i+1}</span>
-                                                <h3 className="text-2xl font-black">{res.name}</h3>
+
+                                <div className="space-y-8 mb-16">
+                                    {finalResults.map((res, i) => (
+                                        <div key={i} className={`result-card p-10 rounded-[4rem] border-2 flex flex-col md:flex-row justify-between items-center gap-8 ${i === 0 ? 'bg-blue-600 text-white border-blue-400 shadow-2xl scale-105' : 'bg-slate-50 text-slate-800 border-slate-100 shadow-sm'}`}>
+                                            <div className="flex-1 text-center md:text-left">
+                                                <div className="flex items-center gap-4 mb-4 justify-center md:justify-start">
+                                                    {i === 0 && <span className="bg-white text-blue-600 px-4 py-1 rounded-full text-xs font-black uppercase">Best Choice</span>}
+                                                    <h3 className="text-3xl md:text-4xl font-black">{res.name || "미입력 대안"}</h3>
+                                                </div>
+                                                <div className="w-full bg-black/10 h-3 rounded-full overflow-hidden p-0.5">
+                                                    <div className={`h-full rounded-full transition-all duration-1000 ${i === 0 ? 'bg-white' : 'bg-blue-500'}`} style={{ width: `${res.percentage}%` }}></div>
+                                                </div>
                                             </div>
-                                            <div className="text-right">
-                                                <p className="text-xs font-black uppercase opacity-70">Total Score</p>
-                                                <p className="text-4xl font-black">{res.score}</p>
+                                            <div className={`text-center md:text-right p-8 rounded-[2.5rem] min-w-[240px] shadow-inner ${i === 0 ? 'bg-white/10' : 'bg-white'}`}>
+                                                <p className={`text-[10px] font-black uppercase tracking-widest mb-2 ${i === 0 ? 'text-blue-200' : 'text-slate-400'}`}>Weighted Total Score</p>
+                                                <p className={`text-5xl font-black ${i === 0 ? 'text-white' : 'text-blue-600'}`}>
+                                                    {res.total}
+                                                </p>
+                                                <p className={`text-xs font-bold mt-2 ${i === 0 ? 'text-blue-100' : 'text-slate-400'}`}>적합도: {res.percentage}%</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">📝</div>
+                                    <h3 className="text-2xl font-black mb-4">의사결정 인사이트</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        가중치 결정 매트릭스 분석 결과, 가장 높은 점수를 획득한 대안은 <strong>[{finalResults[0].name}]</strong>입니다. 
+                                        이 결과는 귀하가 설정한 기준별 중요도와 각 대안의 성능을 수학적으로 결합한 최적의 해답입니다. 
+                                        상위 대안들 간의 점수 차이가 적다면, 가장 높은 가중치를 가진 기준에서 우위를 점한 대안을 선택하십시오.
+                                    </p>
+                                </div>
+
                                 <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/weighted/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">가중치 결정 매트릭스: 다기준 의사결정의 정석</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                가중치 결정 매트릭스(Weighted Scoring Matrix)는 여러 대안을 상충하는 다양한 기준에 따라 객관적으로 평가하는 도구입니다. 이는 **다기준 의사결정 분석(MCDA)**의 가장 기초적이면서도 강력한 방법론으로, 주관적인 선호도를 정량적인 수치로 변환하여 최적의 선택을 돕습니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                가중치 결정 매트릭스: 다기준 의사결정 분석(MCDA)의 정석
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>가중치 결정 매트릭스(Weighted Scoring Matrix)</strong>는 여러 대안을 상충하는 다양한 기준에 따라 객관적으로 평가하고 순위를 매기는 의사결정 지원 도구입니다. 이 기법은 경영학 및 정책학에서 널리 사용되는 <strong>'다기준 의사결정 분석(Multiple Criteria Decision Analysis, MCDA)'</strong>의 가장 기초적이면서도 강력한 방법론입니다. 복잡한 선택의 순간에서 인간의 직관이 가질 수 있는 편향을 제거하고, 논리적인 수치에 기반하여 최적의 해답을 도출하도록 돕습니다.
+                                </p>
+                                <p>
+                                    이 모델의 핵심 원리는 <strong>'가중 평균(Weighted Average)'</strong>에 있습니다. 모든 평가 기준이 의사결정자에게 동일한 중요도를 가질 수는 없습니다. 예를 들어, 집을 고를 때 누군가는 '가격'을 가장 중요하게 생각하고, 누군가는 '직주근접'을 최우선으로 둡니다. 가중치 결정 매트릭스는 이러한 주관적인 가치관을 1~10점 사이의 '가중치'로 정량화하고, 각 대안이 해당 기준을 얼마나 충족하는지 '점수'를 매겨 이를 합산합니다.
+                                </p>
+                                <p>
+                                    심리학적으로 이 도구는 <strong>'인지적 부하'</strong>를 획기적으로 줄여줍니다. 인간의 뇌는 3개 이상의 대안과 3개 이상의 기준을 동시에 머릿속으로 비교할 때 심각한 오류를 범하기 쉽습니다. 매트릭스 구조는 문제를 작은 단위로 쪼개어 하나씩 평가하게 함으로써 판단의 정확도를 높입니다. 파란랩의 가중치 결정 엔진은 이러한 의사결정 과학을 현대적인 인터페이스로 구현하여, 당신의 선택이 후회 없는 결과로 이어지도록 가이드합니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">가중치의 심리학</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">모든 평가 기준이 동일한 중요도를 가질 수는 없습니다. 본 도구는 각 기준에 가중치를 부여함으로써, 의사결정자가 가장 중요하게 생각하는 가치가 결과에 정확히 반영되도록 설계되었습니다.</p>
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 기준의 독립성 확보</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        평가 기준들은 서로 중복되지 않아야 합니다(MECE 원칙). 독립적인 기준들을 설정할 때 비로소 각 대안의 장단점이 왜곡 없이 수치로 드러나게 됩니다.
+                                    </p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">합리적 대안 비교</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순한 직관은 특정 요소에 매몰되기 쉽습니다. 매트릭스 구조는 모든 대안을 동일한 잣대로 평가하게 하여, 감정적 편향을 배제하고 논리적인 결론에 도달하게 합니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">2. 가중치의 전략적 배분</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        가중치는 당신의 '우선순위'를 상징합니다. 가장 치명적인 기준에 높은 가중치를 부여함으로써, 사소한 장점들이 중대한 결함을 가리는 오류를 방지하십시오.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">3. 객관적 스코어링</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        점수를 매길 때는 가능한 한 객관적인 데이터(금액, 거리, 시간 등)를 근거로 삼으십시오. 데이터가 부족하다면 전문가의 견해나 과거의 경험치를 활용합니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-600 shadow-sm">
+                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">4. 민감도 분석 (Sensitivity)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        최종 결과가 나온 후, 가중치를 조금씩 조정해보며 순위가 어떻게 변하는지 확인하십시오. 이를 통해 어떤 변수가 당신의 결정에 가장 큰 영향을 미치는지 파악할 수 있습니다.
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Belton, V., & Stewart, T. J. (2002). *Multiple Criteria Decision Analysis: An Integrated Approach*. Kluwer Academic Publishers.</li>
-                                    <li>• Keeney, R. L., & Raiffa, H. (1993). *Decisions with Multiple Objectives: Preferences and Value Trade-offs*. Cambridge University Press.</li>
+                                    <li>• Belton, V., & Stewart, T. J. (2002). <em>Multiple Criteria Decision Analysis: An Integrated Approach</em>. Kluwer Academic Publishers.</li>
+                                    <li>• Keeney, R. L., & Raiffa, H. (1993). <em>Decisions with Multiple Objectives: Preferences and Value Trade-offs</em>. Cambridge University Press.</li>
+                                    <li>• Saaty, T. L. (1980). <em>The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation</em>. McGraw-Hill.</li>
+                                    <li>• Hammond, J. S., Keeney, R. L., & Raiffa, H. (1999). <em>Smart Choices: A Practical Guide to Making Better Decisions</em>. Harvard Business School Press.</li>
                                 </ul>
                             </div>
                         </div>
@@ -244,8 +397,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<WeightedApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(WeightedApp));
     </script>
 </body>
 </html>
