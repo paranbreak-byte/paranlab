@@ -3,172 +3,406 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>이키가이(Ikigai) 분석 도구 | 삶의 목적 발견 | 파란랩(Paran Lab)</title>
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- [SEO 표준] -->
+    <title>이키가이(Ikigai) 분석 도구 | 삶의 목적과 존재 이유 발견 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="당신이 사랑하는 일, 잘하는 일, 세상이 필요한 일, 수익이 되는 일의 교집합을 찾으세요. 이키가이 모델을 통해 삶의 진정한 목적을 과학적으로 설계합니다.">
+    <meta name="keywords" content="이키가이, Ikigai, 삶의목적, 자기계발, 직업선택, 존재이유, 파란랩, 벤다이어그램">
+    <meta property="og:title" content="파란랩 이키가이 분석 엔진">
+    <meta property="og:description" content="당신이 살아가는 보람, '이키가이'를 발견하는 가장 과학적인 방법.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/ikigai/">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 이키가이 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "LifestyleApplication",
+      "description": "열정, 미션, 직업, 천직의 네 가지 요소를 분석하여 삶의 목적을 도출하는 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
-        .ikigai-container { position: relative; width: 100%; max-width: 600px; height: 600px; margin: 0 auto; }
-        .circle { position: absolute; width: 320px; height: 320px; border-radius: 50%; mix-blend-mode: multiply; opacity: 0.7; display: flex; align-items: center; justify-content: center; padding: 40px; text-align: center; font-weight: 800; font-size: 0.9rem; transition: all 0.5s ease; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        
+        /* 이키가이 벤 다이어그램 시각화 */
+        .ikigai-viz { position: relative; width: 100%; max-width: 500px; height: 500px; margin: 0 auto; }
+        .circle { position: absolute; width: 280px; height: 280px; border-radius: 50%; mix-blend-mode: multiply; opacity: 0.6; display: flex; align-items: center; justify-content: center; padding: 30px; text-align: center; font-weight: 800; font-size: 0.85rem; transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
         .c-love { background-color: #fca5a5; top: 0; left: 50%; transform: translateX(-50%); color: #991b1b; }
-        .c-good { background-color: #93c5fd; top: 160px; left: 0; color: #1e40af; }
-        .c-need { background-color: #6ee7b7; top: 160px; right: 0; color: #065f46; }
+        .c-good { background-color: #93c5fd; top: 140px; left: 0; color: #1e40af; }
+        .c-need { background-color: #6ee7b7; top: 140px; right: 0; color: #065f46; }
         .c-paid { background-color: #fde047; bottom: 0; left: 50%; transform: translateX(-50%); color: #854d0e; }
-        .ikigai-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 10px 25px rgba(0,0,0,0.15); font-weight: 900; color: #1e293b; border: 3px solid #2563eb; text-align: center; min-width: 120px; }
-        @media (max-width: 640px) { .ikigai-container { height: 450px; transform: scale(0.7); transform-origin: top center; } }
+        .ikigai-center { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 20; background: white; padding: 15px 25px; border-radius: 50px; box-shadow: 0 10px 30px rgba(0,0,0,0.2); font-weight: 900; color: #1e293b; border: 3px solid #2563eb; text-align: center; min-width: 140px; font-size: 1rem; }
+        
+        @media (max-width: 640px) {
+            .ikigai-viz { height: 400px; transform: scale(0.8); transform-origin: top center; }
+            .circle { width: 220px; height: 220px; padding: 20px; font-size: 0.75rem; }
+            .c-good { top: 110px; }
+            .c-need { top: 110px; }
+        }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center p-10 bg-white rounded-[3rem] shadow-xl border border-slate-100">
-                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <h2 class="text-2xl font-black text-slate-800">이키가이 엔진 초기화 중...</h2>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
+
+        // [v7.6] 샘플 데이터 (시니어 디자이너의 멘토 전환)
+        const SAMPLE_DATA = {
+            subject: "나의 제2의 인생 목적 찾기",
+            love: "그림 그리기, 사람들에게 지식 나누기, 창의적인 문제 해결 과정",
+            good: "시각 디자인 실무, 복잡한 개념 시각화, 1:1 커뮤니케이션",
+            need: "실무 중심의 디자인 교육, 주니어 디자이너들을 위한 멘토링",
+            paid: "온라인 강의 수익, 기업 디자인 컨설팅, 전문 서적 출판",
+            ikigai: "디자인 교육을 통해 사람들의 창의성을 깨우는 멘토",
+            isSample: true
+        };
 
         function IkigaiApp() {
-            const [step, setStep] = useState(1); 
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(5); // 샘플을 먼저 보여주기 위해 결과 단계로 시작
             const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState({
-                love: "", good: "", need: "", paid: "", ikigai: "",
-                scenarioContext: null
-            });
+            const [data, setData] = useState(SAMPLE_DATA);
 
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-ikigai');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        setData(prev => ({ ...prev, ...parsed }));
-                        setStep(2);
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-ikigai');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isSample: false });
+                        } else {
+                            setData(SAMPLE_DATA);
+                        }
+                    } catch (e) {
+                        console.error("Init Error:", e);
                     }
-                } catch(e) { console.error(e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
+
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isSample) {
+                    localStorage.setItem('paranlab-ikigai', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
 
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'ikigai.png', { type: 'image/png' });
-                        const shareText = `[파란랩 이키가이 리포트]\n나의 존재 이유: ${data.ikigai}\nhttps://paranlab.com`;
+                        const file = new File([blob], 'ikigai-report.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 이키가이', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 나의 이키가이 분석 결과: ${data.ikigai}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'ikigai.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'ikigai-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
-                } catch (err) { setIsSharing(false); }
+                } catch (err) {
+                    setIsSharing(false);
+                }
             };
 
+            if (!isLoaded) return null;
+
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-ikigai'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-ikigai'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Ikigai Engine v6.5</div>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-xs uppercase tracking-widest">Purpose Science</p>
+                            <p className="text-white font-bold text-sm">PARAN LAB IKIGAI v7.6</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['주제 정의', '열정과 재능', '가치와 수익', '이키가이 정의', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 존재 이유를 찾아서</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100">
-                                        <h3 className="font-black text-rose-600 mb-2">1. What you LOVE</h3>
-                                        <textarea value={data.love} onChange={e => setData({...data, love: e.target.value})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" placeholder="당신이 사랑하고 즐거워하는 일은?" />
-                                    </div>
-                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100">
-                                        <h3 className="font-black text-blue-600 mb-2">2. What you are GOOD AT</h3>
-                                        <textarea value={data.good} onChange={e => setData({...data, good: e.target.value})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" placeholder="당신이 남들보다 잘하는 기술이나 재능은?" />
-                                    </div>
-                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100">
-                                        <h3 className="font-black text-emerald-600 mb-2">3. What the world NEEDS</h3>
-                                        <textarea value={data.need} onChange={e => setData({...data, need: e.target.value})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" placeholder="세상이 당신에게 필요로 하는 가치는?" />
-                                    </div>
-                                    <div className="p-8 bg-amber-50 rounded-[2.5rem] border border-amber-100">
-                                        <h3 className="font-black text-amber-600 mb-2">4. What you can be PAID FOR</h3>
-                                        <textarea value={data.paid} onChange={e => setData({...data, paid: e.target.value})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-sm font-bold shadow-sm" placeholder="당신이 수익을 창출할 수 있는 일은?" />
-                                    </div>
-                                </div>
-                                <div className="max-w-xl mx-auto text-center space-y-6">
-                                    <h3 className="text-2xl font-black text-slate-900">최종적인 나의 '이키가이'</h3>
-                                    <input type="text" value={data.ikigai} onChange={e => setData({...data, ikigai: e.target.value})} className="w-full p-6 bg-slate-900 text-white rounded-3xl font-black text-center text-xl shadow-xl" placeholder="이 모든 것의 교집합을 한 문장으로 정의하세요" />
-                                </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">이키가이 맵 확인하기</button>
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.isSample || data.scenarioContext) && step === 5 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.isSample ? "샘플 데이터 적용됨" : "시나리오 데이터 적용됨"}
+                                </span>
                             </div>
                         )}
 
-                        {step === 2 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="flex justify-between items-start mb-16">
-                                    <div>
-                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Purpose of Existence</span>
-                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">나의 이키가이(Ikigai) 리포트</h2>
-                                    </div>
-                                    {data.scenarioContext && (
-                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
-                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
-                                        </div>
-                                    )}
+                        {/* Step 1: Subject */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">분석의 주제를 정하세요</h2>
                                 </div>
-                                <div className="ikigai-container mb-20">
-                                    <div className="circle c-love">{data.love}</div>
-                                    <div className="circle c-good">{data.good}</div>
-                                    <div className="circle c-need">{data.need}</div>
-                                    <div className="circle c-paid">{data.paid}</div>
+                                <input 
+                                    type="text" 
+                                    value={data.subject} 
+                                    onChange={e => setData({...data, subject: e.target.value, isSample: false})}
+                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                    placeholder="예: 나의 진정한 커리어 목적 찾기"
+                                />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 열정과 재능 분석</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Love & Good at */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="p-10 bg-rose-50 rounded-[3rem] border border-rose-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-rose-600 flex items-center gap-2">❤️ What you LOVE</h3>
+                                        <p className="text-sm text-rose-400 font-bold">당신이 사랑하고 즐거워하는 일은 무엇인가요?</p>
+                                        <textarea 
+                                            value={data.love} 
+                                            onChange={e => setData({...data, love: e.target.value, isSample: false})}
+                                            className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-rose-200 transition-all"
+                                            placeholder="예: 글쓰기, 요리, 사람들과 대화하기..."
+                                        />
+                                    </div>
+                                    <div className="p-10 bg-blue-50 rounded-[3rem] border border-blue-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-blue-600 flex items-center gap-2">💪 What you are GOOD AT</h3>
+                                        <p className="text-sm text-blue-400 font-bold">당신이 남들보다 잘하는 기술이나 재능은?</p>
+                                        <textarea 
+                                            value={data.good} 
+                                            onChange={e => setData({...data, good: e.target.value, isSample: false})}
+                                            className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                            placeholder="예: 데이터 분석, 프로그래밍, 설득력..."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 가치와 수익 분석</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Need & Paid for */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="p-10 bg-emerald-50 rounded-[3rem] border border-emerald-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-emerald-600 flex items-center gap-2">🌍 What the world NEEDS</h3>
+                                        <p className="text-sm text-emerald-400 font-bold">세상이 당신에게 필요로 하는 가치는 무엇인가요?</p>
+                                        <textarea 
+                                            value={data.need} 
+                                            onChange={e => setData({...data, need: e.target.value, isSample: false})}
+                                            className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-emerald-200 transition-all"
+                                            placeholder="예: 환경 보호, 교육 불평등 해소, 효율적인 도구..."
+                                        />
+                                    </div>
+                                    <div className="p-10 bg-amber-50 rounded-[3rem] border border-amber-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-amber-600 flex items-center gap-2">💰 What you can be PAID FOR</h3>
+                                        <p className="text-sm text-amber-400 font-bold">당신이 수익을 창출할 수 있는 일은 무엇인가요?</p>
+                                        <textarea 
+                                            value={data.paid} 
+                                            onChange={e => setData({...data, paid: e.target.value, isSample: false})}
+                                            className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-amber-200 transition-all"
+                                            placeholder="예: 컨설팅, 제품 판매, 유료 강의..."
+                                        />
+                                    </div>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 이키가이 정의</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 4: Final Ikigai */}
+                        {step === 4 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 04. Final Definition</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">당신의 '이키가이'를 한 문장으로 정의하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">위의 네 가지 요소가 만나는 지점의 핵심 가치를 적습니다.</p>
+                                </div>
+                                <div className="p-12 bg-slate-900 rounded-[4rem] shadow-2xl">
+                                    <input 
+                                        type="text" 
+                                        value={data.ikigai} 
+                                        onChange={e => setData({...data, ikigai: e.target.value, isSample: false})}
+                                        className="w-full p-8 bg-transparent border-b-4 border-blue-500 outline-none text-white text-3xl font-black text-center placeholder:text-slate-700"
+                                        placeholder="예: 디자인 교육을 통해 창의성을 깨우는 멘토"
+                                    />
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 5: Result Report */}
+                        {step === 5 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Ikigai Purpose Discovery Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        나의 이키가이 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                                </div>
+
+                                {/* Visual Venn Diagram */}
+                                <div className="ikigai-viz mb-24">
+                                    <div className="circle c-love">
+                                        <div>
+                                            <p className="text-[10px] uppercase mb-1">Love</p>
+                                            <p className="line-clamp-3">{data.love || "열정"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="circle c-good">
+                                        <div>
+                                            <p className="text-[10px] uppercase mb-1">Good At</p>
+                                            <p className="line-clamp-3">{data.good || "재능"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="circle c-need">
+                                        <div>
+                                            <p className="text-[10px] uppercase mb-1">Needs</p>
+                                            <p className="line-clamp-3">{data.need || "미션"}</p>
+                                        </div>
+                                    </div>
+                                    <div className="circle c-paid">
+                                        <div>
+                                            <p className="text-[10px] uppercase mb-1">Paid For</p>
+                                            <p className="line-clamp-3">{data.paid || "직업"}</p>
+                                        </div>
+                                    </div>
                                     <div className="ikigai-center">
                                         <p className="text-[10px] uppercase font-black text-blue-600 mb-1">My Ikigai</p>
-                                        {data.ikigai || "발견 중"}
+                                        <p className="leading-tight">{data.ikigai || "발견 중"}</p>
                                     </div>
                                 </div>
-                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🌸</div>
+                                    <h3 className="text-2xl font-black mb-4">존재의 이유(Ikigai)에 대한 제언</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        당신의 이키가이는 <strong>[{data.ikigai || "미정"}]</strong>입니다. 
+                                        이 지점은 당신의 행복과 사회적 기여, 그리고 경제적 자립이 완벽한 균형을 이루는 곳입니다. 
+                                        이 목적을 나침반 삼아 매일의 선택을 정렬하십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 5 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/ikigai/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">이키가이(Ikigai): 삶의 의미를 찾는 과학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">이키가이는 '살아가는 보람'을 뜻하는 일본어입니다. 현대 심리학과 경영학에서는 이를 **열정, 미션, 직업, 천직**의 네 가지 요소가 만나는 지점으로 정의합니다.</p>
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                이키가이(Ikigai): 삶의 의미와 보람을 찾는 과학
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>이키가이(Ikigai, 生き甲斐)</strong>는 '살아가는 보람' 혹은 '존재하는 이유'를 뜻하는 일본어입니다. 이 개념은 일본 오키나와 지역의 장수 비결을 연구하던 학자들에 의해 전 세계적으로 알려지기 시작했습니다. 오키나와 사람들에게 이키가이는 아침에 눈을 떴을 때 나를 움직이게 만드는 구체적인 이유이며, 이는 신체적 건강뿐만 아니라 정신적 풍요로움을 결정짓는 핵심 요소로 작용합니다.
+                                </p>
+                                <p>
+                                    현대 심리학과 경영학에서 재해석된 이키가이 모델은 네 가지 핵심 질문의 교집합으로 정의됩니다: <strong>1) 당신이 사랑하는 것(Passion/Mission), 2) 당신이 잘하는 것(Passion/Profession), 3) 세상이 필요로 하는 것(Mission/Vocation), 4) 당신이 수익을 얻을 수 있는 것(Profession/Vocation)</strong>. 이 네 가지 요소가 모두 충족되는 중앙 지점이 바로 진정한 '이키가이'입니다. 만약 하나라도 결여된다면, 우리는 '풍족하지만 공허함'을 느끼거나 '즐겁지만 가난한' 상태에 머물게 됩니다.
+                                </p>
+                                <p>
+                                    이 도구는 단순히 직업을 찾는 것을 넘어, 자신의 삶을 다각도로 조망하게 합니다. <strong>댄 부트너(Dan Buettner)</strong>는 그의 저서 <em>'Blue Zones'</em>에서 이키가이가 있는 사람들은 그렇지 않은 사람들보다 평균 수명이 길고 인지 능력이 뛰어나다는 사실을 과학적으로 입증했습니다. 파란랩의 이키가이 분석 엔진은 이 고대의 지혜를 현대적인 데이터 시각화 기술과 결합하여, 당신의 삶이 나아가야 할 북극성을 찾도록 돕습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">1. Passion (열정)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        사랑하는 일과 잘하는 일의 교집합입니다. 즐거움과 성취감을 주지만, 세상에 필요하지 않거나 수익이 되지 않는다면 단순한 취미에 머물 수 있습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">2. Mission (사명)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        사랑하는 일과 세상이 필요한 일의 교집합입니다. 높은 만족감을 주지만, 수익이 뒷받침되지 않으면 지속 가능성이 떨어질 수 있습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. Vocation (천직)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        세상이 필요한 일과 수익이 되는 일의 교집합입니다. 사회적 기여와 경제적 보상을 주지만, 스스로 사랑하지 않는 일이라면 공허함을 느낄 수 있습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-400 shadow-sm">
+                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">4. Profession (직업)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        잘하는 일과 수익이 되는 일의 교집합입니다. 안정적인 삶을 보장하지만, 열정이 결여되어 있다면 매너리즘에 빠지기 쉽습니다.
+                                    </p>
+                                </div>
+                            </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Buettner, D. (2008). *The Blue Zones*. National Geographic.</li>
-                                    <li>• García, H., & Miralles, F. (2016). *Ikigai: The Japanese Secret to a Long and Happy Life*.</li>
+                                    <li>• Buettner, D. (2008). <em>The Blue Zones: Lessons for Living Longer From the People Who've Lived the Longest</em>. National Geographic.</li>
+                                    <li>• García, H., & Miralles, F. (2016). <em>Ikigai: The Japanese Secret to a Long and Happy Life</em>. Penguin Books.</li>
+                                    <li>• Mogi, K. (2017). <em>Awakening Your Ikigai: How the Japanese Wake Up to Joy and Purpose Every Day</em>. Experiment.</li>
+                                    <li>• Matthews, G. (1996). <em>What Makes Life Worth Living? How Japanese and Americans Make Sense of Their Worlds</em>. University of California Press.</li>
                                 </ul>
                             </div>
                         </div>
@@ -176,8 +410,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<IkigaiApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(IkigaiApp));
     </script>
 </body>
 </html>
