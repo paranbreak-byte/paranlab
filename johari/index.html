@@ -3,74 +3,400 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>조하리의 창 자기분석 | 인간관계 및 소통 진단 도구 | 파란랩</title>
-    <meta name="description" content="나도 모르는 나의 모습과 타인이 보는 나의 모습을 분석해 보세요. 조하리의 창(Johari Window)을 통해 소통의 문제를 진단하고 더 나은 인간관계를 맺을 수 있습니다.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- [SEO 표준] -->
+    <title>조하리의 창 자기분석 | 인간관계 및 소통 진단 도구 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="나도 모르는 나의 모습과 타인이 보는 나의 모습을 분석하세요. 조하리의 창(Johari Window)을 통해 소통의 사각지대를 발견하고 더 나은 인간관계를 설계합니다.">
+    <meta name="keywords" content="조하리의창, JohariWindow, 자기분석, 소통도구, 인간관계심리학, 심리검사, 파란랩, 조셉루프트">
+    <meta property="og:title" content="파란랩 조하리의 창 분석 엔진">
+    <meta property="og:description" content="타인의 시선과 나의 자아를 연결하는 소통의 창을 열어보세요.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/johari/">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 조하리의 창 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "LifestyleApplication",
+      "description": "자신과 타인의 인식을 비교하여 소통의 상태를 4가지 영역으로 분류하는 심리 분석 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; }
+        .trait-btn { transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1); }
+        .trait-btn:active { transform: scale(0.95); }
+        @media print { .no-print { display: none; } }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">조하리의 창이란?</h2>
-            <p><strong>조하리의 창</strong>은 자신과 타인 사이의 정보 공유 정도를 분석하여 소통의 상태를 진단하는 심리학 모델입니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
+
+        // [v7.6] 샘플 데이터 (팀 프로젝트 소통 스타일)
+        const SAMPLE_DATA = {
+            subject: "팀 프로젝트 내에서의 나의 소통 스타일",
+            selectedSelf: ["똑똑한", "논리적인", "자신감 있는", "독립적인", "유능한"],
+            selectedOthers: ["똑똑한", "논리적인", "조용한", "차분한", "믿음직한"],
+            isSample: true
+        };
+
+        const TRAITS = [
+            "친절한", "자신감 있는", "차분한", "똑똑한", "믿음직한", 
+            "활발한", "대담한", "독립적인", "성숙한", "행복한", 
+            "인내심 있는", "논리적인", "조용한", "유능한", "따뜻한", 
+            "겸손한", "창의적인", "용감한", "관대한", "정직한",
+            "신중한", "열정적인", "유머러스한", "냉철한", "사교적인"
+        ];
+
         function JohariApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-johari') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [selectedSelf, setSelectedSelf] = useState(saved.selectedSelf || []);
-            const [selectedOthers, setSelectedOthers] = useState(saved.selectedOthers || []);
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(4); // 샘플을 먼저 보여주기 위해 결과 단계로 시작
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(SAMPLE_DATA);
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-johari', JSON.stringify({ step, selectedSelf, selectedOthers })); }, [step, selectedSelf, selectedOthers]);
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-johari');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isSample: false });
+                        } else {
+                            setData(SAMPLE_DATA);
+                        }
+                    } catch (e) {
+                        console.error("Init Error:", e);
+                    }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
+            }, []);
 
-            const traits = ["친절한", "자신감 있는", "차분한", "똑똑한", "믿음직한", "활발한", "대담한", "독립적인", "성숙한", "행복한", "인내심 있는", "논리적인", "조용한", "유능한", "따뜻한", "겸손한"];
-            const windows = useMemo(() => ({
-                open: selectedSelf.filter(t => selectedOthers.includes(t)),
-                blind: selectedOthers.filter(t => !selectedSelf.includes(t)),
-                hidden: selectedSelf.filter(t => !selectedOthers.includes(t))
-            }), [selectedSelf, selectedOthers]);
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isSample) {
+                    localStorage.setItem('paranlab-johari', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // 4가지 창 계산 로직
+            const windows = useMemo(() => {
+                const self = data.selectedSelf || [];
+                const others = data.selectedOthers || [];
+                return {
+                    open: self.filter(t => others.includes(t)),
+                    blind: others.filter(t => !self.includes(t)),
+                    hidden: self.filter(t => !others.includes(t)),
+                    unknown: TRAITS.filter(t => !self.includes(t) && !others.includes(t))
+                };
+            }, [data.selectedSelf, data.selectedOthers]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'johari-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] 조하리의 창 분석 결과: ${data.subject}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'johari-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) {
+                    setIsSharing(false);
+                }
+            };
+
+            if (!isLoaded) return null;
+
+            const toggleTrait = (listKey, trait) => {
+                const currentList = data[listKey] || [];
+                const newList = currentList.includes(trait) 
+                    ? currentList.filter(t => t !== trait) 
+                    : [...currentList, trait];
+                setData({...data, [listKey]: newList, isSample: false});
+            };
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-2xl font-black mb-6 text-center text-blue-600">내가 생각하는 나</h2>
-                            <div className="flex flex-wrap gap-2 justify-center mb-10">{traits.map(t => <button key={t} onClick={()=>setSelectedSelf(selectedSelf.includes(t)?selectedSelf.filter(i=>i!==t):[...selectedSelf,t])} className={`px-4 py-2 rounded-full text-sm font-bold ${selectedSelf.includes(t)?'bg-blue-600 text-white':'bg-slate-100 text-slate-400'}`}>{t}</button>)}</div>
-                            <h2 className="text-2xl font-black mb-6 text-center text-rose-600">남이 말하는 나</h2>
-                            <div className="flex flex-wrap gap-2 justify-center mb-10">{traits.map(t => <button key={t} onClick={()=>setSelectedOthers(selectedOthers.includes(t)?selectedOthers.filter(i=>i!==t):[...selectedOthers,t])} className={`px-4 py-2 rounded-full text-sm font-bold ${selectedOthers.includes(t)?'bg-rose-600 text-white':'bg-slate-100 text-slate-400'}`}>{t}</button>)}</div>
-                            <button onClick={()=>setStep(2)} className="w-full py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl shadow-xl">결과 보기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-johari'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-3xl font-black text-slate-900 mb-10 text-center">조하리의 창 분석 결과</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                                    <div className="p-6 bg-blue-50 rounded-[2rem] border-2 border-blue-100"><h3 className="font-black text-blue-700 mb-2">열린 창 (Open)</h3><p className="text-xs font-bold text-slate-600">{windows.open.join(', ') || '없음'}</p></div>
-                                    <div className="p-6 bg-rose-50 rounded-[2rem] border-2 border-rose-100"><h3 className="font-black text-rose-700 mb-2">눈먼 창 (Blind)</h3><p className="text-xs font-bold text-slate-600">{windows.blind.join(', ') || '없음'}</p></div>
-                                    <div className="p-6 bg-emerald-50 rounded-[2rem] border-2 border-emerald-100"><h3 className="font-black text-emerald-700 mb-2">숨겨진 창 (Hidden)</h3><p className="text-xs font-bold text-slate-600">{windows.hidden.join(', ') || '없음'}</p></div>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-xs uppercase tracking-widest">Psychology Science</p>
+                            <p className="text-white font-bold text-sm">PARAN LAB JOHARI v7.6</p>
+                        </div>
+                    </div>
+
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['주제 정의', '내가 보는 나', '남이 보는 나', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.isSample || data.scenarioContext) && step === 4 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.isSample ? "샘플 데이터 적용됨" : "시나리오 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Step 1: Subject */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">분석할 관계나 상황을 정의하세요</h2>
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+                                <input 
+                                    type="text" 
+                                    value={data.subject} 
+                                    onChange={e => setData({...data, subject: e.target.value, isSample: false})}
+                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                    placeholder="예: 우리 팀 내에서의 나의 모습"
+                                />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 내가 생각하는 나</button>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'johari-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`조하리의 창 결과`, ``, 'johari-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[조하리의 창 결과]\n열린창: ${windows.open.join(', ')}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {/* Step 2: Self Selection */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Self Perception</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">내가 생각하는 나의 모습은?</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">자신을 가장 잘 설명하는 단어들을 선택하세요 (복수 선택 가능)</p>
+                                </div>
+                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
+                                    {TRAITS.map(t => (
+                                        <button 
+                                            key={t} 
+                                            onClick={() => toggleTrait('selectedSelf', t)}
+                                            className={`trait-btn px-6 py-3 rounded-full text-sm font-black shadow-sm ${data.selectedSelf.includes(t) ? 'bg-blue-600 text-white scale-110' : 'bg-white text-slate-400 hover:text-slate-600'}`}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 남이 말하는 나</button>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+
+                        {/* Step 3: Others Selection */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-rose-600 font-black text-sm uppercase tracking-widest">Step 03. Others' Perception</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">타인이 말하는 나의 모습은?</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">주변 사람들로부터 자주 듣는 평가를 선택하세요.</p>
+                                </div>
+                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
+                                    {TRAITS.map(t => (
+                                        <button 
+                                            key={t} 
+                                            onClick={() => toggleTrait('selectedOthers', t)}
+                                            className={`trait-btn px-6 py-3 rounded-full text-sm font-black shadow-sm ${data.selectedOthers.includes(t) ? 'bg-rose-600 text-white scale-110' : 'bg-white text-slate-400 hover:text-slate-600'}`}
+                                        >
+                                            {t}
+                                        </button>
+                                    ))}
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 4: Result Report */}
+                        {step === 4 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Johari Window Communication Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        조하리의 창 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                                </div>
+
+                                <div className="matrix-grid mb-12">
+                                    {/* Open Window */}
+                                    <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 relative min-h-[250px]">
+                                        <div className="absolute top-4 right-6 text-blue-200 font-black text-5xl italic opacity-40">Open</div>
+                                        <h3 className="font-black text-blue-700 mb-4 text-xl">열린 창 (공통 인식)</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.open.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-blue-600 shadow-sm border border-blue-100 animate-in zoom-in">{t}</span>)}
+                                            {windows.open.length === 0 && <p className="text-xs text-blue-300 font-bold italic">나와 타인이 모두 아는 모습이 없습니다.</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Blind Window */}
+                                    <div className="p-8 bg-rose-50 rounded-[3rem] border-2 border-rose-100 relative min-h-[250px]">
+                                        <div className="absolute top-4 right-6 text-rose-200 font-black text-5xl italic opacity-40">Blind</div>
+                                        <h3 className="font-black text-rose-700 mb-4 text-xl">눈먼 창 (타인만 인식)</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.blind.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-rose-600 shadow-sm border border-rose-100 animate-in zoom-in">{t}</span>)}
+                                            {windows.blind.length === 0 && <p className="text-xs text-rose-300 font-bold italic">타인만 알고 나는 모르는 모습이 없습니다.</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Hidden Window */}
+                                    <div className="p-8 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 relative min-h-[250px]">
+                                        <div className="absolute top-4 right-6 text-emerald-200 font-black text-5xl italic opacity-40">Hidden</div>
+                                        <h3 className="font-black text-emerald-700 mb-4 text-xl">숨겨진 창 (나만 인식)</h3>
+                                        <div className="flex flex-wrap gap-2">
+                                            {windows.hidden.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-emerald-600 shadow-sm border border-emerald-100 animate-in zoom-in">{t}</span>)}
+                                            {windows.hidden.length === 0 && <p className="text-xs text-emerald-300 font-bold italic">나만 알고 타인은 모르는 모습이 없습니다.</p>}
+                                        </div>
+                                    </div>
+
+                                    {/* Unknown Window */}
+                                    <div className="p-8 bg-slate-100 rounded-[3rem] border-2 border-slate-200 relative min-h-[250px]">
+                                        <div className="absolute top-4 right-6 text-slate-200 font-black text-5xl italic opacity-40">Unknown</div>
+                                        <h3 className="font-black text-slate-700 mb-4 text-xl">미지의 창 (잠재력)</h3>
+                                        <p className="text-xs text-slate-400 font-bold leading-relaxed">나와 타인 모두 아직 발견하지 못한 영역입니다. 새로운 경험을 통해 이 영역의 특성들이 다른 창으로 이동할 수 있습니다.</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🪟</div>
+                                    <h3 className="text-2xl font-black mb-4">소통 개선을 위한 제언</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        건강한 소통의 핵심은 <strong>'열린 창(Open Window)'</strong>을 넓히는 것입니다. 
+                                        적절한 자기 공개(Self-disclosure)를 통해 숨겨진 창을 줄이고, 타인의 피드백을 수용하여 눈먼 창을 줄여나가십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 4 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/johari/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                조하리의 창: 자아 인식과 소통의 심리학
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>조하리의 창(Johari Window)</strong>은 1955년 미국의 심리학자 <strong>조셉 루프트(Joseph Luft)</strong>와 <strong>해링턴 인검(Harrington Ingham)</strong>이 개발한 자아 분석 및 소통 모델입니다. 모델의 명칭은 두 사람의 이름 앞글자를 따서 명명되었습니다. 이 모델은 자신과 타인 사이의 정보 공유 정도를 4가지 영역으로 시각화하여, 개인이 조직 내에서 어떻게 소통하고 관계를 맺는지 진단하는 데 탁월한 효능을 발휘합니다.
+                                </p>
+                                <p>
+                                    조하리의 창은 두 가지 축으로 구성됩니다. 하나는 '자신이 아는가 모르는가'이고, 다른 하나는 '타인이 아는가 모르는가'입니다. 이 두 축이 교차하며 만들어내는 4가지 영역은 다음과 같습니다: <strong>1) 열린 창(Open), 2) 눈먼 창(Blind), 3) 숨겨진 창(Hidden), 4) 미지의 창(Unknown)</strong>. 건강한 인간관계와 효율적인 팀워크를 위해서는 '열린 창'의 면적을 넓히는 것이 핵심입니다.
+                                </p>
+                                <p>
+                                    심리학적으로 이 모델은 <strong>'자기 공개(Self-disclosure)'</strong>와 <strong>'피드백(Feedback)'</strong>의 중요성을 강조합니다. 내가 가진 생각이나 감정을 솔직하게 표현함으로써 숨겨진 창을 줄이고, 타인의 시선과 평가를 겸허히 수용함으로써 눈먼 창을 줄여나갈 때, 비로소 소통의 사각지대가 해소됩니다. 파란랩의 조하리의 창 분석 엔진은 이러한 심리학적 원리를 현대적인 인터페이스로 구현하여, 당신의 대인관계 역량을 과학적으로 점검하도록 돕습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 열린 창 (Open Area)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        나도 알고 타인도 아는 영역입니다. 이 영역이 넓을수록 소통이 원활하고 신뢰 관계가 두텁습니다. 팀워크의 효율성은 이 영역의 크기에 비례합니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 눈먼 창 (Blind Spot)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        타인은 보지만 나는 깨닫지 못하는 나의 모습입니다. 타인의 피드백을 경청함으로써 이 영역을 줄이고 자아 인식을 확장할 수 있습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 숨겨진 창 (Hidden Area)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        나는 알지만 타인에게는 숨기고 있는 영역입니다. 적절한 자기 공개를 통해 타인과의 거리감을 좁히고 오해를 방지할 수 있습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 미지의 창 (Unknown Area)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        누구도 아직 발견하지 못한 잠재적 영역입니다. 새로운 도전과 깊이 있는 성찰을 통해 이 영역에 숨겨진 재능이나 특성을 발견할 수 있습니다.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Luft, J., & Ingham, H. (1955). "The Johari window, a graphic model of interpersonal awareness". <em>Proceedings of the western training laboratory in group development</em>.</li>
+                                    <li>• Luft, J. (1969). <em>Of Human Interaction</em>. National Press Books.</li>
+                                    <li>• Verklan, M. T. (2007). "Johari Window: A Model for Self-awareness". <em>Journal of Perinatal & Neonatal Nursing</em>.</li>
+                                    <li>• Hase, S., et al. (2003). "The Johari Window and the Dark Side of Organisations". <em>Southern Cross University</em>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<JohariApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(JohariApp));
     </script>
 </body>
 </html>
