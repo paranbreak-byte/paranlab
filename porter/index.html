@@ -4,32 +4,31 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
-    <!-- [SEO 표준 메타 태그] -->
+    <!-- [SEO 표준] -->
     <title>5 Forces 분석 도구 | 산업 매력도 및 경쟁 강도 진단 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="마이클 포터의 5 Forces 모델로 시장의 경쟁 구조를 분석하세요. 신규 진입자, 대체재, 공급자 및 구매자의 협상력을 수치로 진단합니다.">
-    <meta name="keywords" content="5Forces, 산업분석, 마이클포터, 경쟁전략, 시장매력도, 경영전략도구, 파란랩">
+    <meta name="description" content="마이클 포터의 5 Forces 모델로 시장의 경쟁 구조를 분석하세요. 신규 진입자, 대체재, 공급자 및 구매자의 협상력을 수치로 진단하여 최적의 전략을 수립합니다.">
+    <meta name="keywords" content="5Forces, 산업분석, 마이클포터, 경쟁전략, 시장매력도, 경영전략도구, 파란랩, 수익구조분석">
+    <meta property="og:title" content="파란랩 5 Forces 분석 엔진">
+    <meta property="og:description" content="시장의 수익성을 결정하는 5가지 핵심 압력을 과학적으로 분석하세요.">
+    <meta property="og:type" content="website">
     <link rel="canonical" href="https://paranlab.com/porter/">
     
-    <!-- [오픈 그래프] -->
-    <meta property="og:title" content="5 Forces 분석 도구 - 파란랩">
-    <meta property="og:description" content="시장의 수익 구조를 결정하는 5가지 핵심 압력을 과학적으로 분석하세요.">
-    <meta property="og:url" content="https://paranlab.com/porter/">
-    
-    <!-- [구조화 데이터] -->
+    <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "파란랩 5 Forces 분석 엔진",
+      "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
-      "description": "마이클 포터의 5 Forces 이론을 바탕으로 한 산업 구조 분석 도구",
+      "description": "마이클 포터의 5 Forces 이론을 바탕으로 산업의 경쟁 강도와 수익 잠재력을 평가하는 도구",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
     }
     </script>
 
     <!-- 라이브러리 로드 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -37,58 +36,77 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
-        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -9px; border: 3px solid white; }
+        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center">
-                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-500 font-bold">5 Forces 엔진 가동 중...</p>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.7] 도구 전용 기본 샘플 (국내 저가 커피 프랜차이즈 시장)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "국내 저가 커피 프랜차이즈 시장 분석",
+            scores: {
+                rivalry: 9,    // 기존 기업 간 경쟁: 매우 치열
+                entrants: 8,   // 신규 진입자의 위협: 진입장벽 낮음
+                substitutes: 7, // 대체재의 위협: 편의점 커피, RTD 등
+                suppliers: 4,  // 공급자의 협상력: 원두 공급처 다변화 가능
+                buyers: 8      // 구매자의 협상력: 브랜드 전환 비용 낮음
+            },
+            isDefault: true
+        };
+
+        const FORCES_CONFIG = [
+            { k: 'rivalry', n: '기존 기업 간 경쟁', d: '시장 내 경쟁자의 수와 성장 속도, 차별화 정도는?', icon: '⚔️', color: 'text-rose-600', bg: 'bg-rose-50' },
+            { k: 'entrants', n: '신규 진입자의 위협', d: '새로운 경쟁자가 시장에 들어오기 쉬운가? (진입장벽)', icon: '🚪', color: 'text-amber-600', bg: 'bg-amber-50' },
+            { k: 'substitutes', n: '대체재의 위협', d: '우리 제품을 완전히 대신할 다른 서비스가 있는가?', icon: '🔄', color: 'text-emerald-600', bg: 'bg-emerald-50' },
+            { k: 'suppliers', n: '공급자의 협상력', d: '원재료나 부품 공급업체가 가격 주도권을 쥐고 있는가?', icon: '🚛', color: 'text-blue-600', bg: 'bg-blue-50' },
+            { k: 'buyers', n: '구매자의 협상력', d: '고객이 가격 인하를 요구하거나 브랜드를 바꿀 힘이 강한가?', icon: '🛒', color: 'text-indigo-600', bg: 'bg-indigo-50' }
+        ];
+
         function PorterApp() {
-            const [step, setStep] = useState(1); 
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(2); // 샘플 우선 노출
             const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState({
-                subject: "",
-                scores: { rivalry: 5, entrants: 5, substitutes: 5, suppliers: 5, buyers: 5 },
-                scenarioContext: null
-            });
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            const forces = [
-                { k: 'rivalry', n: '기존 기업 간 경쟁', d: '시장 내 경쟁자의 수와 강도는 어떠한가?' },
-                { k: 'entrants', n: '신규 진입자의 위협', d: '새로운 경쟁자가 들어오기 쉬운가? (진입장벽)' },
-                { k: 'substitutes', n: '대체재의 위협', d: '우리 제품을 대신할 다른 서비스가 있는가?' },
-                { k: 'suppliers', n: '공급자의 협상력', d: '원재료 공급업체가 가격 주도권을 쥐고 있는가?' },
-                { k: 'buyers', n: '구매자의 협상력', d: '고객이 가격 인하를 요구할 힘이 강한가?' }
-            ];
-
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-porter');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        setData(prev => ({ ...prev, ...parsed }));
-                        setStep(2);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-porter');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-porter', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // 평균 경쟁 압력 계산
             const avgScore = useMemo(() => {
-                const vals = Object.values(data.scores);
+                const vals = Object.values(data.scores || {});
+                if (vals.length === 0) return "0.0";
                 return (vals.reduce((a, b) => a + b, 0) / vals.length).toFixed(1);
             }, [data.scores]);
 
@@ -97,130 +115,227 @@
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'porter-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 5 Forces 리포트]\n대상: ${data.subject}\nhttps://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 5 Forces 분석', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 5 Forces 산업 분석 결과: ${data.subject}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'porter-report.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'porter-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
+            if (!isLoaded) return null;
+
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-porter'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-porter'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">5 Forces Engine v7.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Industry Science</p>
+                            <p className="font-bold text-sm">PARAN LAB PORTER v7.7</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['산업 및 압력 측정', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">산업의 경쟁 압력을 측정하세요.</h2>
-                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value})} className="w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석할 산업/시장 입력" />
-                                <div className="space-y-8">
-                                    {forces.map(f => (
-                                        <div key={f.k} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100">
-                                            <div className="flex justify-between font-black mb-2">
-                                                <span className="text-slate-800">{f.n}</span>
-                                                <span className="text-blue-600">{data.scores[f.k]}점</span>
-                                            </div>
-                                            <p className="text-xs text-slate-400 mb-6">{f.d}</p>
-                                            <input type="range" min="1" max="10" value={data.scores[f.k]} onChange={e => setData({...data, scores: {...data.scores, [f.k]: parseInt(e.target.value)}})} />
-                                        </div>
-                                    ))}
-                                </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">산업 매력도 리포트 확인</button>
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 2 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
                             </div>
                         )}
 
+                        {/* Step 1: Input */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="text-center">
+                                    <h2 className="text-4xl font-black text-slate-900">산업의 경쟁 압력을 측정하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">각 요인이 산업의 수익성을 얼마나 위협하는지 1~10점으로 평가합니다.</p>
+                                </div>
+                                
+                                <div className="max-w-3xl mx-auto space-y-8">
+                                    <div className="p-10 bg-blue-50 rounded-[3rem] border-2 border-blue-100 shadow-inner">
+                                        <label className="block text-[10px] font-black text-blue-400 uppercase mb-2 tracking-widest">Industry Subject (분석 대상)</label>
+                                        <input 
+                                            type="text" 
+                                            value={data.subject} 
+                                            onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
+                                            className="w-full p-4 bg-white rounded-2xl border-none outline-none text-2xl font-black text-center shadow-sm focus:ring-4 ring-blue-100"
+                                            placeholder="예: 국내 배달 앱 시장 분석"
+                                        />
+                                    </div>
+
+                                    {FORCES_CONFIG.map(f => (
+                                        <div key={f.k} className={`p-8 ${f.bg} rounded-[3rem] border border-slate-100 space-y-6 animate-in slide-in-from-bottom-2`}>
+                                            <div className="flex justify-between items-center">
+                                                <h3 className={`text-xl font-black ${f.color} flex items-center gap-3`}>{f.icon} {f.n}</h3>
+                                                <span className={`text-3xl font-black ${f.color}`}>{data.scores[f.k]}</span>
+                                            </div>
+                                            <p className="text-sm font-bold text-slate-400">{f.d}</p>
+                                            <input 
+                                                type="range" min="1" max="10" step="1"
+                                                value={data.scores[f.k]}
+                                                onChange={e => setData({...data, scores: {...data.scores, [f.k]: parseInt(e.target.value)}, isDefault: false})}
+                                            />
+                                            <div className="flex justify-between text-[10px] font-black text-slate-300 uppercase tracking-tighter">
+                                                <span>위협 낮음 (수익성 높음)</span>
+                                                <span>위협 높음 (수익성 낮음)</span>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Result Report */}
                         {step === 2 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="flex justify-between items-start mb-16">
-                                    <div>
-                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Industry Attractiveness Report</span>
-                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.subject || "산업 구조 분석 결과"}</h2>
-                                    </div>
-                                    {data.scenarioContext && (
-                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
-                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
-                                        </div>
-                                    )}
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Porter's 5 Forces Industry Analysis
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        산업 구조 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">대상: {data.subject || "미정"}</p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 items-center mb-12">
-                                    <div className="space-y-6">
-                                        {forces.map(f => (
-                                            <div key={f.k}>
-                                                <div className="flex justify-between text-sm font-black mb-2">
-                                                    <span className="text-slate-600">{f.n}</span>
-                                                    <span className="text-blue-600">{data.scores[f.k]}/10</span>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                                    {/* Forces Progress Bars */}
+                                    <div className="space-y-8">
+                                        {FORCES_CONFIG.map(f => (
+                                            <div key={f.k} className="space-y-3">
+                                                <div className="flex justify-between items-end">
+                                                    <span className="text-lg font-black text-slate-700">{f.n}</span>
+                                                    <span className={`text-xl font-black ${f.color}`}>{data.scores[f.k]}/10</span>
                                                 </div>
-                                                <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
-                                                    <div className="h-full bg-blue-600" style={{ width: (data.scores[f.k] * 10) + "%" }}></div>
+                                                <div className="h-4 bg-slate-100 rounded-full overflow-hidden p-1">
+                                                    <div 
+                                                        className={`h-full rounded-full transition-all duration-1000 ${data.scores[f.k] > 7 ? 'bg-rose-500' : data.scores[f.k] > 4 ? 'bg-amber-500' : 'bg-emerald-500'}`}
+                                                        style={{ width: `${data.scores[f.k] * 10}%` }}
+                                                    ></div>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
-                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
-                                        <p className="text-blue-400 font-black text-xs uppercase mb-2">Average Pressure</p>
-                                        <h4 className="text-5xl font-black mb-6">{avgScore}</h4>
-                                        <p className="text-sm opacity-60 leading-relaxed font-medium">
-                                            {avgScore > 7 ? "경쟁 압력이 매우 높아 수익을 내기 어려운 시장입니다." : 
-                                             avgScore > 4 ? "보통 수준의 경쟁 환경입니다." : 
-                                             "매우 매력적인 시장입니다."}
+
+                                    {/* Summary Gauge */}
+                                    <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-9xl opacity-10 font-black">!</div>
+                                        <p className="text-blue-400 font-black text-sm uppercase tracking-widest mb-4">Average Competitive Pressure</p>
+                                        <h4 className="text-7xl font-black mb-8 tracking-tighter">{avgScore}</h4>
+                                        <div className={`inline-block px-8 py-3 rounded-full text-sm font-black mb-8 ${Number(avgScore) > 7 ? 'bg-rose-600' : Number(avgScore) > 4 ? 'bg-amber-600' : 'bg-emerald-600'}`}>
+                                            {Number(avgScore) > 7 ? "매우 높은 경쟁 압력" : Number(avgScore) > 4 ? "보통 수준의 경쟁 환경" : "매우 매력적인 시장 환경"}
+                                        </div>
+                                        <p className="text-slate-400 leading-relaxed font-medium">
+                                            {Number(avgScore) > 7 
+                                                ? "이 산업은 5가지 압력이 모두 강력하여 평균 수익률이 낮을 가능성이 큽니다. 압도적인 차별화나 비용 우위 전략이 필수적입니다." 
+                                                : Number(avgScore) > 4 
+                                                ? "전형적인 경쟁 시장입니다. 특정 세부 시장(Niche)을 공략하거나 구매자와의 협상력을 높이는 전략적 포지셔닝이 필요합니다." 
+                                                : "산업의 구조적 매력도가 매우 높습니다. 신규 진입자를 막기 위한 진입장벽을 강화하고 시장 지배력을 공고히 하십시오."}
                                         </p>
                                     </div>
                                 </div>
-                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/porter/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">Porter's 5 Forces: 산업 분석의 정석</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                5 Forces 모델은 하버드 경영대학원의 **마이클 포터(Michael Porter)** 교수가 1979년에 발표한 산업 구조 분석 프레임워크입니다. 기업이 직면한 5가지 핵심 경쟁 압력을 분석하여 해당 산업의 수익 잠재력과 매력도를 정량적으로 평가합니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">수익 구조의 결정 요인</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">포터는 개별 기업의 역량보다 '산업의 구조'가 수익성을 결정하는 더 큰 요인이라고 보았습니다. 5가지 압력이 강할수록 산업 내 평균 수익률은 낮아지며, 이를 파악하는 것이 전략 수립의 첫걸음입니다.</p>
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                Porter's 5 Forces: 산업 구조 분석의 정석과 전략적 통찰
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>5 Forces 모델</strong>은 하버드 경영대학원의 <strong>마이클 포터(Michael Porter)</strong> 교수가 1979년 하버드 비즈니스 리뷰(HBR)에 발표한 산업 구조 분석 프레임워크입니다. 포터 교수는 개별 기업의 역량보다 '산업의 구조'가 기업의 수익성을 결정하는 더 근본적인 요인이라고 보았습니다. 이 모델은 기업이 직면한 5가지 핵심 경쟁 압력을 분석하여 해당 산업의 수익 잠재력과 매력도를 과학적으로 평가합니다.
+                                </p>
+                                <p>
+                                    5가지 압력이란 <strong>1) 기존 기업 간의 경쟁, 2) 신규 진입자의 위협, 3) 대체재의 위협, 4) 공급자의 협상력, 5) 구매자의 협상력</strong>을 의미합니다. 이 압력들이 강할수록 산업 내 평균 수익률은 낮아지며, 기업은 치열한 가격 전쟁이나 비용 상승의 압박을 받게 됩니다. 반대로 압력이 낮을수록 기업은 초과 수익을 달성할 수 있는 매력적인 환경에 놓이게 됩니다.
+                                </p>
+                                <p>
+                                    이 도구의 진정한 가치는 단순히 위협을 측정하는 데 그치지 않고, 기업이 어디에 위치해야 경쟁 압력을 최소화하고 지속 가능한 경쟁 우위를 확보할 수 있는지에 대한 방향성을 제시한다는 점에 있습니다. 파란랩의 5 Forces 분석 엔진은 이러한 고전적 경쟁 전략 이론을 현대적인 데이터 시각화 기술과 결합하여, 당신의 비즈니스가 속한 시장의 '진짜 얼굴'을 마주하도록 돕습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">1. 기존 기업 간 경쟁</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        동일 산업 내 경쟁자들의 수, 시장 성장성, 고정비 비중 등을 분석합니다. 경쟁이 치열할수록 마케팅 비용이 상승하고 가격 인하 압박이 거세집니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-600 shadow-sm">
+                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">2. 신규 진입자의 위협</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        규모의 경제, 브랜드 충성도, 자본 요구량 등 진입장벽을 분석합니다. 진입장벽이 낮을수록 새로운 경쟁자가 쉽게 유입되어 수익성을 희석시킵니다.
+                                    </p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">전략적 포지셔닝</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">이 도구는 단순히 위협을 측정하는 데 그치지 않고, 기업이 어디에 위치해야 경쟁 압력을 최소화하고 초과 수익을 달성할 수 있는지에 대한 방향성을 제시합니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 대체재의 위협</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        우리 제품과 기능은 비슷하지만 형태가 다른 제품의 존재를 분석합니다. 대체재는 산업의 가격 상한선을 결정짓는 강력한 제약 요인이 됩니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">4. 공급자 및 구매자의 협상력</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        원재료 공급처나 고객이 쥐고 있는 주도권을 분석합니다. 협상력이 한쪽으로 쏠릴수록 기업의 마진 구조는 취약해집니다.
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Porter, M. E. (1979). "How Competitive Forces Shape Strategy". *Harvard Business Review*.</li>
-                                    <li>• Porter, M. E. (2008). "The Five Competitive Forces That Shape Strategy". *Harvard Business Review*.</li>
+                                    <li>• Porter, M. E. (1979). "How Competitive Forces Shape Strategy". <em>Harvard Business Review</em>, 57(2), 137-145.</li>
+                                    <li>• Porter, M. E. (1980). <em>Competitive Strategy: Techniques for Analyzing Industries and Competitors</em>. Free Press.</li>
+                                    <li>• Porter, M. E. (2008). "The Five Competitive Forces That Shape Strategy". <em>Harvard Business Review</em>, 86(1), 78-93.</li>
+                                    <li>• Magretta, J. (2011). <em>Understanding Michael Porter: The Essential Guide to Competition and Strategy</em>. Harvard Business Review Press.</li>
                                 </ul>
                             </div>
                         </div>
@@ -228,8 +343,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<PorterApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(PorterApp));
     </script>
 </body>
 </html>
