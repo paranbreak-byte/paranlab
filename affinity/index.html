@@ -3,29 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- [SEO 표준] -->
     <title>친화도법 도구 | 아이디어 그룹화 및 KJ법 분석 | 파란랩(Paran Lab)</title>
     <meta name="description" content="흩어진 아이디어를 유사성에 따라 그룹화하여 핵심 통찰을 도출하세요. 가와키타 지로의 KJ법을 바탕으로 복잡한 정보를 과학적으로 정리합니다.">
-    <meta name="keywords" content="친화도법, AffinityDiagram, KJ법, 아이디어정리, 브레인스토밍, 파란랩, 가와키타지로">
-    <meta property="og:title" content="파란랩 친화도법 분석 엔진">
-    <meta property="og:description" content="복잡한 생각을 하나로 묶는 기술, 친화도법으로 시작하세요.">
-    <meta property="og:type" content="website">
-    <link rel="canonical" href="https://paranlab.com/affinity/">
     
-    <!-- [구조화 데이터] -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 친화도법 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "방대한 아이디어를 유사성에 따라 그룹화하여 핵심 키워드를 도출하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
-    }
-    </script>
-
     <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -38,8 +18,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .sticky-note { transition: all 0.3s ease; border-left: 8px solid #3b82f6; }
-        .sticky-note:hover { transform: translateX(5px); }
+        .sticky-note { border-left: 8px solid #3b82f6; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -51,51 +30,41 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.7] 도구 전용 기본 샘플 (팀 소통 개선 아이디어)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "우리 팀의 소통 활성화 방안",
+            ideas: ["매주 금요일 티타임", "슬랙 채널 정리", "익명 건의함 설치", "월 1회 회식", "업무 공유 툴 도입", "칭찬 릴레이"],
+            groups: { 0: "오프라인 모임", 1: "디지털 도구", 2: "심리적 안전감", 3: "오프라인 모임", 4: "디지털 도구", 5: "심리적 안전감" },
+            isDefault: true
+        };
+
         function AffinityApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(1); // 1:Subject, 2:Ideas, 3:Grouping, 4:Result
-            const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState({
-                subject: "",
-                ideas: ["", "", ""],
-                groups: {}, // { ideaIndex: "GroupName" }
-                scenarioContext: null
-            });
+            const [step, setStep] = useState(4); 
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
                         const saved = localStorage.getItem('paranlab-affinity');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData(prev => ({
-                                subject: parsed.subject || prev.subject,
-                                ideas: Array.isArray(parsed.ideas) ? parsed.ideas : prev.ideas,
-                                groups: parsed.groups || prev.groups,
-                                scenarioContext: parsed.scenarioContext || prev.scenarioContext
-                            }));
-                            // 데이터가 있으면 즉시 결과 리포트로 이동 (Learning by Doing)
-                            if (parsed.subject && parsed.ideas && parsed.ideas.length > 0) {
-                                setStep(4);
-                            }
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) {
-                        console.error("Init Error:", e);
-                    }
+                    } catch (e) { console.error(e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
-                if (isLoaded) {
+                if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-affinity', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
-            // 그룹화 데이터 계산
             const groupedData = useMemo(() => {
                 const res = {};
                 data.ideas.forEach((idea, i) => {
@@ -107,281 +76,116 @@
                 return res;
             }, [data.ideas, data.groups]);
 
-            const handleShare = async () => {
-                const element = document.getElementById('report-card');
-                if (!element) return;
-                setIsSharing(true);
-                try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-                    canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'affinity-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩] 친화도법 분석 결과\n주제: ${data.subject}\nhttps://paranlab.com/affinity/`;
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: shareText });
-                        } else {
-                            const link = document.createElement('a');
-                            link.download = 'affinity-report.png';
-                            link.href = canvas.toDataURL();
-                            link.click();
-                        }
-                        setIsSharing(false);
-                    }, 'image/png');
-                } catch (err) {
-                    console.error('Share error:', err);
-                    setIsSharing(false);
-                }
-            };
-
-            if (!isLoaded) {
-                return (
-                    <div className="flex items-center justify-center min-h-screen">
-                        <div className="text-center">
-                            <div className="inline-block w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-6"></div>
-                            <h2 className="text-2xl font-black text-slate-800">친화도 엔진 가동 중...</h2>
-                        </div>
-                    </div>
-                );
-            }
+            if (!isLoaded) return null;
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 데이터 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-affinity'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-affinity'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-right hidden md:block">
-                            <p className="text-blue-400 font-black text-xs uppercase tracking-widest">Information Science</p>
-                            <p className="text-white font-bold text-sm">PARAN LAB AFFINITY v7.5</p>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Information Science</p>
+                            <p className="font-bold text-sm">PARAN LAB AFFINITY v7.7</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['주제 정의', '아이디어 나열', '그룹화 작업', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                        {['주제', '아이디어', '그룹화', '리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
-
-                    {/* 메인 컨텐츠 카드 */}
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 시나리오 배지 */}
-                        {data.scenarioContext && (
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-amber-100 text-amber-700 px-4 py-2 rounded-full text-xs font-black border border-amber-200 animate-pulse">
-                                    💡 시나리오 데이터 적용됨
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Subject */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">정리하고 싶은 주제를 입력하세요</h2>
-                                </div>
-                                <input 
-                                    type="text" 
-                                    value={data.subject} 
-                                    onChange={e => setData({...data, subject: e.target.value})}
-                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="예: 신제품 개발을 위한 아이디어 정리"
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 아이디어 나열</button>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">정리하고 싶은 주제를 입력하세요</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음 단계</button>
                             </div>
                         )}
 
-                        {/* Step 2: Ideas Listing */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Brainstorming</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">생각나는 모든 아이디어를 적으세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">형식에 구애받지 말고 자유롭게 나열하세요.</p>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">생각나는 모든 아이디어를 적으세요</h2>
                                 <div className="grid grid-cols-1 gap-4">
                                     {data.ideas.map((idea, i) => (
-                                        <div key={i} className="flex gap-4 animate-in slide-in-from-bottom-2" style={{animationDelay: `${i * 50}ms`}}>
-                                            <input 
-                                                type="text" 
-                                                value={idea} 
-                                                onChange={e => {
-                                                    const newIdeas = [...data.ideas];
-                                                    newIdeas[i] = e.target.value;
-                                                    setData({...data, ideas: newIdeas});
-                                                }}
-                                                className="flex-1 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-2 ring-blue-200"
-                                                placeholder={`아이디어 ${i + 1}`}
-                                            />
-                                            <button 
-                                                onClick={() => setData({...data, ideas: data.ideas.filter((_, idx) => idx !== i)})}
-                                                className="px-6 text-red-400 font-black hover:text-red-600"
-                                            >
-                                                삭제
-                                            </button>
+                                        <div key={i} className="flex gap-4">
+                                            <input type="text" value={idea} onChange={e => { const n = [...data.ideas]; n[i] = e.target.value; setData({...data, ideas: n, isDefault: false}); }} className="flex-1 p-6 bg-slate-50 rounded-2xl font-bold shadow-inner" placeholder={`아이디어 ${i+1}`} />
+                                            <button onClick={() => setData({...data, ideas: data.ideas.filter((_, idx) => idx !== i), isDefault: false})} className="text-red-400 font-black">삭제</button>
                                         </div>
                                     ))}
                                 </div>
-                                <button 
-                                    onClick={() => setData({...data, ideas: [...data.ideas, ""]})}
-                                    className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:bg-slate-50 transition-all"
-                                >
-                                    + 아이디어 추가
-                                </button>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 그룹화 작업</button>
-                                </div>
+                                <button onClick={() => setData({...data, ideas: [...data.ideas, ""], isDefault: false})} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black">+ 아이디어 추가</button>
+                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">다음</button></div>
                             </div>
                         )}
 
-                        {/* Step 3: Grouping */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 03. Grouping</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">유사한 아이디어끼리 묶어주세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">각 아이디어에 해당하는 그룹명을 입력하세요.</p>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">유사한 아이디어끼리 묶어주세요</h2>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                                     {data.ideas.map((idea, i) => idea.trim() && (
                                         <div key={i} className="p-6 bg-white rounded-[2rem] border-2 border-slate-100 shadow-sm sticky-note">
                                             <p className="text-slate-800 font-bold mb-4 text-lg">"{idea}"</p>
-                                            <input 
-                                                type="text" 
-                                                value={data.groups[i] || ""} 
-                                                onChange={e => setData({...data, groups: {...data.groups, [i]: e.target.value}})}
-                                                className="w-full p-4 bg-blue-50 rounded-xl border-none outline-none text-sm font-black text-blue-600 placeholder:text-blue-200"
-                                                placeholder="그룹명 입력 (예: 비용, 디자인, 기술)"
-                                            />
+                                            <input type="text" value={data.groups[i] || ""} onChange={e => setData({...data, groups: {...data.groups, [i]: e.target.value}, isDefault: false})} className="w-full p-4 bg-blue-50 rounded-xl font-black text-blue-600" placeholder="그룹명 입력" />
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
-                                </div>
+                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">리포트 생성</button></div>
                             </div>
                         )}
 
-                        {/* Step 4: Result Report */}
                         {step === 4 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        Affinity Diagram Analysis
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        아이디어 그룹화 리포트
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Affinity Diagram Analysis</span>
+                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">아이디어 그룹화 리포트</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject}</p>
                                 </div>
-
                                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-12">
                                     {Object.keys(groupedData).map((groupName, i) => (
                                         <div key={i} className="p-10 bg-slate-50 rounded-[3.5rem] border border-slate-100 shadow-sm relative overflow-hidden">
-                                            <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">{i + 1}</div>
-                                            <h3 className="font-black text-blue-600 mb-6 flex items-center gap-2 text-xl">
-                                                📌 {groupName}
-                                            </h3>
+                                            <h3 className="font-black text-blue-600 mb-6 text-xl">📌 {groupName}</h3>
                                             <ul className="space-y-4">
                                                 {groupedData[groupName].map((item, j) => (
-                                                    <li key={j} className="flex items-start gap-3 text-slate-700 font-bold leading-relaxed">
-                                                        <span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0"></span>
-                                                        {item}
-                                                    </li>
+                                                    <li key={j} className="flex items-start gap-3 text-slate-700 font-bold leading-relaxed"><span className="w-1.5 h-1.5 bg-blue-400 rounded-full mt-2 shrink-0"></span>{item}</li>
                                                 ))}
                                             </ul>
                                         </div>
                                     ))}
                                 </div>
-
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">📎</div>
-                                    <h3 className="text-2xl font-black mb-4">친화도 분석 인사이트</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        그룹화된 아이디어들은 복잡한 문제 속의 핵심 패턴을 보여줍니다. 
-                                        가장 많은 아이디어가 모인 그룹이나, 예상치 못한 연결 고리를 가진 그룹에 주목하여 전략적 우선순위를 결정하십시오.
-                                    </p>
-                                </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
-                                </div>
                             </div>
                         )}
                     </div>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/affinity/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/affinity/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                친화도법: 복잡한 정보를 구조화하는 KJ법의 과학
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>친화도법(Affinity Diagram)</strong>은 방대한 양의 아이디어나 데이터를 유사성에 따라 그룹화하여 문제의 본질을 파악하는 창의적 사고 도구입니다. 이 기법은 1960년대 일본의 인류학자 <strong>가와키타 지로(Jiro Kawakita)</strong>에 의해 개발되었으며, 그의 이름을 따서 <strong>KJ법</strong>이라고도 불립니다. 친화도법은 단순히 정보를 분류하는 것을 넘어, 겉으로 보기에 관련 없어 보이는 데이터들 사이의 잠재적 관계를 시각화하는 데 탁월한 효능이 있습니다.
-                                </p>
-                                <p>
-                                    전통적인 분석법이 하향식(Top-down)으로 미리 정해진 카테고리에 데이터를 끼워 맞추는 방식이라면, 친화도법은 상향식(Bottom-up) 접근을 취합니다. 데이터 자체에서 의미를 찾아내고, 그 데이터들이 스스로 그룹을 형성하게 함으로써 분석자의 선입견을 배제한 객관적인 통찰을 얻을 수 있습니다. 이는 특히 브레인스토밍 직후 쏟아져 나온 수많은 아이디어를 정리하거나, 복잡한 고객 피드백에서 핵심 요구사항을 도출할 때 강력한 힘을 발휘합니다.
-                                </p>
-                                <p>
-                                    심리학적으로 친화도법은 인간의 뇌가 정보를 처리하는 방식인 <strong>'청킹(Chunking)'</strong> 원리를 활용합니다. 낱개의 정보를 의미 있는 덩어리로 묶음으로써 인지적 과부하를 줄이고, 문제의 전체상을 조망할 수 있게 합니다. 현대 경영에서는 품질 관리(TQM)의 7가지 신도구 중 하나로 꼽히며, 디자인 씽킹(Design Thinking)의 공감 및 정의 단계에서 필수적인 도구로 사용되고 있습니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 상향식 그룹화 (Bottom-up)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        미리 카테고리를 정하지 않습니다. 아이디어들을 펼쳐놓고 서로 '친한' 것끼리 모으다 보면 자연스럽게 그룹의 이름이 결정됩니다. 이는 새로운 관점을 발견하게 하는 핵심 동력입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 시각적 패턴 인식</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        텍스트로만 존재하던 정보가 공간적으로 배치되면서 뇌는 패턴을 인식하기 시작합니다. 특정 영역에 아이디어가 몰려 있다면, 그것이 바로 문제 해결의 핵심 지점일 가능성이 높습니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 팀 합의 형성</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        여러 사람의 아이디어를 함께 그룹화하는 과정에서 팀원들은 서로의 생각을 이해하고 공통된 결론에 도달하게 됩니다. 이는 실행 단계에서의 강력한 동기부여가 됩니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 복잡성의 단순화</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        수백 개의 아이디어를 5~6개의 핵심 그룹으로 압축함으로써 의사결정자는 명확한 전략적 방향성을 설정할 수 있습니다. 단순함이 곧 강력함입니다.
-                                    </p>
-                                </div>
-                            </div>
-
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">친화도법: 복잡한 정보를 구조화하는 KJ법의 과학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">친화도법(Affinity Diagram)은 방대한 양의 아이디어나 데이터를 유사성에 따라 그룹화하여 문제의 본질을 파악하는 창의적 사고 도구입니다. 이 기법은 1960년대 일본의 인류학자 <strong>가와키타 지로(Jiro Kawakita)</strong>에 의해 개발되었으며, 그의 이름을 따서 <strong>KJ법</strong>이라고도 불립니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Kawakita, J. (1967). <em>The KJ Method: A Scientific Approach to Problem Solving</em>. Chuokoron-sha.</li>
-                                    <li>• Scupin, R. (1997). "The KJ Method: A Technique for Analyzing Data Derived from Japanese Ethnology". <em>Human Organization</em>.</li>
                                     <li>• Tague, N. R. (2005). <em>The Quality Toolbox</em>. ASQ Quality Press.</li>
                                 </ul>
                             </div>
@@ -390,10 +194,7 @@
                 </main>
             );
         }
-
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(AffinityApp));
     </script>
 </body>
