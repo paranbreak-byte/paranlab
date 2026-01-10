@@ -6,25 +6,29 @@
     
     <!-- [SEO 표준] -->
     <title>OKR 설정 도구 | 도전적 목표와 핵심 결과 지표 관리 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="구글과 인텔의 성공 비결, OKR(Objectives and Key Results)을 통해 도전적인 목표를 수립하고 성과를 측정하세요. 지민이의 영어 정복 시나리오와 함께합니다.">
-    <meta name="keywords" content="OKR, 목표관리, 성과지표, 핵심결과, 구글목표설정, 조직관리도구, 파란랩">
+    <meta name="description" content="구글과 인텔의 성공 비결, OKR을 통해 도전적인 목표를 수립하고 성과를 측정하세요. 가슴 뛰는 목표(O)와 측정 가능한 결과(KR)를 설계하는 과학적 도구입니다.">
+    <meta name="keywords" content="OKR, 목표관리, 성과지표, 핵심결과, 구글목표설정, 조직관리도구, 파란랩, 존도어, 앤디그로브">
+    <meta property="og:title" content="파란랩 OKR 설정 엔진">
+    <meta property="og:description" content="단순한 KPI를 넘어, 혁신을 만드는 OKR의 힘을 경험하세요.">
+    <meta property="og:type" content="website">
     <link rel="canonical" href="https://paranlab.com/okr/">
     
-    <!-- [구조화 데이터] -->
+    <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "파란랩 OKR 설정 엔진",
+      "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
-      "description": "도전적 목표(Objective)와 측정 가능한 결과(Key Results)를 설계하는 도구",
+      "description": "도전적 목표(Objective)와 측정 가능한 결과(Key Results)를 설계하고 관리하는 도구",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
     }
     </script>
 
     <!-- 라이브러리 로드 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -32,172 +36,305 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .okr-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .okr-card:hover { transform: translateY(-5px); }
         @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center">
-                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-500 font-bold">OKR 엔진 가동 중...</p>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
+
+        // [v7.7] 도구 전용 기본 샘플 (개인 커리어 성장 OKR)
+        const DEFAULT_TOOL_SAMPLE = {
+            obj: "글로벌 시장에서 인정받는 데이터 사이언티스트로 도약한다",
+            krs: [
+                "Kaggle 글로벌 랭킹 상위 5% 진입 및 은메달 이상 획득",
+                "데이터 분석 관련 전문 기술 블로그 월 방문자 1만 명 달성",
+                "실무 데이터 프로젝트 3건 완료 및 영어 포트폴리오 업데이트"
+            ],
+            isDefault: true
+        };
 
         function OkrApp() {
-            const [step, setStep] = useState(1); // 1:입력, 2:결과
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(3); // 샘플 우선 노출
             const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState({
-                obj: "", krs: ["", "", ""],
-                scenarioContext: null
-            });
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-okr');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        setData(prev => ({ ...prev, ...parsed }));
-                        setStep(2);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-okr');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
+
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-okr', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
 
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'okr-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 OKR 리포트]\n목표: ${data.obj}\nhttps://paranlab.com`;
-                        navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 OKR 분석', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] OKR 설정 리포트: ${data.obj}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'okr-report.png'; link.href = canvas.toDataURL(); link.click();
-                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
+                            const link = document.createElement('a');
+                            link.download = 'okr-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
-            const resetAll = () => { if (confirm("초기화하시겠습니까?")) { localStorage.removeItem('paranlab-okr'); location.reload(); } };
+            if (!isLoaded) return null;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-okr'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">OKR Engine v7.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Performance Science</p>
+                            <p className="font-bold text-sm">PARAN LAB OKR v7.7</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['목표 설정(O)', '핵심 결과(KR)', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">가슴 뛰는 목표(O)와 측정 가능한 결과(KR)</h2>
-                                <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-xl">
-                                    <label className="block text-xs font-black uppercase mb-2 opacity-70 tracking-widest">Objective (목표)</label>
-                                    <input type="text" value={data.obj} onChange={e => setData({...data, obj: e.target.value})} className="w-full bg-transparent border-none outline-none text-3xl font-black placeholder:text-white/30" placeholder="어디로 가고 싶나요? (정성적 목표)" />
-                                </div>
-                                <div className="space-y-6">
-                                    <h3 className="text-xl font-black text-slate-800">Key Results (핵심 결과)</h3>
-                                    {data.krs.map((kr, i) => (
-                                        <div key={i} className="flex gap-4 items-center p-6 bg-slate-50 rounded-3xl border border-slate-100">
-                                            <span className="w-10 h-10 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0">{i+1}</span>
-                                            <input type="text" value={kr} onChange={e => {
-                                                const newKrs = [...data.krs]; newKrs[i] = e.target.value; setData({...data, krs: newKrs});
-                                            }} className="flex-1 bg-transparent border-none outline-none text-lg font-bold" placeholder="어떻게 측정할까요? (정량적 지표)" />
-                                        </div>
-                                    ))}
-                                </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">OKR 리포트 확인하기</button>
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
                             </div>
                         )}
 
-                        {step === 2 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="flex justify-between items-start mb-16">
-                                    <div>
-                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Objectives & Key Results</span>
-                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">나의 OKR 리포트</h2>
-                                    </div>
-                                    {data.scenarioContext && (
-                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
-                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs font-bold">{data.scenarioContext.title}</p>
-                                        </div>
-                                    )}
+                        {/* Step 1: Objective */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Objective</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">가슴 뛰는 도전적 목표를 세우세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">Objective는 정성적이고 영감을 주는 문장이어야 합니다.</p>
                                 </div>
-                                <div className="max-w-3xl mx-auto space-y-12">
-                                    <div className="p-12 bg-blue-600 text-white rounded-[3.5rem] shadow-2xl relative overflow-hidden">
-                                        <h3 className="text-sm font-black uppercase tracking-widest opacity-70 mb-4">Objective</h3>
-                                        <p className="text-4xl font-black leading-tight">{data.obj || "목표 미설정"}</p>
+                                <div className="p-10 bg-blue-600 text-white rounded-[3rem] shadow-xl">
+                                    <textarea 
+                                        value={data.obj} 
+                                        onChange={e => setData({...data, obj: e.target.value, isDefault: false})}
+                                        className="w-full h-40 bg-transparent border-none outline-none text-2xl md:text-3xl font-black placeholder:text-white/30 leading-tight text-center"
+                                        placeholder="어디로 가고 싶나요? (예: 업계 최고의 고객 경험을 제공한다)"
+                                    />
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 핵심 결과(KR) 설정</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Key Results */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Key Results</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">측정 가능한 결과를 정의하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">Key Results는 반드시 숫자로 측정 가능해야 합니다.</p>
+                                </div>
+                                <div className="space-y-6">
+                                    {data.krs.map((kr, i) => (
+                                        <div key={i} className="flex gap-4 items-center p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 animate-in slide-in-from-bottom-2" style={{animationDelay: `${i * 100}ms`}}>
+                                            <div className="w-12 h-12 bg-slate-800 text-white rounded-full flex items-center justify-center font-black shrink-0 shadow-lg">{i + 1}</div>
+                                            <input 
+                                                type="text" 
+                                                value={kr} 
+                                                onChange={e => {
+                                                    const newKrs = [...data.krs];
+                                                    newKrs[i] = e.target.value;
+                                                    setData({...data, krs: newKrs, isDefault: false});
+                                                }}
+                                                className="flex-1 bg-transparent border-none outline-none text-xl font-bold text-slate-700"
+                                                placeholder="어떻게 측정할까요? (예: 재방문율 20% 향상)"
+                                            />
+                                            {data.krs.length > 1 && (
+                                                <button onClick={() => setData({...data, krs: data.krs.filter((_, idx) => idx !== i), isDefault: false})} className="text-red-400 font-black">삭제</button>
+                                            )}
+                                        </div>
+                                    ))}
+                                </div>
+                                <button 
+                                    onClick={() => setData({...data, krs: [...data.krs, ""], isDefault: false})}
+                                    className="w-full py-4 border-2 border-dashed border-slate-200 rounded-[2rem] text-slate-400 font-black hover:bg-slate-50 transition-all"
+                                >
+                                    + 핵심 결과 추가
+                                </button>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Result Report */}
+                        {step === 3 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Objectives & Key Results Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        나의 OKR 리포트
+                                    </h2>
+                                </div>
+
+                                <div className="max-w-4xl mx-auto space-y-12">
+                                    {/* Objective Card */}
+                                    <div className="p-12 bg-blue-600 text-white rounded-[4rem] shadow-2xl relative overflow-hidden okr-card">
+                                        <div className="absolute -top-4 -right-4 text-9xl opacity-10 font-black">O</div>
+                                        <h3 className="text-xs font-black uppercase tracking-widest opacity-70 mb-6">Objective (도전적 목표)</h3>
+                                        <p className="text-3xl md:text-4xl font-black leading-tight">
+                                            "{data.obj || "정의된 목표 없음"}"
+                                        </p>
                                     </div>
+
+                                    {/* Key Results List */}
                                     <div className="space-y-6">
-                                        <h3 className="text-xl font-black text-slate-800 ml-4">Key Results</h3>
-                                        {data.krs.map((kr, i) => kr && (
-                                            <div key={i} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 flex items-center gap-6">
-                                                <div className="w-12 h-12 bg-white border-2 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black shrink-0 shadow-sm">{i+1}</div>
-                                                <p className="text-xl font-bold text-slate-700">{kr}</p>
+                                        <h3 className="text-xl font-black text-slate-800 ml-6 flex items-center gap-2">
+                                            🎯 Key Results (핵심 결과 지표)
+                                        </h3>
+                                        {data.krs.map((kr, i) => kr.trim() && (
+                                            <div key={i} className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 flex items-center gap-8 okr-card">
+                                                <div className="w-16 h-16 bg-white border-4 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black text-2xl shrink-0 shadow-lg">
+                                                    {i + 1}
+                                                </div>
+                                                <p className="text-xl md:text-2xl font-bold text-slate-700 leading-relaxed">
+                                                    {kr}
+                                                </p>
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+
+                                <div className="mt-20 p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🚀</div>
+                                    <h3 className="text-2xl font-black mb-4">OKR 실행을 위한 제언</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        OKR의 목표는 100% 달성이 아닌 <strong>70% 달성</strong>을 목표로 할 만큼 도전적이어야 합니다. 
+                                        수치화된 Key Results를 매주 점검하며, 목표를 향한 정렬(Alignment)을 유지하십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 3 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/okr/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">OKR: 구글을 만든 목표 설정의 과학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                OKR(Objectives and Key Results)은 인텔의 전 CEO **앤디 그로브(Andy Grove)**가 창안하고, 전설적인 투자자 **존 도어(John Doerr)**가 구글에 도입하며 전 세계적으로 확산된 목표 설정 프레임워크입니다. 단순히 할 일을 나열하는 것이 아니라, 가슴 뛰는 목표(O)와 이를 증명하는 수치적 결과(KR)를 연결합니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                OKR: 구글과 실리콘밸리를 만든 목표 설정의 과학
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>OKR(Objectives and Key Results)</strong>은 인텔의 전 CEO <strong>앤디 그로브(Andy Grove)</strong>가 창안하고, 전설적인 투자자 <strong>존 도어(John Doerr)</strong>가 구글에 도입하며 전 세계적으로 확산된 목표 설정 프레임워크입니다. 단순히 할 일을 나열하는 기존의 방식에서 벗어나, 조직이나 개인이 나아가야 할 가슴 뛰는 방향(Objective)과 그 방향으로 가고 있음을 증명하는 측정 가능한 지표(Key Results)를 연결하는 것이 핵심입니다.
+                                </p>
+                                <p>
+                                    OKR의 진정한 가치는 <strong>'도전성'</strong>과 <strong>'투명성'</strong>에 있습니다. 존 도어는 그의 저서 <em>'Measure What Matters'</em>에서 OKR의 목표는 100% 달성이 당연시되는 안전한 목표가 아니라, 70% 정도만 달성해도 성공이라고 평가받을 만큼 공격적인 '문샷(Moonshot)' 목표여야 한다고 강조합니다. 이는 구성원들이 기존의 사고방식을 깨고 혁신적인 방법을 찾도록 유도하는 강력한 심리적 장치가 됩니다.
+                                </p>
+                                <p>
+                                    또한, 모든 Key Results는 반드시 숫자로 측정 가능해야 합니다. "고객 만족도 향상"과 같은 모호한 문구 대신 "NPS 지수 20점 상승"과 같이 결과가 명확할 때, 실행력은 극대화됩니다. 파란랩의 OKR 설정 엔진은 이러한 실리콘밸리의 성과 관리 철학을 현대적인 인터페이스로 구현하여, 당신의 비전이 단순한 희망 사항에 그치지 않고 실질적인 성과로 이어지도록 가이드합니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">도전적 목표 (Moonshot)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">OKR의 목표는 100% 달성이 아닌 70% 달성을 목표로 할 만큼 도전적이어야 합니다. 이는 조직과 개인이 기존의 한계를 넘어 혁신적인 방법을 찾도록 유도하는 심리적 장치입니다.</p>
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. Objective (정성적 목표)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        "우리가 무엇을 달성하고 싶은가?"에 대한 답입니다. 구체적이고, 행동 지향적이며, 영감을 주는 문장이어야 합니다. 잘 세워진 목표는 팀원들의 가슴을 뛰게 만듭니다.
+                                    </p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">측정 가능한 결과</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">핵심 결과(Key Results)는 반드시 숫자로 측정 가능해야 합니다. "열심히 공부하기"가 아니라 "오픽 AL 등급 획득"과 같이 결과가 명확할 때 실행력이 극대화됩니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">2. Key Results (정량적 결과)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        "목표 달성 여부를 어떻게 알 수 있는가?"에 대한 답입니다. 반드시 측정 가능한 수치가 포함되어야 하며, 달성하기 어렵지만 불가능하지 않은 수준으로 설정합니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">3. 정렬과 집중 (Alignment)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        OKR은 조직 전체의 목표와 개인의 목표를 하나로 정렬시킵니다. 모든 에너지를 가장 중요한 우선순위에 집중하게 함으로써 자원 낭비를 방지합니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-600 shadow-sm">
+                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">4. 추적과 회고</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        OKR은 한 번 세우고 끝나는 것이 아닙니다. 주기적인 체크인을 통해 진척도를 확인하고, 실패를 통해 배우며 다음 분기의 목표를 더 정교하게 다듬어 나갑니다.
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Doerr, J. (2018). *Measure What Matters: How Google, Bono, and the Gates Foundation Rock the World with OKRs*. Portfolio.</li>
-                                    <li>• Grove, A. S. (1983). *High Output Management*. Random House.</li>
-                                    <li>• Wodtke, C. R. (2016). *Radical Focus: Achieving Your Most Important Goals with Objectives and Key Results*.</li>
+                                    <li>• Doerr, J. (2018). <em>Measure What Matters: How Google, Bono, and the Gates Foundation Rock the World with OKRs</em>. Portfolio.</li>
+                                    <li>• Grove, A. S. (1983). <em>High Output Management</em>. Random House.</li>
+                                    <li>• Wodtke, C. R. (2016). <em>Radical Focus: Achieving Your Most Important Goals with Objectives and Key Results</em>. Cucina Media.</li>
+                                    <li>• Niven, P. R., & Lamorte, B. (2016). <em>Objectives and Key Results: Driving Focus, Alignment, and Engagement with OKRs</em>. Wiley.</li>
                                 </ul>
                             </div>
                         </div>
@@ -205,8 +342,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<OkrApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(OkrApp));
     </script>
 </body>
 </html>
