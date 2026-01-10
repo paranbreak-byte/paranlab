@@ -6,8 +6,12 @@
     
     <!-- [SEO 표준] -->
     <title>만다라트 계획표 | 목표 달성을 위한 81칸 핵심 전략 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="오타니 쇼헤이의 성공 비결, 만다라트 계획표를 온라인에서 작성하세요. 지민이의 영어 정복 시나리오와 함께 목표를 시각화하고 실행력을 높이는 도구입니다.">
-    <meta name="keywords" content="만다라트, Mandalart, 목표설정, 오타니계획표, 성공전략, 아이디어발상, 파란랩">
+    <meta name="description" content="오타니 쇼헤이의 성공 비결, 만다라트 계획표를 온라인에서 작성하세요. 핵심 목표를 8가지 세부 목표와 64가지 실행 과제로 시각화하여 달성률을 높입니다.">
+    <meta name="keywords" content="만다라트, Mandalart, 목표설정, 오타니계획표, 성공전략, 아이디어발상, 파란랩, 이마즈히로아키">
+    <meta property="og:title" content="파란랩 만다라트 엔진">
+    <meta property="og:description" content="81칸의 기적, 당신의 목표를 시각화하고 현실로 만드세요.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/mandalart/">
     
     <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
@@ -15,14 +19,16 @@
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "파란랩 만다라트 엔진",
+      "operatingSystem": "All",
       "applicationCategory": "DesignApplication",
+      "description": "핵심 목표를 중심으로 81개의 칸을 채워 구체적인 실행 계획을 수립하는 도구",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
     }
     </script>
 
     <!-- 라이브러리 로드 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -30,19 +36,22 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         
         /* 만다라트 그리드 스타일 */
-        .manda-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 2px; background-color: #e2e8f0; border: 2px solid #e2e8f0; }
-        .manda-cell { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; padding: 4px; font-size: 10px; line-height: 1.2; text-align: center; word-break: keep-all; background-color: white; }
+        .manda-grid { display: grid; grid-template-columns: repeat(9, 1fr); gap: 2px; background-color: #e2e8f0; border: 2px solid #e2e8f0; border-radius: 1rem; overflow: hidden; }
+        .manda-cell { aspect-ratio: 1/1; display: flex; align-items: center; justify-content: center; padding: 4px; font-size: 10px; line-height: 1.2; text-align: center; word-break: keep-all; background-color: white; transition: all 0.2s; }
         .cell-main { background-color: #2563eb !important; color: white; font-weight: 900; font-size: 12px; }
-        .cell-sub { background-color: #eff6ff !important; color: #1e40af; font-weight: 700; }
+        .cell-sub { background-color: #eff6ff !important; color: #1e40af; font-weight: 700; font-size: 11px; }
+        .manda-cell:hover { filter: brightness(0.95); }
         
         @media (max-width: 768px) {
             .manda-cell { font-size: 6px; padding: 1px; }
             .cell-main { font-size: 8px; }
+            .cell-sub { font-size: 7px; }
         }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
@@ -53,153 +62,182 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        function MandalartApp() {
-            const [step, setStep] = useState(1); // 1:핵심/세부목표, 2:실행과제, 3:결과
-            const [activeSub, setActiveSub] = useState(0); // 현재 입력 중인 세부 목표 인덱스
-            const [isSharing, setIsSharing] = useState(false);
-            
-            const [data, setData] = useState({
-                mainGoal: "",
-                subGoals: Array(8).fill(""),
-                actions: Array(8).fill(null).map(() => Array(8).fill("")),
-                scenarioContext: null
-            });
+        // [v7.7] 도구 전용 기본 샘플 (오타니 쇼헤이의 목표 달성표)
+        const DEFAULT_TOOL_SAMPLE = {
+            mainGoal: "8구단 드래프트 1순위",
+            subGoals: ["몸만들기", "제구", "구위", "멘탈", "변화구", "운", "인간성", "훈련"],
+            actions: [
+                ["식사 7그릇", "단백질 섭취", "유연성", "스테미너", "가동역", "부상방지", "근력트레이닝", "휴식"], // 몸만들기
+                ["인스텝 개선", "체간 안정", "릴리스 포인트", "하체 주도", "어깨 강화", "손목 강화", "거리 조절", "일관성"], // 제구
+                ["회전수 증가", "볼 끝 강화", "각도 조절", "스트라이크 존", "초구 스트라이크", "구속 160km", "무게 중심", "폭발력"], // 구위
+                ["일희일비 금지", "목표 설정", "자기 통제", "감사하는 마음", "평상심", "투지", "자신감", "집중력"], // 멘탈
+                ["포크볼", "슬라이더", "커브", "체인지업", "낙차 계산", "완급 조절", "결정구", "카운트 잡기"], // 변화구
+                ["인사하기", "쓰레기 줍기", "장비 소중히", "심판 대하는 태도", "긍정적 사고", "응원받는 사람", "독서", "행운"], // 운
+                ["감성", "배려", "예의", "신뢰", "계획성", "감사", "지속력", "사랑받는 사람"], // 인간성
+                ["런닝", "피칭 연습", "원거리 투구", "쉐도우 피칭", "수비 훈련", "웨이트", "전술 이해", "비디오 분석"] // 훈련
+            ],
+            isDefault: true
+        };
 
-            // [표준] 데이터 수신
+        function MandalartApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(3); // 샘플 우선 노출
+            const [activeSub, setActiveSub] = useState(0);
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-mandalart');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        setData({
-                            mainGoal: parsed.mainGoal || "",
-                            subGoals: Array.isArray(parsed.subGoals) ? parsed.subGoals : Array(8).fill(""),
-                            actions: Array.isArray(parsed.actions) ? parsed.actions : Array(8).fill(null).map(() => Array(8).fill("")),
-                            scenarioContext: parsed.scenarioContext || null
-                        });
-                        setStep(3);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-mandalart');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
 
-            // --- [표준] 공유 로직 ---
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-mandalart', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'mandalart-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 만다라트 리포트]\n핵심 목표: ${data.mainGoal}\n81칸의 성공 지도를 완성했습니다.\n\n상세 보기: https://paranlab.com`;
-                        navigator.clipboard.writeText(shareText);
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 만다라트', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 만다라트 성공 지도: ${data.mainGoal}` });
                         } else {
                             const link = document.createElement('a');
                             link.download = 'mandalart-report.png';
                             link.href = canvas.toDataURL();
                             link.click();
-                            alert('이미지가 저장되었습니다. 링크와 함께 공유하세요!');
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
-            const resetAll = () => { if (confirm("모든 데이터를 초기화하시겠습니까?")) { localStorage.removeItem('paranlab-mandalart'); location.reload(); } };
+            if (!isLoaded) return null;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    {/* [표준] 상단 컨트롤 바 */}
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정하기</button>
-                            <button onClick={resetAll} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-mandalart'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Mandalart Engine v6.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Goal Science</p>
+                            <p className="font-bold text-sm">PARAN LAB MANDALART v7.7</p>
+                        </div>
                     </div>
 
-                    {/* [표준] 단계 네비게이션 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
                         {['목표 설정', '실행 계획', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-4 text-xs md:text-sm font-black ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    <div id="report-card" className="bg-white p-6 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                    {/* [Part 3] 상단 광고 영역 */}
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         
-                        {/* STEP 1: 핵심 및 세부 목표 */}
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Step 1: Main & Sub Goals */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
                                 <div className="text-center">
-                                    <h2 className="text-3xl font-black text-slate-900">1. 핵심 목표와 8가지 세부 목표</h2>
-                                    <p className="text-slate-500 mt-2">가장 중심이 되는 목표를 세우고, 이를 이루기 위한 8개 영역을 정하세요.</p>
+                                    <h2 className="text-4xl font-black text-slate-900">핵심 목표와 8가지 세부 목표</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">가장 중심이 되는 목표를 세우고, 이를 이루기 위한 8개 영역을 정하세요.</p>
                                 </div>
                                 <div className="max-w-2xl mx-auto space-y-8">
-                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border-2 border-blue-200">
-                                        <label className="block text-xs font-black text-blue-400 uppercase mb-2 tracking-widest">Main Goal</label>
-                                        <input type="text" value={data.mainGoal} onChange={e => setData({...data, mainGoal: e.target.value})} className="w-full p-4 bg-white rounded-2xl border-none outline-none text-2xl font-black text-center shadow-sm" placeholder="최종 목표 입력" />
+                                    <div className="p-10 bg-blue-50 rounded-[3rem] border-2 border-blue-200 shadow-inner">
+                                        <label className="block text-[10px] font-black text-blue-400 uppercase mb-2 tracking-widest">Main Goal (최종 목표)</label>
+                                        <input type="text" value={data.mainGoal} onChange={e => setData({...data, mainGoal: e.target.value, isDefault: false})} className="w-full p-4 bg-white rounded-2xl border-none outline-none text-3xl font-black text-center shadow-sm focus:ring-4 ring-blue-100" placeholder="최종 목표 입력" />
                                     </div>
                                     <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                                         {data.subGoals.map((sg, i) => (
-                                            <div key={i}>
-                                                <label className="block text-[10px] font-black text-slate-400 mb-1 uppercase">Sub {i+1}</label>
-                                                <input type="text" value={sg} onChange={e => {
-                                                    const newSg = [...data.subGoals]; newSg[i] = e.target.value; setData({...data, subGoals: newSg});
-                                                }} className="w-full p-3 bg-slate-50 rounded-xl border-none text-sm font-bold text-center focus:bg-white transition-all" placeholder="세부 목표" />
+                                            <div key={i} className="space-y-1">
+                                                <label className="block text-[10px] font-black text-slate-400 uppercase">Sub {i+1}</label>
+                                                <input type="text" value={sg} onChange={e => { const n = [...data.subGoals]; n[i] = e.target.value; setData({...data, subGoals: n, isDefault: false}); }} className="w-full p-4 bg-slate-50 rounded-2xl border-none text-sm font-bold text-center focus:bg-white focus:ring-2 ring-blue-100 transition-all" placeholder="세부 목표" />
                                             </div>
                                         ))}
                                     </div>
                                 </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">다음: 64개 실행 계획 세우기</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 64개 실행 계획 세우기</button>
                             </div>
                         )}
 
-                        {/* STEP 2: 실행 과제 입력 (세부 목표별로) */}
+                        {/* Step 2: Actions Wizard */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
                                 <div className="flex flex-wrap gap-2 justify-center mb-8">
                                     {data.subGoals.map((sg, i) => (
-                                        <button key={i} onClick={() => setActiveSub(i)} className={`px-4 py-2 rounded-full text-xs font-black transition-all ${activeSub === i ? 'bg-blue-600 text-white shadow-md' : 'bg-slate-100 text-slate-400'}`}>
+                                        <button key={i} onClick={() => setActiveSub(i)} className={`px-6 py-3 rounded-full text-xs font-black transition-all ${activeSub === i ? 'bg-blue-600 text-white shadow-lg scale-110' : 'bg-slate-100 text-slate-400 hover:bg-slate-200'}`}>
                                             {sg || `목표 ${i+1}`}
                                         </button>
                                     ))}
                                 </div>
-                                <div className="text-center">
-                                    <h2 className="text-2xl font-black text-slate-900">[{data.subGoals[activeSub] || `세부목표 ${activeSub+1}`}]</h2>
-                                    <p className="text-slate-500 text-sm mt-1">이 목표를 달성하기 위한 8가지 구체적 행동을 적으세요.</p>
+                                <div className="text-center p-10 bg-slate-50 rounded-[3rem] border border-slate-100">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Target Sub-Goal</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">[{data.subGoals[activeSub] || `세부목표 ${activeSub+1}`}]</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">이 목표를 달성하기 위한 8가지 구체적 행동을 적으세요.</p>
                                 </div>
-                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-3xl mx-auto">
+                                <div className="grid grid-cols-2 md:grid-cols-4 gap-4 max-w-4xl mx-auto">
                                     {data.actions[activeSub].map((act, i) => (
                                         <input key={i} type="text" value={act} onChange={e => {
                                             const newActions = [...data.actions];
                                             newActions[activeSub][i] = e.target.value;
-                                            setData({...data, actions: newActions});
-                                        }} className="w-full p-4 bg-slate-50 rounded-2xl border-none text-sm font-bold text-center shadow-inner" placeholder={`실행과제 ${i+1}`} />
+                                            setData({...data, actions: newActions, isDefault: false});
+                                        }} className="w-full p-6 bg-white rounded-2xl border-2 border-slate-100 text-sm font-bold text-center shadow-sm focus:border-blue-500 outline-none transition-all" placeholder={`실행과제 ${i+1}`} />
                                     ))}
                                 </div>
-                                <div className="flex gap-6 mt-12">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                    <button onClick={() => activeSub < 7 ? setActiveSub(activeSub + 1) : setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-lg">
-                                        {activeSub < 7 ? "다음 세부 목표" : "최종 만다라트 확인"}
+                                <div className="flex gap-4 mt-12">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => activeSub < 7 ? setActiveSub(activeSub + 1) : setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">
+                                        {activeSub < 7 ? "다음 세부 목표" : "최종 리포트 생성"}
                                     </button>
                                 </div>
                             </div>
                         )}
 
-                        {/* STEP 3: 결과 리포트 (81칸 그리드) */}
+                        {/* Step 3: Result Report */}
                         {step === 3 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-12">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Mandalart Success Map</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">{data.mainGoal || "나의 성공 지도"}</h2>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Mandalart Success Map</span>
+                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">{data.mainGoal || "나의 성공 지도"}</h2>
                                 </div>
 
-                                <div className="manda-grid mb-12">
-                                    {/* 9x9 그리드 렌더링 로직 */}
+                                <div className="manda-grid mb-16 shadow-2xl">
                                     {Array(9).fill().map((_, row) => 
                                         Array(9).fill().map((_, col) => {
                                             const blockRow = Math.floor(row / 3);
@@ -212,13 +250,13 @@
                                             let content = "";
                                             let className = "manda-cell ";
 
-                                            if (blockIdx === 4) { // 중앙 블록
+                                            if (blockIdx === 4) { // 중앙 3x3 블록
                                                 if (innerIdx === 4) { content = data.mainGoal; className += "cell-main"; }
                                                 else { 
                                                     const sgIdx = innerIdx > 4 ? innerIdx - 1 : innerIdx;
                                                     content = data.subGoals[sgIdx]; className += "cell-sub";
                                                 }
-                                            } else { // 주변 8개 블록
+                                            } else { // 주변 8개 3x3 블록
                                                 const sgIdx = blockIdx > 4 ? blockIdx - 1 : blockIdx;
                                                 if (innerIdx === 4) { content = data.subGoals[sgIdx]; className += "cell-sub"; }
                                                 else {
@@ -226,65 +264,79 @@
                                                     content = data.actions[sgIdx][actIdx];
                                                 }
                                             }
-
                                             return <div key={`${row}-${col}`} className={className}>{content}</div>;
                                         })
                                     )}
                                 </div>
 
-                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
-                                    <div className="relative z-10">
-                                        <p className="text-blue-400 font-black text-sm uppercase tracking-widest mb-4">Success Insight</p>
-                                        <h4 className="text-2xl md:text-3xl font-black mb-4">"생각이 바뀌면 행동이 바뀌고, 행동이 바뀌면 운명이 바뀐다."</h4>
-                                        <p className="text-sm opacity-60 font-medium leading-relaxed">
-                                            완성된 81칸의 지도는 당신의 잠재의식에 각인되어<br/>
-                                            목표를 향한 가장 빠른 길을 안내할 것입니다.
-                                        </p>
-                                    </div>
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🎯</div>
+                                    <h3 className="text-2xl font-black mb-4">성공을 위한 마인드셋</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        완성된 81칸의 지도는 당신의 잠재의식에 각인되어 목표를 향한 가장 빠른 길을 안내할 것입니다. 
+                                        <strong> "생각이 바뀌면 행동이 바뀌고, 행동이 바뀌면 운명이 바뀐다."</strong>
+                                    </p>
                                 </div>
 
-                                <div className="mt-10 pt-6 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* [표준] 하단 액션 버튼 세트 */}
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/mandalart/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [표준] 학술적 근거 섹션 (SEO) */}
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">만다라트: 뇌과학적 목표 달성법</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                만다라트(Mandalart)는 일본의 디자이너 **이마즈 히로아키**가 개발한 사고 기법으로, '만다라(Mandala)'와 '아트(Art)'의 합성어입니다. 불교의 만다라 문양처럼 중심에서 주변으로 사고를 확장하여, 복잡한 목표를 한눈에 파악할 수 있는 가장 강력한 시각화 도구입니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">만다라트: 뇌과학적 목표 달성법과 시각화의 힘</h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>만다라트(Mandalart)</strong>는 일본의 디자이너 <strong>이마즈 히로아키</strong>가 1987년 개발한 사고 기법으로, '만다라(Mandala)'와 '아트(Art)'의 합성어입니다. 불교의 만다라 문양처럼 중심에서 주변으로 사고를 확장하여, 복잡한 목표를 한눈에 파악할 수 있는 가장 강력한 시각화 도구 중 하나로 꼽힙니다. 이 기법은 메이저리그의 전설적인 투수 <strong>오타니 쇼헤이</strong>가 고교 시절 자신의 꿈을 이루기 위해 사용했다는 사실이 알려지면서 전 세계적인 주목을 받게 되었습니다.
+                                </p>
+                                <p>
+                                    만다라트의 핵심은 <strong>'방사형 사고(Radial Thinking)'</strong>에 있습니다. 인간의 뇌는 선형적인 리스트보다 방사형 구조를 더 빠르게 인식하고 처리합니다. 81칸의 그리드를 채우는 과정에서 뇌는 빈칸을 채우려는 본능적인 욕구를 발휘하며, 평소 생각지 못한 창의적인 대안과 구체적인 실행 방안을 스스로 찾아내게 됩니다. 이는 단순히 목표를 적는 행위를 넘어, 목표 달성을 위한 뇌의 신경망을 재구조화하는 과정과도 같습니다.
+                                </p>
+                                <p>
+                                    특히 오타니 쇼헤이의 사례에서 볼 수 있듯이, 만다라트는 기술적인 목표뿐만 아니라 '운', '인간성', '멘탈'과 같은 무형의 가치들을 구체적인 행동 지침으로 변환하는 데 탁월합니다. "운을 끌어당기기 위해 쓰레기를 줍는다"는 식의 구체성은 막연한 희망을 강력한 실행력으로 바꾸는 원동력이 됩니다. 파란랩의 만다라트 엔진은 이러한 심리학적, 뇌과학적 원리를 현대적인 인터페이스로 구현하여 당신의 성공 지도를 과학적으로 설계하도록 돕습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">오타니 쇼헤이의 성공 비결</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">메이저리그의 전설 오타니 쇼헤이는 고교 시절 '8구단 드래프트 1순위'라는 핵심 목표를 위해 만다라트를 작성했습니다. 그는 기술뿐만 아니라 '운', '인성', '멘탈'까지 구체적인 행동 지침으로 만들어 실천했습니다.</p>
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 핵심 목표의 명확화</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">가장 중앙의 칸은 당신의 북극성입니다. 이 목표가 흔들리지 않아야 주변의 80개 칸이 의미를 갖게 됩니다. 가장 간절하고 구체적인 목표를 적으십시오.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 8대 영역의 균형</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">성공은 한 가지 요소로 결정되지 않습니다. 건강, 인맥, 기술, 경제력 등 목표 달성에 필요한 8가지 핵심 영역을 균형 있게 배치하는 것이 중요합니다.</p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">방사형 사고의 힘</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간의 뇌는 선형적인 리스트보다 방사형 구조를 더 빠르게 인식합니다. 81칸을 채우는 과정에서 뇌는 빈칸을 채우려는 본능을 발휘하여, 평소 생각지 못한 창의적인 대안을 스스로 찾아냅니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 실행 과제의 구체성</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">최외곽의 64개 칸은 '오늘 당장 할 수 있는 일'이어야 합니다. 수치화할 수 있거나 행동으로 옮길 수 있는 동사형 문장으로 작성하십시오.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 시각적 각인 효과</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">81칸의 지도를 매일 바라보는 것만으로도 뇌는 목표를 우선순위로 인식합니다. 시각화된 데이터는 의지력을 소모하지 않고도 행동을 이끌어내는 힘이 있습니다.</p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Imazu, H. (1987). *The Mandalart: A Method for Creative Thinking*.</li>
-                                    <li>• Buzan, T. (1993). *The Mind Map Book*. BBC Books.</li>
-                                    <li>• Ohtani, S. (2017). *The Goal Setting Method of Shohei Ohtani*. Sports Graphic Number.</li>
+                                    <li>• Imazu, H. (1987). <em>The Mandalart: A Method for Creative Thinking and Goal Setting</em>.</li>
+                                    <li>• Buzan, T. (1993). <em>The Mind Map Book: How to Use Radiant Thinking to Maximize Your Brain's Untapped Potential</em>. BBC Books.</li>
+                                    <li>• Ohtani, S. (2017). <em>The Goal Setting Method of Shohei Ohtani</em>. Sports Graphic Number Special Edition.</li>
+                                    <li>• Locke, E. A., & Latham, G. P. (2002). "Building a practically useful theory of goal setting and task motivation". <em>American Psychologist</em>.</li>
                                 </ul>
                             </div>
                         </div>
@@ -293,8 +345,10 @@
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<MandalartApp />);
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(MandalartApp));
     </script>
 </body>
 </html>
