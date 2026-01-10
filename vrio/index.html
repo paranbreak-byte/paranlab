@@ -3,93 +3,376 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>VRIO 핵심역량 분석 | 나만의 독보적인 경쟁 우위 진단 | 파란랩</title>
-    <meta name="description" content="당신이 가진 자원은 진짜 경쟁력이 있나요? 가치(V), 희소성(R), 모방 불가능성(I), 조직(O)의 4단계 필터를 통해 지속 가능한 경쟁 우위를 확인해 보세요.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- [SEO 표준] -->
+    <title>VRIO 핵심역량 분석 도구 | 독보적인 경쟁 우위 진단 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="당신이 가진 자원은 진짜 경쟁력이 있나요? 가치(V), 희소성(R), 모방 불가능성(I), 조직(O)의 4단계 필터를 통해 지속 가능한 경쟁 우위를 과학적으로 진단하세요.">
+    <meta name="keywords" content="VRIO분석, 핵심역량, 경쟁우위, RBV, 자원기반관점, 제이바니, 경영전략도구, 파란랩">
+    <meta property="og:title" content="파란랩 VRIO 분석 엔진">
+    <meta property="og:description" content="단순한 강점을 넘어, 누구도 흉내 낼 수 없는 핵심 역량을 발견하세요.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/vrio/">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 VRIO 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "description": "기업의 내부 자원과 역량이 경쟁 우위를 창출할 수 있는지 4가지 지표로 평가하는 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .vrio-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .vrio-card:hover { transform: translateY(-5px); }
+        @media print { .no-print { display: none; } }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-2xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">VRIO 분석이란?</h2>
-            <p><strong>VRIO 분석</strong>은 기업의 내부 자원과 역량이 경쟁 우위를 창출할 수 있는지 평가하는 도구입니다. 4가지 질문을 통해 해당 역량의 전략적 가치를 판단합니다.</p>
-            <ul class="list-disc list-inside space-y-2">
-                <li><strong>Value (가치):</strong> 외부 위협을 막거나 기회를 포착하는가?</li>
-                <li><strong>Rarity (희소성):</strong> 소수의 기업만 보유하고 있는가?</li>
-                <li><strong>Inimitability (모방 불가능성):</strong> 경쟁자가 복제하기 어려운가?</li>
-                <li><strong>Organization (조직):</strong> 자원을 활용할 조직적 준비가 되었는가?</li>
-            </ul>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
-        const { useState, useMemo, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
+
+        // [v7.7] 도구 전용 기본 샘플 (테슬라의 배터리 관리 시스템)
+        const DEFAULT_TOOL_SAMPLE = {
+            resource: "테슬라의 독자적 배터리 관리 시스템(BMS) 및 소프트웨어",
+            answers: { v: true, r: true, i: true, o: true },
+            isDefault: true
+        };
+
+        const VRIO_CONFIG = [
+            { id: 'v', n: 'Value (가치)', q: '이 자원이 외부 위협을 무력화하거나 기회를 포착하는 데 기여합니까?', desc: '가치가 없다면 경쟁 열위 상태입니다.' },
+            { id: 'r', n: 'Rarity (희소성)', q: '현재 이 자원을 보유한 경쟁자가 거의 없습니까?', desc: '누구나 가졌다면 경쟁 동등 상태입니다.' },
+            { id: 'i', n: 'Inimitability (모방 불가능성)', q: '다른 기업이 이 자원을 복제하거나 대체하는 데 막대한 비용이 듭니까?', desc: '따라하기 쉽다면 일시적 우위일 뿐입니다.' },
+            { id: 'o', n: 'Organization (조직)', q: '회사는 이 자원의 잠재력을 완전히 끌어낼 조직적 준비가 되어 있습니까?', desc: '준비가 안 되었다면 미활용 우위에 머뭅니다.' }
+        ];
+
         function VrioApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-vrio') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [resource, setResource] = useState(saved.resource || "");
-            const [answers, setAnswers] = useState(saved.answers || { v: null, r: null, i: null, o: null });
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(4); // 샘플 우선 노출
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-vrio', JSON.stringify({ step, resource, answers })); }, [step, resource, answers]);
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-vrio');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
+            }, []);
 
-            const result = useMemo(() => {
-                if (answers.v === false) return { status: "경쟁 열위", color: "bg-red-500", desc: "현재 가치가 낮아 개선이 필요합니다." };
-                if (answers.r === false) return { status: "경쟁 동등", color: "bg-slate-500", desc: "가치는 있으나 누구나 가진 역량입니다." };
-                if (answers.i === false) return { status: "일시적 우위", color: "bg-blue-500", desc: "지금은 앞서있으나 곧 따라잡힐 수 있습니다." };
-                if (answers.o === false) return { status: "미활용 우위", color: "bg-amber-500", desc: "좋은 자원을 가졌으나 조직적 활용이 부족합니다." };
-                return { status: "지속적 우위", color: "bg-emerald-600", desc: "당신만의 독보적인 핵심 경쟁력입니다!" };
-            }, [answers]);
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-vrio', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // VRIO 결과 판정 로직
+            const analysis = useMemo(() => {
+                const { v, r, i, o } = data.answers;
+                if (v === false) return { status: "경쟁 열위 (Disadvantage)", color: "bg-rose-600", desc: "현재 분석 대상은 시장에서 가치를 인정받기 어렵습니다. 근본적인 개선이 필요합니다." };
+                if (r === false) return { status: "경쟁 동등 (Parity)", color: "bg-slate-500", desc: "가치는 있으나 경쟁자들도 모두 가진 역량입니다. 생존을 위한 최소 요건입니다." };
+                if (i === false) return { status: "일시적 우위 (Temporary)", color: "bg-blue-500", desc: "현재는 앞서 있으나 경쟁자가 곧 따라잡을 수 있습니다. 혁신 속도를 높여야 합니다." };
+                if (o === false) return { status: "미활용 우위 (Unused)", color: "bg-amber-500", desc: "독보적인 자원을 가졌으나 조직적 시스템이 이를 뒷받침하지 못해 가치가 낭비되고 있습니다." };
+                if (v && r && i && o) return { status: "지속적 우위 (Sustained)", color: "bg-emerald-600", desc: "누구도 흉내 낼 수 없는 당신만의 핵심 경쟁력입니다! 시장 지배력을 공고히 하십시오." };
+                return { status: "진단 중", color: "bg-slate-200", desc: "모든 질문에 답하면 결과가 나타납니다." };
+            }, [data.answers]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'vrio-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] VRIO 핵심역량 분석 결과: ${data.resource}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'vrio-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
+            if (!isLoaded) return null;
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">어떤 능력을 검증해볼까요?</h2>
-                            <input value={resource} onChange={(e)=>setResource(e.target.value)} placeholder="예: 독자적인 데이터 알고리즘" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">검증 시작하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-vrio'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                    ) : step === 2 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                            <div className="space-y-10">
-                                {['v','r','i','o'].map((id, i) => (
-                                    <div key={id}>
-                                        <h3 className="text-lg font-black text-slate-800 mb-4">{i+1}. {id.toUpperCase()} 질문에 답하세요.</h3>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Competency Science</p>
+                            <p className="font-bold text-sm">PARAN LAB VRIO v7.7</p>
+                        </div>
+                    </div>
+
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['역량 정의', 'V-R 진단', 'I-O 진단', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Step 1: Resource Definition */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Resource Definition</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">검증하고 싶은 핵심 역량을 입력하세요</h2>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    value={data.resource} 
+                                    onChange={e => setData({...data, resource: e.target.value, isDefault: false})}
+                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                    placeholder="예: 독자적인 데이터 분석 알고리즘"
+                                />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 가치와 희소성 진단</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: V & R */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-10">
+                                {[VRIO_CONFIG[0], VRIO_CONFIG[1]].map(q => (
+                                    <div key={q.id} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-slate-800">{q.n}</h3>
+                                        <p className="text-lg font-bold text-slate-600 leading-tight">"{q.q}"</p>
                                         <div className="flex gap-4">
-                                            <button onClick={()=>setAnswers({...answers, [id]:true})} className={`flex-1 py-4 rounded-2xl font-black ${answers[id]===true?'bg-blue-600 text-white':'bg-slate-100 text-slate-400'}`}>예</button>
-                                            <button onClick={()=>setAnswers({...answers, [id]:false})} className={`flex-1 py-4 rounded-2xl font-black ${answers[id]===false?'bg-rose-600 text-white':'bg-slate-100 text-slate-400'}`}>아니오</button>
+                                            <button 
+                                                onClick={() => setData({...data, answers: {...data.answers, [q.id]: true}, isDefault: false})}
+                                                className={`flex-1 py-6 rounded-2xl font-black text-xl transition-all ${data.answers[q.id] === true ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-slate-400 border border-slate-200'}`}
+                                            >
+                                                예 (Yes)
+                                            </button>
+                                            <button 
+                                                onClick={() => setData({...data, answers: {...data.answers, [q.id]: false}, isDefault: false})}
+                                                className={`flex-1 py-6 rounded-2xl font-black text-xl transition-all ${data.answers[q.id] === false ? 'bg-rose-600 text-white shadow-lg scale-105' : 'bg-white text-slate-400 border border-slate-200'}`}
+                                            >
+                                                아니오 (No)
+                                            </button>
                                         </div>
                                     </div>
                                 ))}
-                            </div>
-                            <button disabled={Object.values(answers).includes(null)} onClick={()=>setStep(3)} className="w-full mt-12 py-6 bg-slate-900 text-white rounded-[2rem] font-black text-xl disabled:opacity-30">결과 확인</button>
-                        </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 text-center">
-                                <div className={`p-10 rounded-[2.5rem] mb-10 text-white shadow-2xl ${result.color}`}>
-                                    <p className="text-white/70 font-bold mb-2 uppercase tracking-widest">현재 경쟁 상태</p>
-                                    <h3 className="text-5xl font-black mb-4">{result.status}</h3>
-                                    <p className="font-medium">{result.desc}</p>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 모방 가능성 및 조직 진단</button>
                                 </div>
-                                <p className="text-[10px] text-slate-300 font-black uppercase tracking-widest">Generated by Paran Lab</p>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'vrio-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`VRIO 분석 결과`, `<div class='box'>상태: ${result.status}</div>`, 'vrio-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[VRIO 분석 결과]\n대상: ${resource}\n결과: ${result.status}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
+                        )}
+
+                        {/* Step 3: I & O */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in space-y-10">
+                                {[VRIO_CONFIG[2], VRIO_CONFIG[3]].map(q => (
+                                    <div key={q.id} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-6">
+                                        <h3 className="text-2xl font-black text-slate-800">{q.n}</h3>
+                                        <p className="text-lg font-bold text-slate-600 leading-tight">"{q.q}"</p>
+                                        <div className="flex gap-4">
+                                            <button 
+                                                onClick={() => setData({...data, answers: {...data.answers, [q.id]: true}, isDefault: false})}
+                                                className={`flex-1 py-6 rounded-2xl font-black text-xl transition-all ${data.answers[q.id] === true ? 'bg-blue-600 text-white shadow-lg scale-105' : 'bg-white text-slate-400 border border-slate-200'}`}
+                                            >
+                                                예 (Yes)
+                                            </button>
+                                            <button 
+                                                onClick={() => setData({...data, answers: {...data.answers, [q.id]: false}, isDefault: false})}
+                                                className={`flex-1 py-6 rounded-2xl font-black text-xl transition-all ${data.answers[q.id] === false ? 'bg-rose-600 text-white shadow-lg scale-105' : 'bg-white text-slate-400 border border-slate-200'}`}
+                                            >
+                                                아니오 (No)
+                                            </button>
+                                        </div>
+                                    </div>
+                                ))}
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                </div>
                             </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+
+                        {/* Step 4: Result Report */}
+                        {step === 4 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        VRIO Core Competency Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        핵심역량 진단 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">대상: {data.resource || "미정"}</p>
+                                </div>
+
+                                <div className={`p-12 rounded-[4rem] shadow-2xl text-center relative overflow-hidden mb-16 text-white ${analysis.color}`}>
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💎</div>
+                                    <p className="text-white/70 font-black text-sm uppercase tracking-widest mb-4">Current Competitive Status</p>
+                                    <h3 className="text-4xl md:text-6xl font-black mb-8">{analysis.status}</h3>
+                                    <p className="text-xl font-bold leading-relaxed max-w-3xl mx-auto">
+                                        {analysis.desc}
+                                    </p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-12">
+                                    {VRIO_CONFIG.map(q => (
+                                        <div key={q.id} className={`p-8 rounded-[2.5rem] border-2 vrio-card ${data.answers[q.id] ? 'bg-blue-50 border-blue-200' : 'bg-slate-50 border-slate-100'}`}>
+                                            <div className="flex justify-between items-center mb-4">
+                                                <h4 className="font-black text-slate-800">{q.n.split(' ')[0]}</h4>
+                                                <span className={`w-8 h-8 rounded-full flex items-center justify-center font-black text-xs ${data.answers[q.id] ? 'bg-blue-600 text-white' : 'bg-slate-300 text-white'}`}>
+                                                    {data.answers[q.id] ? 'Y' : 'N'}
+                                                </span>
+                                            </div>
+                                            <p className="text-xs text-slate-500 font-bold leading-relaxed">{q.q}</p>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🚀</div>
+                                    <h3 className="text-2xl font-black mb-4">전략적 실행 제언</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        진정한 경쟁 우위는 단순히 좋은 자원을 갖는 것이 아니라, 그것을 <strong>'모방 불가능하게'</strong> 만들고 <strong>'조직적으로 활용'</strong>할 때 완성됩니다. 
+                                        '아니오'가 나온 지점이 바로 귀하의 전략적 취약점입니다. 해당 단계를 보완하여 지속 가능한 우위를 확보하십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 4 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/vrio/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                VRIO 분석: 지속 가능한 경쟁 우위를 찾는 자원 기반 관점(RBV)
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>VRIO 분석</strong>은 기업의 내부 자원과 역량이 경쟁 우위를 창출할 수 있는지 평가하는 전략적 프레임워크입니다. 이 모델은 1991년 유타 대학교의 <strong>제이 바니(Jay B. Barney)</strong> 교수가 제안한 <strong>'자원 기반 관점(Resource-Based View, RBV)'</strong> 이론을 실무적으로 체계화한 것입니다. 바니 교수는 기업의 성과 차이가 외부 환경보다는 기업이 보유한 내부 자원의 특성에서 비롯된다고 보았습니다.
+                                </p>
+                                <p>
+                                    VRIO는 <strong>Value(가치), Rarity(희소성), Inimitability(모방 불가능성), Organization(조직)</strong>의 약자입니다. 이 네 가지 질문은 일종의 필터 역할을 합니다. 어떤 자원이 시장에서 가치가 있고(V), 소수만이 보유하고 있으며(R), 경쟁자가 복제하기 어렵고(I), 이를 활용할 조직적 체계(O)를 갖추었을 때 비로소 그 기업은 <strong>'지속 가능한 경쟁 우위(Sustained Competitive Advantage)'</strong>를 확보하게 됩니다.
+                                </p>
+                                <p>
+                                    이 도구의 진정한 가치는 '강점'과 '핵심 역량'을 엄격하게 구분한다는 점에 있습니다. 많은 기업이 단순히 '잘하는 것'을 핵심 역량으로 착각하지만, 경쟁자가 쉽게 따라 할 수 있는 능력은 일시적인 우위에 불과합니다. 파란랩의 VRIO 분석 엔진은 이러한 경영학적 엄밀함을 바탕으로, 당신의 비즈니스가 가진 진짜 무기가 무엇인지, 그리고 그 무기를 어떻게 보호하고 활용해야 하는지 과학적인 가이드를 제공합니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. Value (경제적 가치)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        자원이 외부의 위협을 중화시키거나 기회를 포착하여 기업의 효율성과 효과성을 높이는가? 가치가 없는 자원은 기업에 비용 부담만을 주는 '경쟁 열위'의 원인이 됩니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. Rarity (희소성)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        현재와 잠재적 경쟁자들 중 해당 자원을 보유한 기업이 극소수인가? 가치는 있지만 흔한 자원은 '경쟁 동등' 상태를 만들 뿐, 초과 수익을 보장하지 않습니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. Inimitability (모방 불가능성)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        자원을 보유하지 못한 기업이 이를 획득하거나 복제하는 데 막대한 비용적, 시간적 불이익이 발생하는가? 역사적 조건, 인과관계의 모호성, 사회적 복잡성이 모방을 막는 핵심 요소입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. Organization (조직적 활용)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        기업의 프로세스, 정책, 문화가 해당 자원을 전략적으로 활용할 수 있도록 정렬되어 있는가? 아무리 훌륭한 자원도 조직적 뒷받침이 없다면 '미활용 우위'에 그치고 맙니다.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Barney, J. B. (1991). "Firm Resources and Sustained Competitive Advantage". <em>Journal of Management</em>, 17(1), 99-120.</li>
+                                    <li>• Barney, J. B. (1995). "Looking Inside for Competitive Advantage". <em>Academy of Management Executive</em>, 9(4), 49-61.</li>
+                                    <li>• Barney, J. B., & Hesterly, W. S. (2018). <em>Strategic Management and Competitive Advantage: Concepts and Cases</em>. Pearson.</li>
+                                    <li>• Wernerfelt, B. (1984). "A resource-based view of the firm". <em>Strategic Management Journal</em>.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<VrioApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(VrioApp));
     </script>
 </body>
 </html>
