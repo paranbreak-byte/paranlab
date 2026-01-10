@@ -3,75 +3,340 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PEST 거시환경 분석 | 시장 트렌드 및 환경 분석 도구 | 파란랩</title>
-    <meta name="description" content="정치, 경제, 사회, 기술의 변화를 읽으세요. PEST 분석을 통해 외부 환경의 기회와 위협을 파악하고 장기적인 비즈니스 전략을 수립할 수 있습니다.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- [SEO 표준] -->
+    <title>PEST 거시환경 분석 도구 | 시장 트렌드 및 외부 환경 진단 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="정치, 경제, 사회, 기술의 변화를 읽으세요. PEST 분석을 통해 외부 환경의 기회와 위협을 파악하고 장기적인 비즈니스 전략을 수립하는 과학적 도구입니다.">
+    <meta name="keywords" content="PEST분석, 거시환경분석, 시장분석, 경영전략, 트렌드분석, 정치경제사회기술, 파란랩, 프랜시스아길라">
+    <meta property="og:title" content="파란랩 PEST 분석 엔진">
+    <meta property="og:description" content="거대한 변화의 흐름 속에서 비즈니스의 기회를 발견하세요.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/pest/">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 PEST 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "description": "정치(P), 경제(E), 사회(S), 기술(T)의 4가지 관점으로 외부 환경을 분석하는 전략 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .pest-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .pest-card:hover { transform: translateY(-5px); }
+        @media print { .no-print { display: none; } }
+    </style>
 </head>
-<body class="bg-slate-50">
-    <div id="root">
-        <div id="app-container" class="max-w-4xl mx-auto py-10 px-4"></div>
-        <section id="seo-content" class="max-w-2xl mx-auto px-6 py-12 mt-10 border-t border-slate-200 no-print text-slate-600 leading-relaxed space-y-4 text-sm md:text-base">
-            <h2 class="text-2xl font-black text-slate-800 mb-6">PEST 분석이란?</h2>
-            <p><strong>PEST 분석</strong>은 기업을 둘러싼 거시적 외부 환경을 분석하는 프레임워크입니다. 정치(P), 경제(E), 사회(S), 기술(T)의 변화를 읽는 데 목적이 있습니다.</p>
-        </section>
-    </div>
+<body>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
+
     <script type="text/babel">
-        const { useState, useEffect } = React;
+        const { useState, useEffect, useMemo } = React;
+
+        // [v7.7] 도구 전용 기본 샘플 (전기차 시장 분석)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "전기차(EV) 시장 글로벌 확장 전략",
+            data: {
+                p: "친환경 보조금 정책 변화, 탄소 배출 규제 강화, 국가 간 무역 장벽 및 관세 변동.",
+                e: "고금리 기조에 따른 소비 심리 위축, 배터리 원자재 가격 변동성, 글로벌 환율 불안정.",
+                s: "친환경 가치 소비 확산, 소유보다 공유 중심의 모빌리티 인식 변화, 고령화 사회 진입.",
+                t: "전고체 배터리 기술 혁신, 자율주행 소프트웨어 고도화, 초급속 충전 인프라 표준화."
+            },
+            isDefault: true
+        };
+
+        const SECTIONS = [
+            { id: 'p', title: 'Political (정치)', color: 'bg-blue-50', border: 'border-blue-100', text: 'text-blue-700', icon: '⚖️', q: '법규, 규제, 정책 변화는?' },
+            { id: 'e', title: 'Economic (경제)', color: 'bg-emerald-50', border: 'border-emerald-100', text: 'text-emerald-700', icon: '📈', q: '금리, 환율, 경기 지표는?' },
+            { id: 's', title: 'Social (사회)', color: 'bg-rose-50', border: 'border-rose-100', text: 'text-rose-700', icon: '👥', q: '인구 구조, 라이프스타일 변화는?' },
+            { id: 't', title: 'Technological (기술)', color: 'bg-amber-50', border: 'border-amber-100', text: 'text-amber-700', icon: '🚀', q: '신기술, R&D, 인프라 혁신은?' }
+        ];
+
         function PestApp() {
-            const saved = JSON.parse(localStorage.getItem('paranlab-pest') || '{}');
-            const [step, setStep] = useState(saved.step || 1);
-            const [subject, setSubject] = useState(saved.subject || "");
-            const [data, setData] = useState(saved.data || { p:"", e:"", s:"", t:"" });
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(4); // 샘플 우선 노출
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            useEffect(() => { if (ParanLabCore.isAutoSaveEnabled()) localStorage.setItem('paranlab-pest', JSON.stringify({ step, subject, data })); }, [step, subject, data]);
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            useEffect(() => {
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-pest');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
+            }, []);
 
-            const sections = [
-                { id: 'p', title: 'Political (정치)', color: 'bg-blue-50', text: 'text-blue-700' },
-                { id: 'e', title: 'Economic (경제)', color: 'bg-emerald-50', text: 'text-emerald-700' },
-                { id: 's', title: 'Social (사회)', color: 'bg-rose-50', text: 'text-rose-700' },
-                { id: 't', title: 'Technological (기술)', color: 'bg-amber-50', text: 'text-amber-700' }
-            ];
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-pest', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'pest-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] PEST 거시환경 분석 결과: ${data.subject}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'pest-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
+            if (!isLoaded) return null;
+
+            const renderInput = (idx1, idx2) => (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    {[SECTIONS[idx1], SECTIONS[idx2]].map(s => (
+                        <div key={s.id} className={`p-10 ${s.color} rounded-[3rem] border ${s.border} space-y-6`}>
+                            <h3 className={`text-2xl font-black ${s.text} flex items-center gap-3`}>{s.icon} {s.title}</h3>
+                            <p className="text-sm font-bold opacity-60">{s.q}</p>
+                            <textarea 
+                                value={data.data[s.id]} 
+                                onChange={e => setData({...data, data: {...data.data, [s.id]: e.target.value}, isDefault: false})}
+                                className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-opacity-30 transition-all"
+                                placeholder="분석 내용을 입력하세요..."
+                            />
+                        </div>
+                    ))}
+                </div>
+            );
 
             return (
-                <div className="animate-in fade-in duration-500">
-                    {step === 1 ? (
-                        <div className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100 max-w-2xl mx-auto">
-                            <h2 className="text-3xl font-black text-slate-900 mb-4">무엇을 둘러싼 환경을 분석할까요?</h2>
-                            <input value={subject} onChange={(e)=>setSubject(e.target.value)} placeholder="예: 2025년 무인 카페 창업 환경" className="w-full p-6 bg-slate-50 border-4 border-transparent focus:border-blue-500 rounded-[2rem] outline-none text-xl font-black" />
-                            <button onClick={()=>setStep(2)} className="w-full mt-10 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-xl">분석 시작하기</button>
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
+                        <div className="flex gap-4">
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-pest'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                    ) : (
-                        <div className="space-y-6">
-                            <div id="report-card" className="bg-white p-10 rounded-[3rem] shadow-2xl border border-slate-100">
-                                <h2 className="text-2xl font-black text-slate-900 mb-10 text-center">PEST 거시환경 리포트</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
-                                    {sections.map(s => (
-                                        <div key={s.id} className={`${s.color} p-6 rounded-[2.5rem] border-2 border-white shadow-sm`}>
-                                            <h3 className={`font-black ${s.text} mb-4`}>{s.title}</h3>
-                                            <textarea value={data[s.id]} onChange={(e)=>setData({...data, [s.id]: e.target.value})} className="w-full h-40 bg-white/60 rounded-2xl p-4 outline-none text-sm" placeholder="내용을 입력하세요..." />
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Macro Science</p>
+                            <p className="font-bold text-sm">PARAN LAB PEST v7.7</p>
+                        </div>
+                    </div>
+
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['주제 정의', '정치/경제', '사회/기술', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Step 1: Subject */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-8">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">분석할 비즈니스 환경을 정의하세요</h2>
+                                </div>
+                                <input 
+                                    type="text" 
+                                    value={data.subject} 
+                                    onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
+                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                    placeholder="예: 2025년 무인 카페 창업 환경 분석"
+                                />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 정치 및 경제 분석</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: P & E */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-8">
+                                {renderInput(0, 1)}
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 사회 및 기술 분석</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: S & T */}
+                        {step === 3 && (
+                            <div className="animate-in fade-in space-y-8">
+                                {renderInput(2, 3)}
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 4: Result Report */}
+                        {step === 4 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        PEST Macro-Environmental Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        거시환경 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
+                                    {SECTIONS.map(s => (
+                                        <div key={s.id} className={`p-10 ${s.color} rounded-[3.5rem] border ${s.border} shadow-sm relative overflow-hidden pest-card`}>
+                                            <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">{s.id.toUpperCase()}</div>
+                                            <h3 className={`font-black ${s.text} mb-6 flex items-center gap-3 text-2xl`}>
+                                                {s.icon} {s.title}
+                                            </h3>
+                                            <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[120px]">
+                                                {data.data[s.id] || "분석된 내용이 없습니다."}
+                                            </p>
                                         </div>
                                     ))}
                                 </div>
-                                <p className="text-center text-[10px] text-slate-300 font-medium uppercase tracking-widest">Generated by Paran Lab</p>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🌐</div>
+                                    <h3 className="text-2xl font-black mb-4">전략적 시사점</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        거시환경의 변화는 비즈니스의 생존을 결정짓는 거대한 파도와 같습니다. 
+                                        위 분석을 바탕으로 <strong>기회(Opportunities)</strong> 요인은 극대화하고, <strong>위협(Threats)</strong> 요인은 선제적으로 방어하는 전략을 수립하십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 no-print">
-                                <button onClick={()=>ParanLabCore.saveAsImage('report-card', 'pest-report')} className="py-5 bg-slate-900 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">🖼️ 이미지 저장</button>
-                                <button onClick={()=>ParanLabCore.saveAsHtml(`PEST 분석 결과`, `<div class='box'>정치: ${data.p}</div>`, 'pest-report')} className="py-5 bg-blue-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📄 HTML 다운로드</button>
-                                <button onClick={()=>ParanLabCore.copyToClipboard(`[파란랩 PEST 결과]\n주제: ${subject}\n정치: ${data.p}`)} className="py-5 bg-emerald-600 text-white rounded-2xl font-black text-sm shadow-xl flex items-center justify-center gap-2">📋 결과 복사</button>
-                            </div>
-                            <button onClick={()=>setStep(1)} className="w-full py-5 bg-slate-100 text-slate-400 rounded-2xl font-black text-sm no-print">다시 하기</button>
+                        )}
+                    </div>
+
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 4 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/pest/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
-                </div>
+
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
+                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
+                        <div className="prose prose-slate max-w-none">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                PEST 분석: 거시환경의 변화를 읽는 전략적 프레임워크
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>PEST 분석</strong>은 기업을 둘러싼 거시적 외부 환경(Macro-environment)을 분석하여 비즈니스의 기회와 위협 요인을 파악하는 전략적 프레임워크입니다. 이 모델은 1967년 하버드 경영대학원의 <strong>프랜시스 아길라(Francis Aguilar)</strong> 교수가 그의 저서 <em>'Scanning the Business Environment'</em>에서 제안한 ETPS 모델에서 유래되었습니다. 이후 정치(Political), 경제(Economic), 사회(Social), 기술(Technological)의 앞글자를 딴 PEST로 정립되어 전 세계 경영 현장에서 필수적인 도구로 사용되고 있습니다.
+                                </p>
+                                <p>
+                                    PEST 분석의 핵심은 기업이 통제할 수 없는 외부의 거대한 흐름을 객관적으로 조망하는 데 있습니다. 많은 기업이 내부 역량에만 집중하다가 외부 환경의 급격한 변화(예: 규제 강화, 경기 침체, 인구 구조 변화, 파괴적 기술의 등장)로 인해 위기를 맞이하곤 합니다. PEST 분석은 이러한 사각지대를 제거하고, 장기적인 관점에서 기업이 나아가야 할 방향을 설정하는 나침반 역할을 합니다.
+                                </p>
+                                <p>
+                                    현대 경영 환경에서는 PEST를 넘어 법적(Legal) 요인과 환경적(Environmental) 요인을 추가한 PESTEL 분석으로 확장되기도 합니다. 하지만 PEST의 4가지 축은 여전히 가장 직관적이고 강력한 분석의 기초가 됩니다. 파란랩의 PEST 분석 엔진은 이러한 고전적 전략 이론을 현대적인 데이터 시각화 기술과 결합하여, 당신의 비즈니스가 거대한 변화의 파도를 타고 도약할 수 있도록 가이드합니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. Political (정치적 요인)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        정부의 정책 방향, 법규 제정, 세제 혜택, 무역 규제 등을 분석합니다. 정치적 안정성과 정책의 일관성은 비즈니스의 예측 가능성을 결정짓는 핵심 요소입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">2. Economic (경제적 요인)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        금리, 환율, 인플레이션, 경제 성장률, 소비 심리 등을 분석합니다. 거시 경제 지표는 기업의 비용 구조와 시장의 구매력에 직접적인 영향을 미칩니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">3. Social (사회적 요인)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        인구 통계학적 변화, 문화적 트렌드, 가치관의 변화, 교육 수준 등을 분석합니다. 사회적 흐름은 고객의 니즈가 어디로 향하는지 알려주는 가장 중요한 지표입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-600 shadow-sm">
+                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">4. Technological (기술적 요인)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        R&D 투자 현황, 신기술의 등장, 자동화 수준, 디지털 전환 속도 등을 분석합니다. 기술적 혁신은 기존 산업의 판도를 바꾸는 파괴적 혁신의 원천이 됩니다.
+                                    </p>
+                                </div>
+                            </div>
+
+                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                    <li>• Aguilar, F. J. (1967). <em>Scanning the Business Environment</em>. Macmillan.</li>
+                                    <li>• Porter, M. E. (1980). <em>Competitive Strategy: Techniques for Analyzing Industries and Competitors</em>. Free Press.</li>
+                                    <li>• Johnson, G., Scholes, K., & Whittington, R. (2008). <em>Exploring Corporate Strategy</em>. Financial Times Prentice Hall.</li>
+                                    <li>• Kotler, P., & Keller, K. L. (2016). <em>Marketing Management</em>. Pearson.</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </section>
+                </main>
             );
         }
-        ReactDOM.createRoot(document.getElementById('app-container')).render(<PestApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(PestApp));
     </script>
 </body>
 </html>
