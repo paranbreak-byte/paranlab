@@ -3,44 +3,18 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- [SEO 표준] -->
-    <title>역장 분석(Force Field) 도구 | 변화 관리 및 문제 해결 엔진 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="커트 레빈의 역장 분석으로 변화를 추진하는 힘과 저항하는 힘을 분석하세요. 조직 혁신과 개인의 행동 변화를 위한 과학적 변화 관리 도구입니다.">
-    <meta name="keywords" content="역장분석, ForceFieldAnalysis, 커트레빈, 변화관리, 조직혁신, 문제해결기법, 파란랩">
-    <meta property="og:title" content="파란랩 역장 분석 엔진">
-    <meta property="og:description" content="변화를 가로막는 저항을 찾아내고 추진력을 극대화하세요.">
-    <meta property="og:type" content="website">
-    <link rel="canonical" href="https://paranlab.com/force-field/">
-    
-    <!-- [구조화 데이터 표준] -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 역장 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "변화를 추진하는 힘과 저항하는 힘의 균형을 분석하여 변화 전략을 수립하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
-    }
-    </script>
-
-    <!-- 라이브러리 로드 -->
+    <title>역장 분석(Force Field) 도구 | 변화 관리 엔진 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="커트 레빈의 역장 분석으로 변화를 추진하는 힘과 저항하는 힘을 분석하세요. 조직 혁신과 개인의 행동 변화를 위한 과학적 도구입니다.">
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
-
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
-        input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
         .force-arrow-right { clip-path: polygon(0% 20%, 80% 20%, 80% 0%, 100% 50%, 80% 100%, 80% 80%, 0% 80%); }
         .force-arrow-left { clip-path: polygon(20% 0%, 20% 20%, 100% 20%, 100% 80%, 20% 80%, 20% 100%, 0% 50%); }
         @media print { .no-print { display: none; } }
@@ -54,362 +28,184 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.6] 샘플 데이터 (사내 디지털 전환 추진)
-        const SAMPLE_DATA = {
+        const DEFAULT_TOOL_SAMPLE = {
             goal: "전사적 디지털 업무 시스템 도입",
             driving: [
                 { id: 1, text: "업무 효율성 및 생산성 향상", score: 9 },
-                { id: 2, text: "경쟁사들의 빠른 디지털 도입", score: 7 },
-                { id: 3, text: "MZ세대 신입 사원들의 요구", score: 5 }
+                { id: 2, text: "경쟁사들의 빠른 디지털 도입", score: 7 }
             ],
             restraining: [
                 { id: 1, text: "기존 시스템에 익숙한 고연차의 반발", score: 8 },
-                { id: 2, text: "초기 도입 비용 및 교육 예산 부족", score: 6 },
-                { id: 3, text: "새로운 툴 학습에 대한 심리적 부담", score: 7 }
+                { id: 2, text: "초기 도입 비용 및 교육 예산 부족", score: 6 }
             ],
-            isSample: true
+            isDefault: true
         };
 
         function ForceFieldApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 샘플을 먼저 보여주기 위해 결과 단계로 시작
-            const [isSharing, setIsSharing] = useState(false);
-            const [data, setData] = useState(SAMPLE_DATA);
+            const [step, setStep] = useState(4); 
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
                         const saved = localStorage.getItem('paranlab-force-field');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData({ ...parsed, isSample: false });
+                            setData({ ...parsed, isDefault: false });
                         } else {
-                            setData(SAMPLE_DATA);
+                            setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) {
-                        console.error("Init Error:", e);
-                    }
+                    } catch (e) { console.error(e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
-                if (isLoaded && !data.isSample) {
+                if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-force-field', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
-            // 역장 합계 계산
             const totals = useMemo(() => {
                 const d = (data.driving || []).reduce((a, b) => a + Number(b.score || 0), 0);
                 const r = (data.restraining || []).reduce((a, b) => a + Number(b.score || 0), 0);
                 return { d, r, diff: d - r };
             }, [data]);
 
-            const handleShare = async () => {
-                const element = document.getElementById('report-card');
-                if (!element) return;
-                setIsSharing(true);
-                try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
-                    canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'force-field-report.png', { type: 'image/png' });
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: `[파란랩] 역장 분석 결과: ${data.goal}` });
-                        } else {
-                            const link = document.createElement('a');
-                            link.download = 'force-field-report.png';
-                            link.href = canvas.toDataURL();
-                            link.click();
-                        }
-                        setIsSharing(false);
-                    }, 'image/png');
-                } catch (err) {
-                    setIsSharing(false);
-                }
-            };
-
             if (!isLoaded) return null;
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-force-field'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-force-field'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-right hidden md:block">
-                            <p className="text-blue-400 font-black text-xs uppercase tracking-widest">Change Science</p>
-                            <p className="text-white font-bold text-sm">PARAN LAB FORCE FIELD v7.6</p>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Change Science</p>
+                            <p className="font-bold text-sm">PARAN LAB FORCE FIELD v7.7</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['목표 정의', '추진력 분석', '저항력 분석', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                        {['목표', '추진력', '저항력', '리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
-
-                    {/* 메인 컨텐츠 카드 */}
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
-                        {(data.isSample || data.scenarioContext) && step === 4 && (
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
-                                    💡 {data.isSample ? "샘플 데이터 적용됨" : "시나리오 데이터 적용됨"}
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Goal */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Change Goal</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">달성하고자 하는 변화 목표를 입력하세요</h2>
-                                </div>
-                                <input 
-                                    type="text" 
-                                    value={data.goal} 
-                                    onChange={e => setData({...data, goal: e.target.value, isSample: false})}
-                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="예: 전사적 디지털 업무 시스템 도입"
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 추진력 분석</button>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">변화 목표를 입력하세요</h2>
+                                <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음 단계</button>
                             </div>
                         )}
 
-                        {/* Step 2: Driving Forces */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Driving Forces</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">변화를 이끄는 긍정적인 힘을 입력하세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">힘의 강도를 1~10 사이의 수치로 평가합니다.</p>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">추진력 분석</h2>
                                 <div className="space-y-4">
                                     {data.driving.map((f, i) => (
                                         <div key={f.id} className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 space-y-6">
                                             <div className="flex gap-4 items-center">
-                                                <input 
-                                                    type="text" value={f.text} 
-                                                    onChange={e => {
-                                                        const newD = [...data.driving];
-                                                        newD[i].text = e.target.value;
-                                                        setData({...data, driving: newD, isSample: false});
-                                                    }}
-                                                    className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" 
-                                                    placeholder="추진 요인 (예: 생산성 향상)" 
-                                                />
-                                                <button onClick={() => setData({...data, driving: data.driving.filter(it => it.id !== f.id), isSample: false})} className="text-blue-400 font-black">삭제</button>
+                                                <input type="text" value={f.text} onChange={e => { const n = [...data.driving]; n[i].text = e.target.value; setData({...data, driving: n, isDefault: false}); }} className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" placeholder="추진 요인" />
+                                                <button onClick={() => setData({...data, driving: data.driving.filter(it => it.id !== f.id), isDefault: false})} className="text-red-400 font-black">삭제</button>
                                             </div>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between font-black text-blue-600"><span>강도(Strength)</span><span>{f.score}</span></div>
-                                                <input type="range" min="1" max="10" value={f.score} onChange={e => {
-                                                    const newD = [...data.driving];
-                                                    newD[i].score = parseInt(e.target.value);
-                                                    setData({...data, driving: newD, isSample: false});
-                                                }} />
-                                            </div>
+                                            <input type="range" min="1" max="10" value={f.score} onChange={e => { const n = [...data.driving]; n[i].score = parseInt(e.target.value); setData({...data, driving: n, isDefault: false}); }} />
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setData({...data, driving: [...data.driving, {id: Date.now(), text: "", score: 5}], isSample: false})} className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl text-blue-400 font-black">+ 추진 요인 추가</button>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 저항력 분석</button>
-                                </div>
+                                <button onClick={() => setData({...data, driving: [...data.driving, {id: Date.now(), text: "", score: 5}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-blue-200 rounded-2xl text-blue-400 font-black">+ 추진 요인 추가</button>
+                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">다음</button></div>
                             </div>
                         )}
 
-                        {/* Step 3: Restraining Forces */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-rose-600 font-black text-sm uppercase tracking-widest">Step 03. Restraining Forces</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">변화를 가로막는 저항 요인을 입력하세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">저항의 강도를 1~10 사이의 수치로 평가합니다.</p>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">저항력 분석</h2>
                                 <div className="space-y-4">
                                     {data.restraining.map((f, i) => (
                                         <div key={f.id} className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 space-y-6">
                                             <div className="flex gap-4 items-center">
-                                                <input 
-                                                    type="text" value={f.text} 
-                                                    onChange={e => {
-                                                        const newR = [...data.restraining];
-                                                        newR[i].text = e.target.value;
-                                                        setData({...data, restraining: newR, isSample: false});
-                                                    }}
-                                                    className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" 
-                                                    placeholder="저항 요인 (예: 변화에 대한 두려움)" 
-                                                />
-                                                <button onClick={() => setData({...data, restraining: data.restraining.filter(it => it.id !== f.id), isSample: false})} className="text-rose-400 font-black">삭제</button>
+                                                <input type="text" value={f.text} onChange={e => { const n = [...data.restraining]; n[i].text = e.target.value; setData({...data, restraining: n, isDefault: false}); }} className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" placeholder="저항 요인" />
+                                                <button onClick={() => setData({...data, restraining: data.restraining.filter(it => it.id !== f.id), isDefault: false})} className="text-red-400 font-black">삭제</button>
                                             </div>
-                                            <div className="space-y-2">
-                                                <div className="flex justify-between font-black text-rose-600"><span>강도(Strength)</span><span>{f.score}</span></div>
-                                                <input type="range" min="1" max="10" value={f.score} onChange={e => {
-                                                    const newR = [...data.restraining];
-                                                    newR[i].score = parseInt(e.target.value);
-                                                    setData({...data, restraining: newR, isSample: false});
-                                                }} />
-                                            </div>
+                                            <input type="range" min="1" max="10" value={f.score} onChange={e => { const n = [...data.restraining]; n[i].score = parseInt(e.target.value); setData({...data, restraining: n, isDefault: false}); }} />
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setData({...data, restraining: [...data.restraining, {id: Date.now(), text: "", score: 5}], isSample: false})} className="w-full py-4 border-2 border-dashed border-rose-200 rounded-2xl text-rose-400 font-black">+ 저항 요인 추가</button>
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
-                                </div>
+                                <button onClick={() => setData({...data, restraining: [...data.restraining, {id: Date.now(), text: "", score: 5}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-rose-200 rounded-2xl text-rose-400 font-black">+ 저항 요인 추가</button>
+                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">리포트 생성</button></div>
                             </div>
                         )}
 
-                        {/* Step 4: Result Report */}
                         {step === 4 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        Lewin's Force Field Analysis Report
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        {data.goal || "역장 분석 리포트"}
-                                    </h2>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Force Field Analysis Report</span>
+                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">{data.goal}</h2>
                                 </div>
-
-                                {/* Visual Force Field Diagram */}
                                 <div className="flex flex-col md:flex-row items-stretch justify-center gap-4 mb-16">
-                                    {/* Driving Side */}
                                     <div className="flex-1 space-y-4">
                                         <div className="p-6 bg-blue-600 text-white rounded-2xl text-center font-black uppercase tracking-widest shadow-lg">Driving Forces</div>
                                         {data.driving.map((f, i) => (
                                             <div key={i} className="flex items-center gap-4">
                                                 <div className="flex-1 text-right font-bold text-slate-600 text-sm">{f.text}</div>
-                                                <div className="bg-blue-500 force-arrow-right h-8 shadow-sm" style={{ width: `${f.score * 10}%`, minWidth: '20px' }}></div>
+                                                <div className="bg-blue-500 force-arrow-right h-8" style={{ width: `${f.score * 10}%`, minWidth: '20px' }}></div>
                                                 <div className="font-black text-blue-600 w-6">{f.score}</div>
                                             </div>
                                         ))}
-                                        <div className="pt-4 border-t-2 border-blue-100 text-right">
-                                            <span className="text-xs font-black text-blue-400 uppercase mr-2">Total Strength</span>
-                                            <span className="text-4xl font-black text-blue-600">{totals.d}</span>
-                                        </div>
                                     </div>
-
-                                    {/* Center Line */}
                                     <div className="w-1 bg-slate-200 rounded-full hidden md:block"></div>
-
-                                    {/* Restraining Side */}
                                     <div className="flex-1 space-y-4">
                                         <div className="p-6 bg-rose-600 text-white rounded-2xl text-center font-black uppercase tracking-widest shadow-lg">Restraining Forces</div>
                                         {data.restraining.map((f, i) => (
                                             <div key={i} className="flex items-center gap-4">
                                                 <div className="font-black text-rose-600 w-6 text-right">{f.score}</div>
-                                                <div className="bg-rose-500 force-arrow-left h-8 shadow-sm" style={{ width: `${f.score * 10}%`, minWidth: '20px' }}></div>
+                                                <div className="bg-rose-500 force-arrow-left h-8" style={{ width: `${f.score * 10}%`, minWidth: '20px' }}></div>
                                                 <div className="flex-1 text-left font-bold text-slate-600 text-sm">{f.text}</div>
                                             </div>
                                         ))}
-                                        <div className="pt-4 border-t-2 border-rose-100 text-left">
-                                            <span className="text-xs font-black text-rose-400 uppercase mr-2">Total Strength</span>
-                                            <span className="text-4xl font-black text-rose-600">{totals.r}</span>
-                                        </div>
                                     </div>
                                 </div>
-
                                 <div className={`p-12 rounded-[4rem] shadow-2xl text-center relative overflow-hidden ${totals.diff > 0 ? 'bg-slate-900 text-white' : 'bg-rose-600 text-white'}`}>
-                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">
-                                        {totals.diff > 0 ? "🚀" : "⚠"}
-                                    </div>
-                                    <h3 className="text-3xl font-black mb-6">
-                                        {totals.diff > 0 ? "변화의 동력이 더 강력합니다." : "저항이 변화의 동력을 압도하고 있습니다."}
-                                    </h3>
-                                    <p className="text-lg opacity-80 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        {totals.diff > 0 
-                                            ? "현재 추진력이 저항력을 상회하고 있습니다. 이 기세를 몰아 변화를 가속화하십시오. 단, 추진력을 높이는 것보다 저항 요인을 하나씩 제거하는 것이 더 안정적인 변화를 이끌어냅니다." 
-                                            : "현재 상태에서는 변화가 일어나기 어렵습니다. 추진력을 억지로 높이기보다는, 저항 요인(Restraining Forces)을 분석하여 이를 완화하거나 제거하는 전략이 우선되어야 합니다."}
-                                    </p>
-                                </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
+                                    <h3 className="text-3xl font-black mb-6">{totals.diff > 0 ? "변화의 동력이 더 강력합니다." : "저항이 변화의 동력을 압도하고 있습니다."}</h3>
+                                    <p className="text-lg opacity-80 leading-relaxed font-medium max-w-3xl mx-auto">{totals.diff > 0 ? "현재 추진력이 저항력을 상회하고 있습니다. 이 기세를 몰아 변화를 가속화하십시오." : "현재 상태에서는 변화가 일어나기 어렵습니다. 저항 요인을 분석하여 이를 완화하는 전략이 우선되어야 합니다."}</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/force-field/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/force-field/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                역장 분석: 변화를 성공시키는 심리학적 메커니즘
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>역장 분석(Force Field Analysis)</strong>은 현대 사회심리학의 창시자이자 조직 개발의 선구자인 <strong>커트 레빈(Kurt Lewin)</strong>이 1940년대에 개발한 변화 관리 도구입니다. 레빈은 모든 사회적 상황이나 조직의 상태가 변화를 추진하려는 힘(Driving Forces)과 현재 상태를 유지하려는 저항하는 힘(Restraining Forces) 사이의 팽팽한 균형 상태, 즉 <strong>'준평형 상태(Quasi-stationary equilibrium)'</strong>에 있다고 보았습니다.
-                                </p>
-                                <p>
-                                    변화란 단순히 새로운 것을 도입하는 것이 아니라, 이 균형을 깨뜨리고 새로운 평형 상태로 이동하는 과정입니다. 레빈은 변화를 성공시키기 위한 3단계 모델인 <strong>'해빙(Unfreezing) - 이동(Moving) - 재결빙(Refreezing)'</strong>을 제시했습니다. 역장 분석은 이 중 '해빙' 단계에서 현재의 힘의 균형을 시각화하고 분석하는 데 결정적인 역할을 합니다.
-                                </p>
-                                <p>
-                                    역장 분석의 가장 중요한 통찰은 <strong>"추진력을 높이는 것보다 저항력을 줄이는 것이 더 효과적이다"</strong>라는 점입니다. 추진력만 억지로 높이면 저항하는 힘도 그에 비례하여 강해지는 '반작용'이 발생하여 조직 내 갈등과 긴장이 고조됩니다. 반면, 저항 요인을 식별하고 이를 완화하거나 제거하면 평형 상태가 자연스럽게 변화의 방향으로 이동하게 됩니다. 이는 현대 경영의 변화 관리(Change Management) 전략에서 가장 기본이 되는 원칙입니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 추진력 (Driving Forces)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        변화를 긍정적인 방향으로 이끄는 힘입니다. 시장의 압력, 새로운 기술의 등장, 리더십의 의지, 고객의 요구 등이 여기에 해당합니다. 추진력은 변화의 필요성을 인식하게 만드는 동력이 됩니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 저항력 (Restraining Forces)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        현재 상태를 유지하려는 관성입니다. 변화에 대한 두려움, 기득권의 상실, 자원 부족, 조직 문화의 경직성 등이 포함됩니다. 저항력은 변화를 방해하거나 지연시키는 요소입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 평형 상태 (Equilibrium)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        추진력과 저항력이 맞서서 변화가 일어나지 않는 상태입니다. 변화를 위해서는 이 균형을 깨뜨려야 하며, 분석을 통해 어떤 힘을 조절할지 결정하는 것이 전략의 핵심입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 전략적 개입</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        분석 결과를 바탕으로 저항 요인을 제거하거나 추진 요인을 강화하는 구체적인 액션 플랜을 수립합니다. 레빈은 저항을 줄이는 것이 조직의 긴장을 낮추는 가장 현명한 방법이라고 조언했습니다.
-                                    </p>
-                                </div>
-                            </div>
-
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">역장 분석: 변화를 성공시키는 심리학</h3>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">역장 분석(Force Field Analysis)은 현대 사회심리학의 창시자 <strong>커트 레빈(Kurt Lewin)</strong>이 개발한 변화 관리 도구입니다. 어떤 상황을 유지하려는 '저항력'과 변화를 이끌어내려는 '추진력' 사이의 균형 상태를 분석하여 전략을 제시합니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Lewin, K. (1951). <em>Field Theory in Social Science: Selected Theoretical Papers</em>. Harper & Row.</li>
-                                    <li>• Burnes, B. (2004). "Kurt Lewin and the Planned Approach to Change: A Re-appraisal". <em>Journal of Management Studies</em>, 41(6), 977-1002.</li>
-                                    <li>• Schein, E. H. (1996). "Kurt Lewin's Change Theory in the Field and in the Classroom: Notes Toward a Model of Managed Learning". <em>Systems Practice</em>.</li>
+                                    <li>• Lewin, K. (1951). <em>Field Theory in Social Science</em>. Harper & Row.</li>
+                                    <li>• Burnes, B. (2004). "Kurt Lewin and the Planned Approach to Change". <em>Journal of Management Studies</em>.</li>
                                 </ul>
                             </div>
                         </div>
@@ -417,10 +213,7 @@
                 </main>
             );
         }
-
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(ForceFieldApp));
     </script>
 </body>
