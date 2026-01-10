@@ -3,65 +3,121 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- [SEO 표준] -->
     <title>쌍대 비교 분석 도구 | 1:1 비교를 통한 우선순위 결정 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="여러 대안 중 무엇이 중요한지 헷갈릴 때, 모든 항목을 1:1로 비교하여 객관적인 순위를 도출하세요. 서스톤의 비교 판단 법칙을 적용한 의사결정 도구입니다.">
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <meta name="description" content="여러 대안 중 무엇이 중요한지 헷갈릴 때, 모든 항목을 1:1로 비교하여 객관적인 순위를 도출하세요. 서스톤의 비교 판단 법칙을 적용한 과학적 의사결정 도구입니다.">
+    <meta name="keywords" content="쌍대비교, PairedComparison, 우선순위결정, 의사결정모델, 서스톤, 비교판단법칙, 파란랩">
+    <meta property="og:title" content="파란랩 쌍대 비교 분석 엔진">
+    <meta property="og:description" content="복잡한 선택지, 1:1 토너먼트로 명쾌하게 정리하세요.">
+    <meta property="og:type" content="website">
+    <link rel="canonical" href="https://paranlab.com/paired/">
+    
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 쌍대 비교 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "description": "모든 항목을 1:1로 대조하여 상대적 중요도를 수치화하고 순위를 매기는 의사결정 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .vs-badge { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 10; }
+        .rank-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .rank-card:hover { transform: scale(1.02); }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center"><div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div><p class="text-slate-500 font-bold">쌍대 비교 엔진 가동 중...</p></div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        function PairedApp() {
-            const [step, setStep] = useState(1); // 1:항목입력, 2:비교, 3:결과
-            const [isSharing, setIsSharing] = useState(false);
-            const [items, setItems] = useState(["가격", "위치", "평수"]);
-            const [votes, setVotes] = useState({}); // "0-1": 0 (index of winner)
+        // [v7.7] 도구 전용 기본 샘플 (업무용 노트북 구매 기준)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "최적의 업무용 노트북 구매 기준 선정",
+            items: ["휴대성(무게)", "성능(CPU/RAM)", "디스플레이 품질", "배터리 지속시간", "가격 합리성"],
+            votes: {
+                "0-1": 1, "0-2": 0, "0-3": 3, "0-4": 0,
+                "1-2": 1, "1-3": 1, "1-4": 1,
+                "2-3": 3, "2-4": 2,
+                "3-4": 3
+            },
+            isDefault: true
+        };
 
+        function PairedApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(3); // 샘플 우선 노출
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-paired');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        if (parsed.items) setItems(parsed.items);
-                        setStep(2);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-paired');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-paired', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // 비교 쌍(Pairs) 생성 로직
             const pairs = useMemo(() => {
                 const p = [];
+                const items = data.items || [];
                 for (let i = 0; i < items.length; i++) {
                     for (let j = i + 1; j < items.length; j++) p.push([i, j]);
                 }
                 return p;
-            }, [items]);
+            }, [data.items]);
 
+            // 최종 랭킹 계산 로직
             const finalRanking = useMemo(() => {
-                const scores = items.map((name, idx) => ({ name, score: 0 }));
+                const items = data.items || [];
+                const votes = data.votes || {};
+                const scores = items.map((name, idx) => ({ name, score: 0, id: idx }));
+                
                 Object.keys(votes).forEach(key => {
                     const winnerIdx = votes[key];
-                    scores[winnerIdx].score += 1;
+                    if (scores[winnerIdx]) scores[winnerIdx].score += 1;
                 });
-                return scores.sort((a, b) => b.score - a.score);
-            }, [votes, items]);
+                
+                return [...scores].sort((a, b) => b.score - a.score);
+            }, [data.votes, data.items]);
 
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
@@ -71,125 +127,258 @@
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'paired-report.png', { type: 'image/png' });
-                        const shareText = `[파란랩 쌍대 비교 리포트]\n최우선 순위: ${finalRanking[0].name}\nhttps://paranlab.com`;
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 쌍대 비교', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 쌍대 비교 분석 결과: ${data.subject}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'paired-report.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'paired-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
+            if (!isLoaded) return null;
+
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-paired'); location.reload();}} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-paired'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Paired Comparison v7.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
+                            <p className="font-bold text-sm">PARAN LAB PAIRED v7.7</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['항목 나열', '1:1 비교', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Step 1: Items Entry */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">비교할 항목들을 나열하세요.</h2>
-                                <div className="max-w-xl mx-auto space-y-4">
-                                    {items.map((item, i) => (
-                                        <div key={i} className="flex gap-2">
-                                            <input type="text" value={item} onChange={e => {
-                                                const newItems = [...items]; newItems[i] = e.target.value; setItems(newItems);
-                                            }} className="flex-1 p-4 bg-slate-50 rounded-2xl border-none font-bold text-lg shadow-inner" placeholder={`항목 ${i+1}`} />
-                                            <button onClick={() => setItems(items.filter((_, idx) => idx !== i))} className="text-red-400 font-black px-2">X</button>
+                                <div className="text-center">
+                                    <h2 className="text-4xl font-black text-slate-900">비교할 항목들을 나열하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">우선순위를 정하고 싶은 선택지나 기준을 입력합니다.</p>
+                                </div>
+                                <div className="max-w-2xl mx-auto space-y-4">
+                                    <input 
+                                        type="text" 
+                                        value={data.subject} 
+                                        onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
+                                        className="w-full p-6 bg-blue-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner mb-8"
+                                        placeholder="분석 주제 (예: 신혼집 선택 기준)"
+                                    />
+                                    {data.items.map((item, i) => (
+                                        <div key={i} className="flex gap-4 animate-in slide-in-from-bottom-2" style={{animationDelay: `${i * 50}ms`}}>
+                                            <input 
+                                                type="text" 
+                                                value={item} 
+                                                onChange={e => {
+                                                    const newItems = [...data.items];
+                                                    newItems[i] = e.target.value;
+                                                    setData({...data, items: newItems, isDefault: false});
+                                                }}
+                                                className="flex-1 p-5 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-2 ring-blue-200"
+                                                placeholder={`항목 ${i + 1}`}
+                                            />
+                                            <button 
+                                                onClick={() => {
+                                                    const newItems = data.items.filter((_, idx) => idx !== i);
+                                                    setData({...data, items: newItems, isDefault: false});
+                                                }}
+                                                className="px-6 text-red-400 font-black hover:text-red-600"
+                                            >
+                                                삭제
+                                            </button>
                                         </div>
                                     ))}
-                                    <button onClick={() => setItems([...items, ""])} className="text-blue-600 font-black text-sm">+ 항목 추가</button>
+                                    <button 
+                                        onClick={() => setData({...data, items: [...data.items, ""], isDefault: false})}
+                                        className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:bg-slate-50 transition-all"
+                                    >
+                                        + 항목 추가
+                                    </button>
                                 </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">다음: 1:1 토너먼트 시작</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 1:1 비교 시작</button>
                             </div>
                         )}
 
+                        {/* Step 2: Comparison Tournament */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-12">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">둘 중 더 중요한 것을 선택하세요.</h2>
-                                <div className="space-y-8">
-                                    {pairs.map((pair, idx) => (
-                                        <div key={idx} className="p-10 bg-slate-50 rounded-[3rem] border border-slate-100 flex flex-col md:flex-row items-center justify-center gap-8">
-                                            <button onClick={() => setVotes({...votes, [`${pair[0]}-${pair[1]}`]: pair[0]})} className={`flex-1 py-8 px-6 rounded-[2rem] font-black text-xl transition-all ${votes[`${pair[0]}-${pair[1]}`] === pair[0] ? 'bg-blue-600 text-white shadow-xl scale-105' : 'bg-white text-slate-400 border border-slate-200 hover:border-blue-300'}`}>
-                                                {items[pair[0]]}
-                                            </button>
-                                            <span className="text-slate-300 font-black italic text-2xl">VS</span>
-                                            <button onClick={() => setVotes({...votes, [`${pair[0]}-${pair[1]}`]: pair[1]})} className={`flex-1 py-8 px-6 rounded-[2rem] font-black text-xl transition-all ${votes[`${pair[0]}-${pair[1]}`] === pair[1] ? 'bg-red-600 text-white shadow-xl scale-105' : 'bg-white text-slate-400 border border-slate-200 hover:border-red-300'}`}>
-                                                {items[pair[1]]}
-                                            </button>
-                                        </div>
-                                    ))}
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. 1:1 Tournament</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">둘 중 더 중요한 것을 선택하세요</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">모든 경우의 수를 1:1로 대조하여 상대적 가치를 측정합니다.</p>
                                 </div>
-                                <button onClick={() => setStep(3)} className="w-full py-6 bg-slate-900 text-white rounded-2xl font-black text-xl shadow-2xl">최종 우선순위 리포트 확인</button>
+                                <div className="space-y-8 max-w-4xl mx-auto">
+                                    {pairs.map((pair, idx) => {
+                                        const pairKey = `${pair[0]}-${pair[1]}`;
+                                        return (
+                                            <div key={idx} className="relative p-1 bg-slate-100 rounded-[3.5rem] flex items-stretch shadow-inner overflow-hidden">
+                                                <button 
+                                                    onClick={() => setData({...data, votes: {...data.votes, [pairKey]: pair[0]}, isDefault: false})}
+                                                    className={`flex-1 py-12 px-8 rounded-[3rem] font-black text-xl md:text-2xl transition-all ${data.votes[pairKey] === pair[0] ? 'bg-blue-600 text-white shadow-2xl z-20 scale-[1.02]' : 'bg-transparent text-slate-400 hover:text-slate-600'}`}
+                                                >
+                                                    {data.items[pair[0]]}
+                                                </button>
+                                                <div className="vs-badge bg-white w-14 h-14 rounded-full flex items-center justify-center shadow-lg border-4 border-slate-100">
+                                                    <span className="text-slate-300 font-black italic text-sm">VS</span>
+                                                </div>
+                                                <button 
+                                                    onClick={() => setData({...data, votes: {...data.votes, [pairKey]: pair[1]}, isDefault: false})}
+                                                    className={`flex-1 py-12 px-8 rounded-[3rem] font-black text-xl md:text-2xl transition-all ${data.votes[pairKey] === pair[1] ? 'bg-rose-600 text-white shadow-2xl z-20 scale-[1.02]' : 'bg-transparent text-slate-400 hover:text-slate-600'}`}
+                                                >
+                                                    {data.items[pair[1]]}
+                                                </button>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                                </div>
                             </div>
                         )}
 
+                        {/* Step 3: Result Report */}
                         {step === 3 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Paired Comparison Ranking</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">우선순위 분석 리포트</h2>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Paired Comparison Ranking Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        우선순위 분석 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
                                 </div>
-                                <div className="space-y-6 mb-12">
+
+                                <div className="max-w-3xl mx-auto space-y-6 mb-16">
                                     {finalRanking.map((res, i) => (
-                                        <div key={i} className={`p-8 rounded-[2.5rem] flex justify-between items-center ${i === 0 ? 'bg-blue-600 text-white shadow-2xl scale-105' : 'bg-slate-50 text-slate-800 border border-slate-100'}`}>
-                                            <div className="flex items-center gap-6">
-                                                <span className="text-2xl font-black opacity-50"># {i+1}</span>
-                                                <h3 className="text-2xl font-black">{res.name}</h3>
+                                        <div key={i} className={`rank-card p-8 rounded-[3rem] flex justify-between items-center border-2 ${i === 0 ? 'bg-blue-600 text-white border-blue-400 shadow-2xl scale-105' : 'bg-slate-50 text-slate-800 border-slate-100 shadow-sm'}`}>
+                                            <div className="flex items-center gap-8">
+                                                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center text-2xl font-black ${i === 0 ? 'bg-white text-blue-600' : 'bg-slate-200 text-slate-500'}`}>
+                                                    {i + 1}
+                                                </div>
+                                                <h3 className="text-2xl md:text-3xl font-black">{res.name || "미입력 항목"}</h3>
                                             </div>
                                             <div className="text-right">
-                                                <p className="text-xs font-black uppercase opacity-70">Win Count</p>
+                                                <p className={`text-[10px] font-black uppercase tracking-widest mb-1 ${i === 0 ? 'text-blue-200' : 'text-slate-400'}`}>Win Count</p>
                                                 <p className="text-4xl font-black">{res.score}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+
+                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">⚖️</div>
+                                    <h3 className="text-2xl font-black mb-4">의사결정 인사이트</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
+                                        쌍대 비교 분석 결과, 귀하에게 가장 중요한 가치는 <strong>[{finalRanking[0].name}]</strong>(으)로 나타났습니다. 
+                                        단순한 선호도를 넘어 모든 항목과 1:1로 대조한 결과이므로, 이 순위를 바탕으로 자원을 배분하거나 최종 결정을 내리십시오.
+                                    </p>
+                                </div>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
                     {step === 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 bg-yellow-500 text-slate-900 rounded-[2rem] font-black text-sm shadow-xl flex items-center justify-center gap-2">💬 이미지+링크 공유</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/paired/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">쌍대 비교 분석: 주관을 객관으로 바꾸는 기술</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                쌍대 비교(Paired Comparison)는 여러 대안을 한꺼번에 순위 매기기 어려울 때, 모든 항목을 1:1로 짝지어 비교함으로써 가장 논리적인 우선순위를 도출하는 기법입니다. 심리학자 **서스톤(L. L. Thurstone)**의 비교 판단 법칙에 근거하여, 인간의 직관적 선택을 정량적인 데이터로 변환합니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                쌍대 비교 분석: 주관적 판단을 객관적 데이터로 변환하는 기술
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>쌍대 비교(Paired Comparison Analysis)</strong>는 여러 대안이나 항목 사이에서 우선순위를 정하기 어려울 때, 모든 항목을 1:1로 짝지어 비교함으로써 가장 논리적이고 객관적인 순위를 도출하는 의사결정 기법입니다. 이 방법론은 1927년 미국의 심리학자 <strong>서스톤(L. L. Thurstone)</strong>이 제안한 '비교 판단 법칙(Law of Comparative Judgment)'에 그 학술적 뿌리를 두고 있습니다.
+                                </p>
+                                <p>
+                                    인간의 뇌는 5개 이상의 항목을 동시에 비교하고 순위를 매기려 할 때 심각한 인지적 부하를 느끼며, 이 과정에서 편향이나 오류가 발생하기 쉽습니다. 쌍대 비교는 이러한 복잡한 문제를 '오직 두 가지만 놓고 고민하는' 단순한 선택의 문제로 치환합니다. 모든 가능한 쌍(Pair)에 대해 승자를 결정하는 과정을 거치면, 각 항목이 얻은 총 승수(Win Count)를 통해 자연스럽게 전체적인 가치 서열이 형성됩니다.
+                                </p>
+                                <p>
+                                    이 도구는 특히 <strong>'메타 인지(Meta-cognition)'</strong> 효과가 뛰어납니다. 단순히 "무엇을 좋아하느냐"고 물었을 때와 달리, 상충하는 두 가치를 직접 대조해보는 과정에서 사용자는 자신이 무의식중에 어떤 기준을 더 중요하게 생각하는지 스스로 깨닫게 됩니다. 파란랩의 쌍대 비교 엔진은 이러한 심리학적 원리를 토너먼트 방식의 인터페이스로 구현하여, 당신의 복잡한 고민을 명쾌한 데이터로 정리해 드립니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">인지적 단순화</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간은 5개 이상의 항목을 동시에 비교할 때 혼란을 겪습니다. 쌍대 비교는 오직 두 가지만을 놓고 고민하게 함으로써 뇌의 인지적 부하를 줄이고 판단의 정확도를 높입니다.</p>
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 인지적 단순화</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        복잡한 다중 선택 문제를 단순한 1:1 선택으로 쪼개어 판단의 정확도를 높입니다. 뇌가 가장 편안하게 느끼는 비교 방식을 채택하여 의사결정 피로도를 줄입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 상대적 가치의 정량화</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        주관적인 선호도를 '승수'라는 정량적 수치로 변환합니다. 이를 통해 "A가 B보다 얼마나 더 중요한가"에 대한 논리적 근거를 확보할 수 있습니다.
+                                    </p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">상대적 가치의 발견</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순 선호도 조사와 달리, 모든 항목과 대조해보는 과정을 통해 내가 무의식중에 어떤 가치를 더 중요하게 생각하는지 스스로 깨닫게 되는 '메타 인지' 효과를 제공합니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 일관성 검증</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        모든 항목을 대조하는 과정에서 자신의 판단이 일관적인지 확인할 수 있습니다. 만약 A>B, B>C인데 C>A라고 선택한다면, 자신의 가치관을 재점검할 기회를 얻게 됩니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 합리적 자원 배분</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        도출된 순위는 한정된 시간과 예산을 어디에 먼저 투입해야 할지 알려주는 명확한 가이드가 됩니다. 감정이 아닌 논리에 기반한 우선순위를 설정하십시오.
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Thurstone, L. L. (1927). "A law of comparative judgment". *Psychological Review*.</li>
-                                    <li>• David, H. A. (1988). *The Method of Paired Comparisons*. Oxford University Press.</li>
+                                    <li>• Thurstone, L. L. (1927). "A law of comparative judgment". <em>Psychological Review</em>, 34(4), 273-286.</li>
+                                    <li>• David, H. A. (1988). <em>The Method of Paired Comparisons</em>. Oxford University Press.</li>
+                                    <li>• Saaty, T. L. (1980). <em>The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation</em>. McGraw-Hill.</li>
+                                    <li>• Bradley, R. A., & Terry, M. E. (1952). "Rank analysis of incomplete block designs: I. The method of paired comparisons". <em>Biometrika</em>.</li>
                                 </ul>
                             </div>
                         </div>
@@ -197,8 +386,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<PairedApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(PairedApp));
     </script>
 </body>
 </html>
