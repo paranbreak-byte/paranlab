@@ -6,16 +6,20 @@
     
     <!-- [SEO 표준] -->
     <title>시간 감사(Time Audit) | 생산성 진단 및 시간 관리 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="당신의 24시간은 어디로 사라지나요? 시간 감사 도구를 통해 생산적 활동과 낭비되는 시간을 분석하세요. 김 팀장의 번아웃 시나리오와 함께하는 과학적 시간 관리 도구입니다.">
-    <meta name="keywords" content="시간감사, TimeAudit, 시간관리, 생산성향상, 번아웃방지, 피터드러커시간관리, 파란랩">
+    <meta name="description" content="당신의 24시간은 어디로 사라지나요? 시간 감사 도구를 통해 생산적 활동과 낭비되는 시간을 분석하세요. 피터 드러커의 원칙에 따른 과학적 시간 관리 도구입니다.">
+    <meta name="keywords" content="시간감사, TimeAudit, 시간관리, 생산성향상, 번아웃방지, 피터드러커시간관리, 파란랩, 시간기록">
+    <meta property="og:title" content="파란랩 시간 감사 엔진">
+    <meta property="og:description" content="기록하지 않으면 관리할 수 없습니다. 당신의 시간을 감사(Audit)하세요.">
+    <meta property="og:type" content="website">
     <link rel="canonical" href="https://paranlab.com/time-audit/">
     
-    <!-- [구조화 데이터] -->
+    <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "SoftwareApplication",
       "name": "파란랩 시간 감사 엔진",
+      "operatingSystem": "All",
       "applicationCategory": "BusinessApplication",
       "description": "시간 사용 내역을 기록하고 카테고리별로 분석하여 생산성을 높이는 도구",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
@@ -23,8 +27,8 @@
     </script>
 
     <!-- 라이브러리 로드 -->
-    <script src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-    <script src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
@@ -32,199 +36,371 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .audit-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .audit-card:hover { transform: translateY(-5px); }
+        @media print { .no-print { display: none; } }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <div class="flex items-center justify-center min-h-[70vh]">
-            <div class="text-center">
-                <div class="inline-block w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-slate-500 font-bold">시간 감사 엔진 가동 중...</p>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.7] 도구 전용 기본 샘플 (김 팀장의 하루 시간 감사)
+        const DEFAULT_TOOL_SAMPLE = {
+            subject: "김 팀장의 평일 시간 사용 진단",
+            acts: [
+                { id: 1, name: "핵심 업무 및 전략 수립", h: 5, cat: "productive" },
+                { id: 2, name: "불필요한 회의 및 보고", h: 3, cat: "waste" },
+                { id: 3, name: "독서 및 온라인 강의 수강", h: 1.5, cat: "growth" },
+                { id: 4, name: "수면 및 식사", h: 9, cat: "essential" },
+                { id: 5, name: "SNS 및 무의미한 웹서핑", h: 2.5, cat: "waste" },
+                { id: 6, name: "운동 및 명상", h: 1, cat: "growth" },
+                { id: 7, name: "출퇴근 이동 시간", h: 2, cat: "essential" }
+            ],
+            isDefault: true
+        };
+
+        const CATEGORIES = {
+            productive: { n: "생산적 활동", c: "bg-blue-600", light: "bg-blue-50", text: "text-blue-700", desc: "목표 달성에 직접 기여하는 핵심 업무" },
+            waste: { n: "낭비되는 시간", c: "bg-rose-600", light: "bg-rose-50", text: "text-rose-700", desc: "의미 없는 습관이나 불필요한 절차" },
+            growth: { n: "자기계발/성장", c: "bg-emerald-600", light: "bg-emerald-50", text: "text-emerald-700", desc: "미래 가치를 높이는 학습과 건강 관리" },
+            essential: { n: "필수 생활 시간", c: "bg-slate-500", light: "bg-slate-50", text: "text-slate-700", desc: "수면, 식사 등 생존을 위한 기본 시간" }
+        };
+
         function TimeAuditApp() {
-            const [step, setStep] = useState(1); 
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(3); // 샘플 우선 노출
             const [isSharing, setIsSharing] = useState(false);
-            const [acts, setActs] = useState([
-                { id: 1, name: "업무", h: 8, cat: "productive" }
-            ]);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            const categories = {
-                productive: { n: "생산적 활동", c: "bg-blue-500" },
-                waste: { n: "낭비되는 시간", c: "bg-rose-500" },
-                growth: { n: "자기계발/성장", c: "bg-emerald-500" },
-                essential: { n: "필수 생활 시간", c: "bg-slate-400" }
-            };
-
+            // [Part 2] 초기화 지연 및 안전한 데이터 로드
             useEffect(() => {
-                try {
-                    const tossed = localStorage.getItem('paranlab-time-audit');
-                    if (tossed) {
-                        const parsed = JSON.parse(tossed);
-                        if (parsed.acts) setActs(parsed.acts);
-                        setStep(2);
-                    }
-                } catch(e) { console.error(e); }
+                const timer = setTimeout(() => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-time-audit');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) { console.error("Init Error:", e); }
+                    setIsLoaded(true);
+                }, 500);
+                return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 변경 시 자동 저장
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-time-audit', JSON.stringify(data));
+                }
+            }, [data, isLoaded]);
+
+            // 통계 계산 로직
             const stats = useMemo(() => {
-                const total = acts.reduce((sum, a) => sum + Number(a.h), 0);
-                const byCat = acts.reduce((acc, a) => {
-                    acc[a.cat] = (acc[a.cat] || 0) + Number(a.h);
+                const total = (data.acts || []).reduce((sum, a) => sum + Number(a.h || 0), 0);
+                const byCat = (data.acts || []).reduce((acc, a) => {
+                    acc[a.cat] = (acc[a.cat] || 0) + Number(a.h || 0);
                     return acc;
                 }, {});
                 return { total, byCat };
-            }, [acts]);
+            }, [data.acts]);
 
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
                 if (!element) return;
                 setIsSharing(true);
                 try {
-                    const canvas = await html2canvas(element, { scale: 2, useCORS: true, scrollY: -window.scrollY });
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], 'time-audit.png', { type: 'image/png' });
-                        const shareText = `[파란랩 시간 감사 리포트]\n총 ${stats.total}시간 중 생산적 활동이 ${(stats.byCat.productive/stats.total*100).toFixed(0)}%입니다.\nhttps://paranlab.com`;
+                        const file = new File([blob], 'time-audit-report.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], title: '파란랩 시간 감사', text: shareText });
+                            await navigator.share({ files: [file], text: `[파란랩] 시간 감사 분석 결과: ${data.subject}` });
                         } else {
-                            const link = document.createElement('a'); link.download = 'time-audit.png'; link.href = canvas.toDataURL(); link.click();
+                            const link = document.createElement('a');
+                            link.download = 'time-audit-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
                         }
                         setIsSharing(false);
                     }, 'image/png');
                 } catch (err) { setIsSharing(false); }
             };
 
+            if (!isLoaded) return null;
+
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4">
-                    <div className="flex justify-between items-center mb-10 no-print bg-slate-900 p-6 rounded-[2rem] shadow-xl">
+                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm">✏️ 수정하기</button>
-                            <button onClick={() => location.reload()} className="px-6 py-3 bg-red-600 text-white rounded-xl font-black text-sm">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-time-audit'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
-                        <div className="text-white font-bold text-xs uppercase tracking-widest opacity-50">Time Audit Engine v7.0</div>
+                        <div className="text-right hidden md:block text-white">
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Efficiency Science</p>
+                            <p className="font-bold text-sm">PARAN LAB TIME AUDIT v7.7</p>
+                        </div>
                     </div>
 
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                        {['주제 및 활동 기록', '시간 및 분류 설정', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [Part 3] 상단 광고 영역 */}
                     <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <h2 className="text-3xl font-black text-slate-900 text-center">당신의 24시간은 어디로 사라지나요?</h2>
-                                <div className="space-y-4">
-                                    {acts.map((a, i) => (
-                                        <div key={a.id} className="p-6 bg-slate-50 rounded-3xl flex flex-col md:flex-row gap-4 items-center">
-                                            <input type="text" value={a.name} onChange={e => {
-                                                const newActs = [...acts]; newActs[i].name = e.target.value; setActs(newActs);
-                                            }} className="flex-1 bg-white p-3 rounded-xl border-none font-bold" placeholder="활동 내용" />
-                                            <div className="flex items-center gap-2">
-                                                <input type="number" value={a.h} onChange={e => {
-                                                    const newActs = [...acts]; newActs[i].h = e.target.value; setActs(newActs);
-                                                }} className="w-20 p-3 bg-white rounded-xl border-none font-black text-center" />
-                                                <span className="font-bold text-slate-400">시간</span>
-                                            </div>
-                                            <select value={a.cat} onChange={e => {
-                                                const newActs = [...acts]; newActs[i].cat = e.target.value; setActs(newActs);
-                                            }} className="p-3 bg-white rounded-xl border-none font-bold">
-                                                {Object.keys(categories).map(k => <option key={k} value={k}>{categories[k].n}</option>)}
-                                            </select>
-                                            <button onClick={() => setActs(acts.filter(item => item.id !== a.id))} className="text-rose-400 font-black px-2">X</button>
-                                        </div>
-                                    ))}
-                                </div>
-                                <button onClick={() => setActs([...acts, { id: Date.now(), name: "", h: 1, cat: "productive" }])} className="text-blue-600 font-black text-sm">+ 활동 추가</button>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-2xl font-black text-xl shadow-xl">시간 감사 리포트 확인</button>
+                    {/* 메인 컨텐츠 카드 */}
+                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        
+                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                            <div className="absolute top-8 right-8 no-print">
+                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
                             </div>
                         )}
 
-                        {step === 2 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="flex justify-between items-start mb-16">
-                                    <div>
-                                        <span className="bg-blue-100 text-blue-700 px-6 py-1.5 rounded-full text-xs font-black uppercase tracking-widest">Time Usage Audit</span>
-                                        <h2 className="text-4xl font-black text-slate-900 mt-6 tracking-tight">시간 사용 진단 리포트</h2>
-                                    </div>
-                                    {localStorage.getItem('paranlab-time-audit') && (
-                                        <div className="text-right bg-blue-600 text-white p-4 rounded-2xl shadow-lg">
-                                            <p className="text-[10px] font-black uppercase opacity-70">Scenario Applied</p>
-                                            <p className="text-xs font-bold">김 팀장의 번아웃 탈출</p>
-                                        </div>
-                                    )}
+                        {/* Step 1: Listing */}
+                        {step === 1 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="text-center">
+                                    <h2 className="text-4xl font-black text-slate-900">무엇을 위해 시간을 사용하셨나요?</h2>
+                                    <p className="text-slate-500 mt-2 font-bold">분석 주제와 주요 활동들을 나열하세요.</p>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mb-12">
-                                    <div className="space-y-6">
-                                        {Object.keys(categories).map(k => {
+                                <div className="max-w-3xl mx-auto space-y-6">
+                                    <input 
+                                        type="text" 
+                                        value={data.subject} 
+                                        onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
+                                        className="w-full p-6 bg-blue-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner mb-8"
+                                        placeholder="분석 주제 (예: 나의 평일 시간 사용 진단)"
+                                    />
+                                    {data.acts.map((a, i) => (
+                                        <div key={a.id} className="flex gap-4 animate-in slide-in-from-bottom-2" style={{animationDelay: `${i * 50}ms`}}>
+                                            <input 
+                                                type="text" 
+                                                value={a.name} 
+                                                onChange={e => {
+                                                    const newActs = [...data.acts];
+                                                    newActs[i].name = e.target.value;
+                                                    setData({...data, acts: newActs, isDefault: false});
+                                                }}
+                                                className="flex-1 p-5 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-2 ring-blue-200"
+                                                placeholder={`활동 ${i + 1}`}
+                                            />
+                                            <button 
+                                                onClick={() => setData({...data, acts: data.acts.filter(item => item.id !== a.id), isDefault: false})}
+                                                className="px-6 text-red-400 font-black hover:text-red-600"
+                                            >
+                                                삭제
+                                            </button>
+                                        </div>
+                                    ))}
+                                    <button 
+                                        onClick={() => setData({...data, acts: [...data.acts, { id: Date.now(), name: "", h: 1, cat: "productive" }], isDefault: false})}
+                                        className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:bg-slate-50 transition-all"
+                                    >
+                                        + 활동 추가
+                                    </button>
+                                </div>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 시간 및 카테고리 설정</button>
+                            </div>
+                        )}
+
+                        {/* Step 2: Categorizing */}
+                        {step === 2 && (
+                            <div className="animate-in fade-in space-y-10">
+                                <div className="text-center">
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Categorizing</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">각 활동의 시간과 성격을 정의하세요</h2>
+                                </div>
+                                <div className="space-y-6">
+                                    {data.acts.map((a, i) => (
+                                        <div key={a.id} className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 flex flex-col md:flex-row gap-8 items-center">
+                                            <div className="flex-1">
+                                                <h3 className="text-xl font-black text-slate-800 mb-2">📌 {a.name || "제목 없는 활동"}</h3>
+                                                <p className="text-xs text-slate-400 font-bold">{CATEGORIES[a.cat].desc}</p>
+                                            </div>
+                                            <div className="flex gap-4 items-center shrink-0">
+                                                <div className="flex flex-col items-center">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-1">Hours</label>
+                                                    <input 
+                                                        type="number" step="0.5" min="0"
+                                                        value={a.h} 
+                                                        onChange={e => {
+                                                            const newActs = [...data.acts];
+                                                            newActs[i].h = e.target.value;
+                                                            setData({...data, acts: newActs, isDefault: false});
+                                                        }}
+                                                        className="w-24 p-4 bg-white rounded-2xl border-none font-black text-center text-xl shadow-sm"
+                                                    />
+                                                </div>
+                                                <div className="flex flex-col items-center">
+                                                    <label className="text-[10px] font-black text-slate-400 uppercase mb-1">Category</label>
+                                                    <select 
+                                                        value={a.cat} 
+                                                        onChange={e => {
+                                                            const newActs = [...data.acts];
+                                                            newActs[i].cat = e.target.value;
+                                                            setData({...data, acts: newActs, isDefault: false});
+                                                        }}
+                                                        className="p-4 bg-white rounded-2xl border-none font-black text-sm shadow-sm outline-none"
+                                                    >
+                                                        {Object.keys(CATEGORIES).map(k => <option key={k} value={k}>{CATEGORIES[k].n}</option>)}
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                                </div>
+                            </div>
+                        )}
+
+                        {/* Step 3: Result Report */}
+                        {step === 3 && (
+                            <div className="animate-in zoom-in duration-700">
+                                <div className="text-center mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
+                                        Time Usage Audit Report
+                                    </span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
+                                        시간 사용 진단 결과
+                                    </h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                                </div>
+
+                                <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center mb-16">
+                                    {/* Category Breakdown */}
+                                    <div className="space-y-8">
+                                        {Object.keys(CATEGORIES).map(k => {
                                             const val = stats.byCat[k] || 0;
-                                            const pct = stats.total > 0 ? (val / stats.total * 100).toFixed(0) : 0;
+                                            const pct = stats.total > 0 ? (val / stats.total * 100).toFixed(1) : "0.0";
                                             return (
-                                                <div key={k}>
-                                                    <div className="flex justify-between text-sm font-black mb-2">
-                                                        <span className="text-slate-600">{categories[k].n}</span>
-                                                        <span className="text-slate-900">{val}시간 ({pct}%)</span>
+                                                <div key={k} className="space-y-3">
+                                                    <div className="flex justify-between items-end">
+                                                        <span className="text-lg font-black text-slate-700">{CATEGORIES[k].n}</span>
+                                                        <span className={`text-xl font-black ${CATEGORIES[k].text}`}>{val}시간 ({pct}%)</span>
                                                     </div>
-                                                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden">
-                                                        <div className={`h-full ${categories[k].c}`} style={{ width: pct + "%" }}></div>
+                                                    <div className="h-4 bg-slate-100 rounded-full overflow-hidden p-1">
+                                                        <div 
+                                                            className={`h-full rounded-full transition-all duration-1000 ${CATEGORIES[k].c}`}
+                                                            style={{ width: `${pct}%` }}
+                                                        ></div>
                                                     </div>
                                                 </div>
                                             );
                                         })}
+                                        <div className="pt-6 border-t-2 border-slate-100 flex justify-between items-center">
+                                            <span className="text-sm font-black text-slate-400 uppercase tracking-widest">Total Audited Time</span>
+                                            <span className="text-3xl font-black text-slate-900">{stats.total}시간</span>
+                                        </div>
                                     </div>
-                                    <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl flex flex-col justify-center text-center">
-                                        <h4 className="text-2xl font-black mb-4">"시간은 가장 희소한 자원입니다."</h4>
-                                        <p className="text-sm opacity-60 leading-relaxed">
-                                            총 <strong>{stats.total}시간</strong>의 기록 중 낭비되는 시간이 <strong>{stats.byCat.waste || 0}시간</strong>입니다.
+
+                                    {/* Insight Card */}
+                                    <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-9xl opacity-10 font-black">⏳</div>
+                                        <p className="text-blue-400 font-black text-sm uppercase tracking-widest mb-4">Strategic Time Insight</p>
+                                        <h4 className="text-3xl font-black mb-8 leading-tight">
+                                            {Number(stats.byCat.waste || 0) > Number(stats.byCat.productive || 0) 
+                                                ? "시간의 누수가 심각합니다. 낭비 요소를 즉시 제거하십시오." 
+                                                : "비교적 생산적인 시간을 보내고 계십니다. 성장을 위한 비중을 더 높여보세요."}
+                                        </h4>
+                                        <p className="text-slate-400 leading-relaxed font-medium">
+                                            피터 드러커는 <strong>"시간은 가장 희소한 자원이며, 이를 관리하지 못하면 아무것도 관리할 수 없다"</strong>고 말했습니다. 
+                                            전체 시간 중 <strong>{(stats.byCat.waste/stats.total*100 || 0).toFixed(0)}%</strong>에 달하는 낭비 시간을 줄여 <strong>자기계발</strong> 영역으로 전환하십시오.
                                         </p>
                                     </div>
                                 </div>
-                                <div className="mt-16 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Visualized by PARANLAB.COM</p>
+
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
+                                        Analyzed by PARANLAB.COM
+                                    </p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-6 bg-slate-900 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-6 bg-blue-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className={`py-6 ${isSharing ? 'bg-gray-400' : 'bg-yellow-500 hover:bg-yellow-400'} text-slate-900 rounded-[2rem] font-black text-sm shadow-xl transition-all flex items-center justify-center gap-2`}>
-                                {isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}
-                            </button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com`)} className="py-6 bg-emerald-600 text-white rounded-[2rem] font-black text-sm shadow-xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {step === 3 && (
+                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
+                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
+                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/time-audit/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">시간 감사(Time Audit): 생산성의 기초</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                시간 감사는 자신의 시간을 어디에 사용하고 있는지 객관적으로 기록하고 분석하는 과정입니다. 현대 경영학의 아버지 **피터 드러커(Peter Drucker)**는 "시간을 관리하려면 먼저 시간이 어디에 쓰이는지 기록하라"고 강조했습니다.
-                            </p>
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-16">
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">
+                                시간 감사(Time Audit): 성과를 만드는 가장 희소한 자원의 관리
+                            </h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>시간 감사(Time Audit)</strong>는 자신의 시간을 어디에 사용하고 있는지 객관적으로 기록하고 분석하여 생산성을 극대화하는 자기 관리 기법입니다. 현대 경영학의 아버지 <strong>피터 드러커(Peter Drucker)</strong>는 그의 저서 <em>'자기 경영 노트(The Effective Executive)'</em>에서 "시간을 관리하려면 먼저 시간이 실제로 어디에 쓰이는지 기록하라"고 강조했습니다. 그는 지식 노동자에게 가장 중요한 자원은 자본도, 인력도 아닌 바로 '시간'이라고 보았습니다.
+                                </p>
+                                <p>
+                                    시간 감사의 핵심은 <strong>'기억'이 아닌 '기록'</strong>에 의존하는 것입니다. 대부분의 사람들은 자신의 시간을 효율적으로 쓰고 있다고 착각하지만, 실제 기록을 해보면 상당 부분의 시간이 불필요한 회의, 습관적인 SNS 확인, 혹은 타인의 요구에 반응하는 수동적인 활동에 낭비되고 있음을 발견하게 됩니다. 시간 감사는 이러한 인지적 오류를 교정하고, 자신의 에너지를 가장 높은 가치를 창출하는 <strong>'생산적 활동(Productive Work)'</strong>에 집중하게 만드는 과학적 도구입니다.
+                                </p>
+                                <p>
+                                    또한 이 도구는 <strong>'파레토 법칙(80/20 법칙)'</strong>을 실천하는 가장 강력한 방법입니다. 전체 성과의 80%는 우리가 사용하는 시간의 20%에서 나옵니다. 시간 감사를 통해 이 핵심적인 20%의 활동이 무엇인지 식별하고, 나머지 80%의 낭비 요소를 과감히 제거하거나 자동화함으로써, 개인과 조직은 번아웃을 방지하고 지속 가능한 성장을 이룰 수 있습니다. 파란랩의 시간 감사 엔진은 이러한 경영학적 원리를 현대적인 인터페이스로 구현하여 당신의 24시간을 가치 있게 재설계하도록 돕습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">파레토 법칙 (80/20 법칙)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">전체 성과의 80%는 우리가 사용하는 시간의 20%에서 나옵니다. 시간 감사는 이 핵심적인 20%의 활동이 무엇인지 식별하고, 나머지 80%의 낭비 요소를 제거하는 데 목적이 있습니다.</p>
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 기록의 원칙 (Record)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        시간 관리는 기록에서 시작됩니다. 막연한 느낌이 아니라 실제 사용한 시간을 분 단위 혹은 시간 단위로 정확히 기록할 때 비로소 개선의 실마리가 보입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 낭비의 식별 (Eliminate)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        성과에 기여하지 않으면서 시간만 잡아먹는 활동을 찾아내십시오. 피터 드러커는 "하지 않아도 될 일을 효율적으로 하는 것만큼 무의미한 일은 없다"고 경고했습니다.
+                                    </p>
                                 </div>
                                 <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">에너지 관리와 시간 관리</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순히 시간을 아끼는 것이 아니라, 자신의 에너지가 가장 높은 시간에 가장 중요한 업무(Productive)를 배치하는 전략적 시간 배분이 가능해집니다.</p>
+                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 통합과 집중 (Consolidate)</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        파편화된 시간을 모아 '덩어리 시간(Time Block)'을 만드십시오. 깊은 몰입(Deep Work)이 필요한 핵심 업무는 방해받지 않는 충분한 시간 확보가 필수적입니다.
+                                    </p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
+                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 지속적인 감사</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
+                                        시간 감사는 일회성 이벤트가 아닙니다. 주기적으로 자신의 시간 사용 내역을 점검하고, 삶의 우선순위와 시간 배분이 일치하는지 확인하는 습관을 기르십시오.
+                                    </p>
                                 </div>
                             </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Drucker, P. F. (1967). *The Effective Executive*. Harper & Row.</li>
-                                    <li>• Koch, R. (1998). *The 80/20 Principle: The Secret to Achieving More with Less*. Currency.</li>
-                                    <li>• Lakein, A. (1973). *How to Get Control of Your Time and Your Life*. Wyden.</li>
+                                    <li>• Drucker, P. F. (1967). <em>The Effective Executive</em>. Harper & Row.</li>
+                                    <li>• Koch, R. (1998). <em>The 80/20 Principle: The Secret to Achieving More with Less</em>. Currency.</li>
+                                    <li>• Newport, C. (2016). <em>Deep Work: Rules for Focused Success in a Distracted World</em>. Grand Central Publishing.</li>
+                                    <li>• Lakein, A. (1973). <em>How to Get Control of Your Time and Your Life</em>. Wyden.</li>
                                 </ul>
                             </div>
                         </div>
@@ -232,8 +408,11 @@
                 </main>
             );
         }
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(<TimeAuditApp />);
+
+        // [Part 2] 안전한 렌더링 방식
+        const rootElement = document.getElementById('root');
+        const root = ReactDOM.createRoot(rootElement);
+        root.render(React.createElement(TimeAuditApp));
     </script>
 </body>
 </html>
