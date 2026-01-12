@@ -303,6 +303,7 @@
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
                             <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
                             <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
                             <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
                         </div>
                     )}
