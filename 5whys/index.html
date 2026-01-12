@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     
     <!-- [SEO 표준] -->
-    <title>3C 분석 도구 | 고객·경쟁사·자사 기반 전략 수립 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="오마에 겐이치의 3C 모델을 통해 비즈니스 환경을 과학적으로 분석하세요. 고객(Customer), 경쟁사(Competitor), 자사(Company)의 조화를 통해 최적의 KFS를 도출합니다.">
-    <meta name="keywords" content="3C분석, 전략삼각형, 경영전략도구, 시장분석, 오마에겐이치, 파란랩, KFS">
-    <link rel="canonical" href="https://paranlab.com/3c/">
+    <title>5 Whys 분석 도구 | 근본 원인 추적 엔진 | 파란랩(Paran Lab)</title>
+    <meta name="description" content="도요타의 5 Whys 기법으로 문제의 표면이 아닌 근본 원인(Root Cause)을 찾아내세요. 재발 방지를 위한 과학적 문제 해결 도구입니다.">
+    <meta name="keywords" content="5Whys, 근본원인분석, RCA, 도요타생산방식, 문제해결기법, 오노다이이치, 파란랩">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❓</text></svg>">
     
     <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
@@ -22,6 +22,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .why-connector { width: 4px; height: 40px; background: linear-gradient(to bottom, #3b82f6, #e2e8f0); margin: 0 auto; border-radius: 2px; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -33,27 +34,42 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (스타벅스의 국내 시장 전략)
+        // [v7.8.1] 도구 전용 기본 샘플 (식당 매출 급감 사례)
         const DEFAULT_TOOL_SAMPLE = {
-            customer: "고급스러운 공간 경험과 일관된 커피 품질을 원하는 2040 직장인 및 카공족. 모바일 주문(사이렌 오더) 편의성 중시.",
-            competitor: "저가형 프랜차이즈(메가커피 등)의 공세와 스페셜티 전문점(블루보틀 등) 사이의 샌드위치 압박.",
-            company: "압도적인 브랜드 파워, 전국 핵심 상권의 직영 매장망, 강력한 로열티 프로그램 및 IT 결합 서비스.",
+            problem: "최근 3개월간 식당의 점심 매출이 전년 대비 40% 급감했다.",
+            whys: [
+                "단골 고객들의 방문 횟수가 눈에 띄게 줄어들었기 때문이다.",
+                "음식의 맛이 예전과 달라졌다는 평가가 많아졌기 때문이다.",
+                "메인 주방장이 교체된 후 레시피 일관성이 깨졌기 때문이다.",
+                "신임 주방장 교육 시 표준 레시피 매뉴얼이 전달되지 않았기 때문이다.",
+                "주방 인력 교체 시 인수인계 프로세스가 시스템화되어 있지 않았기 때문이다."
+            ],
+            rootCause: "주방 인력 교체 시의 체계적인 인수인계 및 교육 시스템 부재",
+            action: "전 메뉴 표준 레시피 디지털화 및 신규 인력 투입 시 7일간의 필수 교육 프로세스 구축",
             isDefault: true
         };
 
-        function ThreeCApp() {
+        function FiveWhysApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 리포트 우선 노출
             const [isSharing, setIsSharing] = useState(false);
+            const [step, setStep] = useState(4); // 결과 우선 노출
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [Part 2] 초기화 지연 및 데이터 격리 로직
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
-                        const saved = localStorage.getItem('paranlab-3c');
+                        const saved = localStorage.getItem('paranlab-5whys');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData({ ...parsed, isDefault: false });
+                            setData({
+                                problem: parsed.problem || DEFAULT_TOOL_SAMPLE.problem,
+                                whys: Array.isArray(parsed.whys) ? parsed.whys : DEFAULT_TOOL_SAMPLE.whys,
+                                rootCause: parsed.rootCause || DEFAULT_TOOL_SAMPLE.rootCause,
+                                action: parsed.action || DEFAULT_TOOL_SAMPLE.action,
+                                scenarioContext: parsed.scenarioContext || null,
+                                isDefault: false
+                            });
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
@@ -63,9 +79,10 @@
                 return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
-                    localStorage.setItem('paranlab-3c', JSON.stringify(data));
+                    localStorage.setItem('paranlab-5whys', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
@@ -76,12 +93,12 @@
                 try {
                     const canvas = await html2canvas(element, { scale: 2, useCORS: true });
                     canvas.toBlob(async (blob) => {
-                        const file = new File([blob], '3c-report.png', { type: 'image/png' });
+                        const file = new File([blob], '5whys-report.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: `[파란랩] 3C 전략 분석 리포트` });
+                            await navigator.share({ files: [file], text: `[파란랩] 5 Whys 근본 원인 분석 결과: ${data.problem}` });
                         } else {
                             const link = document.createElement('a');
-                            link.download = '3c-report.png';
+                            link.download = '5whys-report.png';
                             link.href = canvas.toDataURL();
                             link.click();
                         }
@@ -94,30 +111,36 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* 마스터 컨트롤 바 */}
+                    {/* [Part 1] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-3c'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-5whys'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Strategy Science</p>
-                            <p className="font-bold text-sm">PARAN LAB 3C v7.7</p>
+                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Problem Solving Science</p>
+                            <p className="font-bold text-sm">PARAN LAB 5WHYS v7.8.1</p>
                         </div>
                     </div>
 
-                    {/* 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['고객 분석', '경쟁사 분석', '자사 분석', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* [Part 3] 위저드 단계 표시 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
+                        {['문제 정의', '원인 추적', '결론 도출', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 메인 컨텐츠 카드 */}
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         
-                        {/* 배지 */}
+                        {/* 샘플/시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -126,59 +149,78 @@
                             </div>
                         )}
 
-                        {/* Step 1: Customer */}
+                        {/* Step 1: Problem Definition */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Customer</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">시장의 니즈와 고객을 정의하세요</h2>
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Problem</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">해결하고 싶은 문제를 정의하세요</h2>
                                 </div>
                                 <textarea 
-                                    value={data.customer} 
-                                    onChange={e => setData({...data, customer: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all"
-                                    placeholder="고객 분석 내용 입력..."
+                                    value={data.problem} 
+                                    onChange={e => setData({...data, problem: e.target.value, isDefault: false})}
+                                    className="w-full h-48 p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-2xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
+                                    placeholder="예: 최근 식당의 점심 매출이 급감했다."
                                 />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700">다음: 경쟁사 분석</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 원인 추적 시작</button>
                             </div>
                         )}
 
-                        {/* Step 2: Competitor */}
+                        {/* Step 2: The 5 Whys */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
                                 <div className="text-center">
-                                    <span className="text-rose-600 font-black text-sm uppercase tracking-widest">Step 02. Competitor</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">경쟁자의 전략과 약점을 파악하세요</h2>
+                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Root Cause Tracking</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">꼬리에 꼬리를 무는 질문</h2>
                                 </div>
-                                <textarea 
-                                    value={data.competitor} 
-                                    onChange={e => setData({...data, competitor: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-rose-100 transition-all"
-                                    placeholder="경쟁사 분석 내용 입력..."
-                                />
+                                <div className="space-y-4">
+                                    {data.whys.map((why, i) => (
+                                        <div key={i}>
+                                            <div className="p-6 bg-blue-50 rounded-[2rem] border border-blue-100 flex items-center gap-6">
+                                                <div className="w-12 h-12 bg-blue-600 text-white rounded-full flex items-center justify-center font-black shrink-0 shadow-lg">{i + 1}</div>
+                                                <input 
+                                                    type="text" 
+                                                    value={why} 
+                                                    onChange={e => {
+                                                        const newWhys = [...data.whys];
+                                                        newWhys[i] = e.target.value;
+                                                        setData({...data, whys: newWhys, isDefault: false});
+                                                    }}
+                                                    className="w-full bg-transparent border-none outline-none text-lg font-bold text-slate-800"
+                                                    placeholder="그 이유는 무엇인가요?"
+                                                />
+                                            </div>
+                                            {i < 4 && <div className="why-connector"></div>}
+                                        </div>
+                                    ))}
+                                </div>
                                 <div className="flex gap-4">
                                     <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 자사 분석</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 결론 도출</button>
                                 </div>
                             </div>
                         )}
 
-                        {/* Step 3: Company */}
+                        {/* Step 3: Conclusion */}
                         {step === 3 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <div className="animate-in fade-in space-y-10">
                                 <div className="text-center">
-                                    <span className="text-emerald-600 font-black text-sm uppercase tracking-widest">Step 03. Company</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">우리의 핵심 역량을 정의하세요</h2>
+                                    <span className="text-emerald-600 font-black text-sm uppercase tracking-widest">Step 03. Conclusion</span>
+                                    <h2 className="text-4xl font-black text-slate-900 mt-2">근본 원인과 해결책 정의</h2>
                                 </div>
-                                <textarea 
-                                    value={data.company} 
-                                    onChange={e => setData({...data, company: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-emerald-100 transition-all"
-                                    placeholder="자사 분석 내용 입력..."
-                                />
+                                <div className="space-y-6">
+                                    <div className="p-10 bg-slate-900 rounded-[3rem] shadow-xl">
+                                        <label className="block text-blue-400 font-black text-xs uppercase tracking-widest mb-4">Root Cause (근본 원인)</label>
+                                        <textarea value={data.rootCause} onChange={e => setData({...data, rootCause: e.target.value, isDefault: false})} className="w-full h-32 bg-transparent border-none outline-none text-white text-2xl font-black" placeholder="진짜 원인은 무엇인가요?" />
+                                    </div>
+                                    <div className="p-10 bg-emerald-500 rounded-[3rem] shadow-xl">
+                                        <label className="block text-emerald-100 font-black text-xs uppercase tracking-widest mb-4">Action Plan (해결책)</label>
+                                        <textarea value={data.action} onChange={e => setData({...data, action: e.target.value, isDefault: false})} className="w-full h-32 bg-transparent border-none outline-none text-white text-2xl font-black" placeholder="무엇을 해야 하나요?" />
+                                    </div>
+                                </div>
                                 <div className="flex gap-4">
                                     <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
                                 </div>
                             </div>
                         )}
@@ -187,60 +229,90 @@
                         {step === 4 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">3C Strategic Triangle Report</span>
-                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">비즈니스 전략 분석 결과</h2>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">5 Whys Root Cause Analysis Report</span>
+                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">문제 해결 분석 리포트</h2>
                                 </div>
 
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                                    <div className="p-10 bg-blue-50 rounded-[3.5rem] border border-blue-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
-                                        <h3 className="font-black text-blue-800 mb-6 text-xl">👥 Customer</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.customer || "데이터 없음"}</p>
+                                <div className="bg-slate-50 p-10 rounded-[3.5rem] mb-12 border border-slate-100 relative overflow-hidden">
+                                    <h3 className="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Initial Problem</h3>
+                                    <p className="text-3xl font-black text-slate-800 leading-tight">"{data.problem}"</p>
+                                </div>
+
+                                <div className="space-y-4 mb-16">
+                                    {data.whys.map((why, i) => why && (
+                                        <div key={i} className="flex gap-8 items-center">
+                                            <div className="w-16 h-16 bg-white border-4 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black text-xl shrink-0 shadow-lg">{i + 1}</div>
+                                            <div className="flex-1 bg-white p-6 rounded-[2rem] shadow-sm border border-slate-100 font-bold text-slate-600 text-lg">{why}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl relative overflow-hidden">
+                                        <h3 className="text-blue-400 font-black text-xs uppercase tracking-widest mb-6">Root Cause</h3>
+                                        <p className="text-2xl font-black leading-relaxed">{data.rootCause}</p>
                                     </div>
-                                    <div className="p-10 bg-rose-50 rounded-[3.5rem] border border-rose-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
-                                        <h3 className="font-black text-rose-800 mb-6 text-xl">⚔️ Competitor</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.competitor || "데이터 없음"}</p>
-                                    </div>
-                                    <div className="p-10 bg-emerald-50 rounded-[3.5rem] border border-emerald-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
-                                        <h3 className="font-black text-emerald-800 mb-6 text-xl">🏢 Company</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.company || "데이터 없음"}</p>
+                                    <div className="p-12 bg-emerald-500 text-white rounded-[4rem] shadow-2xl relative overflow-hidden">
+                                        <h3 className="text-emerald-100 font-black text-xs uppercase tracking-widest mb-6">Action Plan</h3>
+                                        <p className="text-2xl font-black leading-relaxed">{data.action}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
-                                    <h3 className="text-2xl font-black mb-4">전략적 시사점 (KFS 도출)</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        성공적인 전략은 <strong>'고객이 원하고'</strong>, <strong>'경쟁사가 제공하지 못하며'</strong>, <strong>'우리가 잘할 수 있는'</strong> 영역의 교집합에서 탄생합니다. 위 분석을 바탕으로 귀사의 핵심 성공 요인(Key Factors for Success)을 정의하십시오.
-                                    </p>
+                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
+                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">Analyzed by PARANLAB.COM</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* 하단 액션 버튼 */}
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 통합 공유 시스템 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/3c/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* 학술적 배경 */}
+                    {/* 학술적 배경 설명 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">3C 분석: 전략 수립의 삼각형</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                3C 분석은 세계적인 경영 컨설턴트 <strong>오마에 겐이치(Kenichi Ohmae)</strong>가 제안한 프레임워크입니다. 비즈니스 성공을 위해 반드시 고려해야 할 3가지 핵심 이해관계자인 고객(Customer), 경쟁사(Competitor), 자사(Company)를 분석하여 지속 가능한 경쟁 우위를 확보하는 데 목적이 있습니다.
-                            </p>
+                            <h3 className="text-4xl font-black text-slate-900 mb-12">5 Whys: 도요타의 혁신을 이끈 근본 원인 분석법</h3>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    <strong>5 Whys 분석</strong>은 도요타 생산 방식(TPS, Toyota Production System)의 창시자이자 일본 산업 혁신의 아이콘인 <strong>오노 다이이치(Taiichi Ohno)</strong>가 제안한 문제 해결 기법입니다. 이 기법의 핵심은 매우 단순하면서도 강력합니다. 어떤 문제의 현상(Symptom)에 대해 '왜?'라는 질문을 최소 5번 반복함으로써, 표면적인 원인이 아닌 시스템적인 <strong>근본 원인(Root Cause)</strong>을 찾아내는 것입니다.
+                                </p>
+                                <p>
+                                    오노 다이이치는 "데이터를 보는 것보다 현장에서 '왜'를 다섯 번 묻는 것이 진짜 문제를 해결하는 길이다"라고 강조했습니다. 대부분의 조직은 문제가 발생했을 때 표면적인 현상을 수습하는 데 급급합니다. 예를 들어, 기계가 멈추면 퓨즈를 교체하는 것으로 끝냅니다. 하지만 5 Whys는 묻습니다. "왜 퓨즈가 끊어졌나?", "왜 과부하가 걸렸나?", "왜 베어링에 윤활유가 공급되지 않았나?", "왜 펌프가 고장 났나?", "왜 펌프 축이 마모되었나?" 이 과정을 통해 결국 '퓨즈 교체'라는 임시방편이 아닌 '여과 장치 설치'라는 근본적인 시스템 개선안을 도출하게 됩니다.
+                                </p>
+                                <p>
+                                    5 Whys의 진정한 가치는 <strong>'사람'이 아닌 '프로세스'</strong>에 집중한다는 점에 있습니다. "누가 실수했는가?"를 묻는 대신 "왜 시스템이 그 실수를 방지하지 못했는가?"를 탐구합니다. 이는 조직 내 비난 문화를 방지하고, 지속 가능한 개선(Kaizen)을 가능하게 하는 토대가 됩니다. 현대 경영에서는 식스 시그마(Six Sigma)나 린(Lean) 방법론의 핵심 도구로 널리 사용되고 있습니다.
+                                </p>
+                            </div>
+                            
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
+                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 현상과 원인의 분리</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">눈에 보이는 현상은 빙산의 일각일 뿐입니다. 5 Whys는 인과관계의 사슬을 따라가며 수면 아래 숨겨진 거대한 시스템적 결함을 찾아내는 논리적 추적 과정입니다.</p>
+                                </div>
+                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
+                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. 인과관계의 논리성</h4>
+                                    <p className="text-base text-slate-500 leading-relaxed font-medium">각 단계의 '왜'는 반드시 논리적으로 연결되어야 합니다. 답변을 거꾸로 읽었을 때(Therefore 테스트) 자연스러운 인과관계가 성립하는지 확인하는 것이 분석의 핵심입니다.</p>
+                                </div>
+                            </div>
+
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Ohmae, K. (1982). <em>The Mind of the Strategist: The Art of Japanese Business</em>. McGraw-Hill.</li>
-                                    <li>• Ohmae, K. (1991). <em>The Borderless World: Power and Strategy in the Interlinked Economy</em>. Harper Business.</li>
+                                    <li>• Ohno, T. (1988). <em>Toyota Production System: Beyond Large-Scale Production</em>. Productivity Press.</li>
+                                    <li>• Liker, J. K. (2004). <em>The Toyota Way: 14 Management Principles from the World's Greatest Manufacturer</em>. McGraw-Hill.</li>
+                                    <li>• Spear, S., & Bowen, H. K. (1999). "Decoding the DNA of the Toyota Production System". <em>Harvard Business Review</em>.</li>
                                 </ul>
                             </div>
                         </div>
@@ -250,7 +322,7 @@
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(ThreeCApp));
+        root.render(React.createElement(FiveWhysApp));
     </script>
 </body>
 </html>
