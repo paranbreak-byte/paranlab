@@ -6,7 +6,6 @@
     <title>AHP 분석 도구 | 정석 계층화 분석법 의사결정 | 파란랩(Paran Lab)</title>
     <meta name="description" content="Thomas Saaty의 AHP 이론을 바탕으로 복잡한 문제를 수학적으로 해결하세요. 실제 일관성 지수(CR) 계산을 통해 분석의 신뢰성을 보장합니다.">
     
-    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -18,21 +17,9 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        
-        /* 대형 슬라이더 디자인 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
-        input[type=range]:focus { outline: none; }
-        input[type=range]::-webkit-slider-runnable-track { 
-            width: 100%; height: 24px; cursor: pointer; 
-            background: linear-gradient(to right, #3b82f6, #f1f5f9, #ef4444); 
-            border-radius: 12px; border: 1px solid #e2e8f0;
-        }
-        input[type=range]::-webkit-slider-thumb { 
-            height: 48px; width: 48px; border-radius: 50%; 
-            background: #ffffff; cursor: pointer; -webkit-appearance: none; 
-            margin-top: -13px; border: 6px solid #1e293b; 
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2); 
-        }
+        input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 16px; cursor: pointer; background: linear-gradient(to right, #3b82f6, #f1f5f9, #ef4444); border-radius: 8px; }
+        input[type=range]::-webkit-slider-thumb { height: 32px; width: 32px; border-radius: 50%; background: #ffffff; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 4px solid #1e293b; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -44,17 +31,12 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (시나리오 없이 직접 진입 시)
         const DEFAULT_TOOL_SAMPLE = {
             goal: "최적의 창업 입지 선정",
             criteria: ["임대료", "유동인구", "경쟁강도"],
             alternatives: ["신도시 상가", "구도심 상가"],
             criteriaComparisons: {"0-1": 2, "0-2": -3, "1-2": -4},
-            alternativeComparisons: {
-                0: {"0-1": -5}, 
-                1: {"0-1": 4},  
-                2: {"0-1": -2}  
-            },
+            alternativeComparisons: { 0: {"0-1": -5}, 1: {"0-1": 4}, 2: {"0-1": -2} },
             isDefault: true
         };
 
@@ -62,38 +44,40 @@
 
         function AhpApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(5); // 샘플 우선 노출 원칙
+            const [step, setStep] = useState(5); 
             const [subStep, setSubStep] = useState(0);
-            const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // 초기 데이터 로드 및 데이터 격리 로직
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
                         const saved = localStorage.getItem('paranlab-ahp');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData({ ...parsed, isDefault: false });
-                            setStep(5); 
+                            setData({
+                                goal: parsed.goal || DEFAULT_TOOL_SAMPLE.goal,
+                                criteria: Array.isArray(parsed.criteria) ? parsed.criteria : DEFAULT_TOOL_SAMPLE.criteria,
+                                alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : DEFAULT_TOOL_SAMPLE.alternatives,
+                                criteriaComparisons: parsed.criteriaComparisons || {},
+                                alternativeComparisons: parsed.alternativeComparisons || {},
+                                scenarioContext: parsed.scenarioContext || null,
+                                isDefault: false
+                            });
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
-                            setStep(5);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) { console.error(e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
             }, []);
 
-            // 자동 저장 (샘플 데이터가 아닐 때만)
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-ahp', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
-            // AHP 계산 엔진
             const calculateAHP = (items, comparisons) => {
                 const n = items.length;
                 if (n <= 1) return { weights: [1], cr: 0 };
@@ -152,7 +136,6 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
                             <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
@@ -160,22 +143,19 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
-                            <p className="font-bold text-sm">PARAN LAB AHP v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB AHP v7.8</p>
                         </div>
                     </div>
 
-                    {/* 단계 표시 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
                         {['목표/기준', '대안설정', '기준비교', '대안비교', '최종결과'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -184,7 +164,6 @@
                             </div>
                         )}
 
-                        {/* Step 1: 목표 및 기준 */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
                                 <h2 className="text-3xl font-black text-slate-900">1. 의사결정 목표와 평가 기준</h2>
@@ -202,7 +181,6 @@
                             </div>
                         )}
 
-                        {/* Step 2: 대안 입력 */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-6">
                                 <h2 className="text-3xl font-black text-slate-900">2. 비교할 대안(선택지) 입력</h2>
@@ -220,7 +198,6 @@
                             </div>
                         )}
 
-                        {/* Step 3: 기준 비교 */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center"><h2 className="text-3xl font-black text-slate-900">3. 평가 기준 간 중요도 비교</h2></div>
@@ -248,7 +225,6 @@
                             </div>
                         )}
 
-                        {/* Step 4: 대안 비교 */}
                         {step === 4 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center">
@@ -285,7 +261,6 @@
                             </div>
                         )}
 
-                        {/* Step 5: 최종 결과 */}
                         {step === 5 && results && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-20">
@@ -324,16 +299,14 @@
                         )}
                     </div>
 
-                    {/* 하단 액션 버튼 */}
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/ahp/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process)의 학술적 토대</h3>
