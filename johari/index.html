@@ -4,13 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>조하리의 창 자기분석 | 소통 진단 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="나도 모르는 나의 모습과 타인이 보는 나의 모습을 분석하세요. 조하리의 창(Johari Window)을 통해 소통의 사각지대를 발견하고 더 나은 인간관계를 설계합니다.">
+    <meta name="description" content="나도 모르는 나의 모습과 타인이 보는 나의 모습을 분석하세요. 조하리의 창(Johari Window)을 통해 소통의 사각지대를 발견합니다.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪟</text></svg>">
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
@@ -38,6 +41,7 @@
 
         function JohariApp() {
             const [isLoaded, setIsLoaded] = useState(false);
+            const [isSharing, setIsSharing] = useState(false);
             const [step, setStep] = useState(4); 
             const [data, setData] = useState(SAMPLE_DATA);
 
@@ -63,6 +67,27 @@
                 }
             }, [data, isLoaded]);
 
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'johari-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] 조하리의 창 분석: ${data.subject}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'johari-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             const windows = useMemo(() => {
                 const self = data.selectedSelf || [];
                 const others = data.selectedOthers || [];
@@ -85,22 +110,27 @@
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-johari'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-johari'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Psychology Science</p>
-                            <p className="font-bold text-sm">PARAN LAB JOHARI v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB JOHARI v7.8.1</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['주제', '내가 보는 나', '남이 보는 나', '리포트'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
+
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
@@ -114,28 +144,28 @@
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-4xl font-black text-slate-900 text-center">분석 주제를 입력하세요</h2>
-                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200" />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음 단계</button>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all" placeholder="예: 팀 프로젝트 내에서의 나의 소통 스타일" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계</button>
                             </div>
                         )}
 
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
-                                <h2 className="text-4xl font-black text-slate-900 text-center">내가 생각하는 나의 모습</h2>
-                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem]">
-                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedSelf', t)} className={`px-6 py-3 rounded-full text-sm font-black shadow-sm ${data.selectedSelf.includes(t) ? 'bg-blue-600 text-white' : 'bg-white text-slate-400'}`}>{t}</button>)}
+                                <h2 className="text-4xl font-black text-slate-900 text-center">내가 생각하는 나의 모습 (다중 선택)</h2>
+                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem] shadow-inner">
+                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedSelf', t)} className={`px-6 py-3 rounded-full text-sm font-black shadow-sm transition-all ${data.selectedSelf.includes(t) ? 'bg-blue-600 text-white scale-110' : 'bg-white text-slate-400 hover:bg-blue-50'}`}>{t}</button>)}
                                 </div>
-                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">다음</button></div>
+                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음</button></div>
                             </div>
                         )}
 
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
-                                <h2 className="text-4xl font-black text-slate-900 text-center">남이 말하는 나의 모습</h2>
-                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem]">
-                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedOthers', t)} className={`px-6 py-3 rounded-full text-sm font-black shadow-sm ${data.selectedOthers.includes(t) ? 'bg-rose-600 text-white' : 'bg-white text-slate-400'}`}>{t}</button>)}
+                                <h2 className="text-4xl font-black text-slate-900 text-center">남이 말하는 나의 모습 (다중 선택)</h2>
+                                <div className="flex flex-wrap gap-3 justify-center p-10 bg-slate-50 rounded-[3rem] shadow-inner">
+                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedOthers', t)} className={`px-6 py-3 rounded-full text-sm font-black shadow-sm transition-all ${data.selectedOthers.includes(t) ? 'bg-rose-600 text-white scale-110' : 'bg-white text-slate-400 hover:bg-rose-50'}`}>{t}</button>)}
                                 </div>
-                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">리포트 생성</button></div>
+                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button></div>
                             </div>
                         )}
 
@@ -149,19 +179,23 @@
                                 <div className="matrix-grid mb-12">
                                     <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 min-h-[250px] relative">
                                         <h3 className="font-black text-blue-700 mb-4 text-xl">열린 창 (Open)</h3>
+                                        <p className="text-[10px] text-blue-400 font-black mb-4 uppercase">나도 알고 남도 아는 영역</p>
                                         <div className="flex flex-wrap gap-2">{windows.open.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-blue-600 shadow-sm">{t}</span>)}</div>
                                     </div>
                                     <div className="p-8 bg-rose-50 rounded-[3rem] border-2 border-rose-100 min-h-[250px] relative">
                                         <h3 className="font-black text-rose-700 mb-4 text-xl">눈먼 창 (Blind)</h3>
+                                        <p className="text-[10px] text-rose-400 font-black mb-4 uppercase">나는 모르지만 남은 아는 영역</p>
                                         <div className="flex flex-wrap gap-2">{windows.blind.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-rose-600 shadow-sm">{t}</span>)}</div>
                                     </div>
                                     <div className="p-8 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 min-h-[250px] relative">
                                         <h3 className="font-black text-emerald-700 mb-4 text-xl">숨겨진 창 (Hidden)</h3>
+                                        <p className="text-[10px] text-emerald-400 font-black mb-4 uppercase">나는 알지만 남은 모르는 영역</p>
                                         <div className="flex flex-wrap gap-2">{windows.hidden.map(t => <span key={t} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-emerald-600 shadow-sm">{t}</span>)}</div>
                                     </div>
                                     <div className="p-8 bg-slate-100 rounded-[3rem] border-2 border-slate-200 min-h-[250px] relative">
                                         <h3 className="font-black text-slate-700 mb-4 text-xl">미지의 창 (Unknown)</h3>
-                                        <p className="text-xs text-slate-400 font-bold">나와 타인 모두 아직 발견하지 못한 잠재적 영역입니다.</p>
+                                        <p className="text-[10px] text-slate-400 font-black mb-4 uppercase">나도 모르고 남도 모르는 영역</p>
+                                        <p className="text-xs text-slate-400 font-bold leading-relaxed">나와 타인 모두 아직 발견하지 못한 잠재적 영역입니다. 새로운 경험을 통해 이 영역을 탐구할 수 있습니다.</p>
                                     </div>
                                 </div>
                                 <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
@@ -172,24 +206,42 @@
                         )}
                     </div>
 
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/johari/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">조하리의 창: 자아 인식과 소통의 심리학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">조하리의 창(Johari Window)은 1955년 심리학자 <strong>조셉 루프트</strong>와 <strong>해링턴 인검</strong>이 개발한 모델입니다. 자신과 타인 사이의 정보 공유 정도를 분석하여 소통의 상태를 진단합니다.</p>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    조하리의 창(Johari Window)은 1955년 심리학자 <strong>조셉 루프트(Joseph Luft)</strong>와 <strong>해링턴 인검(Harrington Ingham)</strong>이 개발한 모델입니다. 두 사람의 이름을 합쳐 '조하리'라는 명칭이 붙었습니다. 이 모델은 자신과 타인 사이의 정보 공유 정도를 분석하여 소통의 상태를 진단하고 개선하는 데 사용됩니다.
+                                </p>
+                                <p>
+                                    모델은 4가지 영역으로 구성됩니다:
+                                    1. <strong>열린 창(Open):</strong> 나도 알고 타인도 아는 영역입니다. 이 영역이 넓을수록 소통이 원활하고 신뢰가 높습니다.
+                                    2. <strong>눈먼 창(Blind):</strong> 타인은 알지만 나는 모르는 나의 모습입니다. 타인의 피드백을 통해 이 영역을 줄일 수 있습니다.
+                                    3. <strong>숨겨진 창(Hidden):</strong> 나는 알지만 타인에게는 숨기는 영역입니다. 적절한 자기 공개(Self-disclosure)를 통해 이 영역을 줄일 수 있습니다.
+                                    4. <strong>미지의 창(Unknown):</strong> 나도 모르고 타인도 모르는 잠재적 영역입니다. 새로운 도전과 성찰을 통해 발견될 수 있습니다.
+                                </p>
+                            </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Luft, J., & Ingham, H. (1955). "The Johari window". <em>Proceedings of the western training laboratory</em>.</li>
+                                    <li>• Luft, J., & Ingham, H. (1955). "The Johari window, a graphic model of interpersonal awareness". <em>Proceedings of the western training laboratory in group development</em>.</li>
                                     <li>• Luft, J. (1969). <em>Of Human Interaction</em>. National Press Books.</li>
+                                    <li>• Verklan, M. T. (2007). "Johari Window: A Model for Communication". <em>Journal of Perinatal & Neonatal Nursing</em>.</li>
                                 </ul>
                             </div>
                         </div>
