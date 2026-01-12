@@ -1,6 +1,6 @@
 /**
- * Paran Lab Master Core v7.8.2
- * 패밀리 사이트(Fact Bomber) 추가 및 내비게이션 최적화 버전
+ * Paran Lab Master Core v7.8.3
+ * 패밀리 사이트 명칭(팩트폭격연구소) 수정 버전
  */
 
 window.ParanLabCore = {
@@ -8,6 +8,7 @@ window.ParanLabCore = {
         adsenseId: "ca-pub-6902579674102145",
         contactEmail: "paranbreak@gmail.com",
         sisterSite: "https://factbomber.kr",
+        sisterSiteName: "팩트폭격연구소",
         baseKey: "paranlab-"
     },
 
@@ -104,7 +105,7 @@ window.ParanLabCore = {
                             <div>
                                 <p class="font-black mb-4">Family Sites</p>
                                 <ul class="text-slate-400 text-sm space-y-2">
-                                    <li><a href="${this.config.sisterSite}" target="_blank" class="hover:text-blue-400 transition-colors flex items-center gap-1">🚀 Fact Bomber (팩트밤버)</a></li>
+                                    <li><a href="${this.config.sisterSite}" target="_blank" class="hover:text-blue-400 transition-colors flex items-center gap-1">🚀 ${this.config.sisterSiteName}</a></li>
                                 </ul>
                             </div>
                             <div>
