@@ -5,17 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GROW 코칭 모델 | 성과 향상 도구 | 파란랩(Paran Lab)</title>
     <meta name="description" content="존 휘트모어 경의 GROW 모델을 통해 당신의 목표를 현실로 만드세요. 목표 설정부터 실행 의지까지 과학적 코칭 프레임워크를 제공합니다.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌱</text></svg>">
+    
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
     <script src="/core.js" defer></script>
+
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .grow-card { transition: all 0.3s ease; }
+        .grow-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .grow-card:hover { transform: translateY(-5px); }
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -44,6 +48,7 @@
 
         function GrowApp() {
             const [isLoaded, setIsLoaded] = useState(false);
+            const [isSharing, setIsSharing] = useState(false);
             const [step, setStep] = useState(5); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
@@ -53,12 +58,11 @@
                         const saved = localStorage.getItem('paranlab-grow');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            const source = parsed.data || parsed;
-                            setData({ ...source, scenarioContext: parsed.scenarioContext, isDefault: false });
+                            setData({ ...parsed, isDefault: false });
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Init Error:", e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -70,22 +74,45 @@
                 }
             }, [data, isLoaded]);
 
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'grow-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] GROW 코칭 리포트: ${data.goal}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'grow-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
             if (!isLoaded) return null;
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-grow'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-grow'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Coaching Science</p>
-                            <p className="font-bold text-sm">PARAN LAB GROW v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB GROW v7.8.1</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['G', 'R', 'O', 'W', 'Result'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
@@ -93,7 +120,13 @@
                         ))}
                     </nav>
 
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -106,10 +139,23 @@
                             <div className="animate-in fade-in space-y-8">
                                 <div className="flex items-center gap-6">
                                     <div className={`${STEPS_CONFIG[step-1].color} text-white w-20 h-20 rounded-[2rem] flex items-center justify-center text-4xl font-black shadow-xl`}>{STEPS_CONFIG[step-1].label[0]}</div>
-                                    <h2 className="text-4xl font-black text-slate-900">{STEPS_CONFIG[step-1].title}</h2>
+                                    <div>
+                                        <h2 className="text-4xl font-black text-slate-900">{STEPS_CONFIG[step-1].title}</h2>
+                                        <p className="text-slate-400 font-bold mt-1">{STEPS_CONFIG[step-1].desc}</p>
+                                    </div>
                                 </div>
-                                <textarea value={data[STEPS_CONFIG[step-1].key]} onChange={e => setData({...data, [STEPS_CONFIG[step-1].key]: e.target.value, isDefault: false})} className="w-full h-64 p-8 bg-slate-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100" placeholder={STEPS_CONFIG[step-1].desc} />
-                                <div className="flex gap-4">{step > 1 && <button onClick={() => setStep(step-1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button>}<button onClick={() => setStep(step+1)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">{step === 4 ? "리포트 생성" : "다음"}</button></div>
+                                <textarea 
+                                    value={data[STEPS_CONFIG[step-1].key]} 
+                                    onChange={e => setData({...data, [STEPS_CONFIG[step-1].key]: e.target.value, isDefault: false})} 
+                                    className="w-full h-64 p-8 bg-slate-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" 
+                                    placeholder="여기에 내용을 입력하세요..." 
+                                />
+                                <div className="flex gap-4">
+                                    {step > 1 && <button onClick={() => setStep(step-1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button>}
+                                    <button onClick={() => setStep(step+1)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">
+                                        {step === 4 ? "최종 리포트 생성" : "다음 단계"}
+                                    </button>
+                                </div>
                             </div>
                         )}
 
@@ -130,30 +176,54 @@
                                 </div>
                                 <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
                                     <h3 className="text-2xl font-black mb-4">코칭 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">성공은 구체적인 의지에서 시작됩니다. 설정하신 목표를 위해 가장 먼저 <strong>[{data.will || "미정"}]</strong>을(를) 실행하기로 약속하셨습니다.</p>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">성공은 구체적인 의지에서 시작됩니다. 설정하신 목표를 위해 가장 먼저 <strong>[{data.will || "미정"}]</strong>을(를) 실행하기로 약속하셨습니다. 이 작은 시작이 큰 변화를 만듭니다.</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/grow/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">GROW 모델: 성과 향상의 과학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">GROW 모델은 1980년대 <strong>존 휘트모어 경(Sir John Whitmore)</strong>에 의해 개발된 세계에서 가장 널리 사용되는 코칭 프레임워크입니다. 스스로 답을 찾아가는 과정을 통해 책임감과 실행력을 극대화합니다.</p>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    GROW 모델은 1980년대 <strong>존 휘트모어 경(Sir John Whitmore)</strong>에 의해 개발된 세계에서 가장 널리 사용되는 코칭 프레임워크입니다. 이 모델은 단순히 조언을 주는 것이 아니라, 질문을 통해 피코치자가 스스로 답을 찾아가는 과정을 구조화합니다.
+                                </p>
+                                <p>
+                                    1. <strong>Goal (목표):</strong> 무엇을 원하는지 명확히 합니다. SMART 원칙에 따라 구체적이고 측정 가능한 목표를 설정하는 것이 핵심입니다.
+                                </p>
+                                <p>
+                                    2. <strong>Reality (현실):</strong> 현재 상황을 객관적으로 직시합니다. 목표와 현재 사이의 간극을 파악하고, 어떤 장애물이 있는지 식별합니다.
+                                </p>
+                                <p>
+                                    3. <strong>Options (대안):</strong> 장애물을 극복할 수 있는 다양한 방법을 브레인스토밍합니다. 비판 없이 최대한 많은 선택지를 나열하는 것이 중요합니다.
+                                </p>
+                                <p>
+                                    4. <strong>Will (의지):</strong> 수많은 대안 중 무엇을 즉시 실행할지 결정합니다. 구체적인 시간표와 실행 계획을 세워 책임감을 부여합니다.
+                                </p>
+                            </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Whitmore, J. (1992). <em>Coaching for Performance</em>. Nicholas Brealey.</li>
-                                    <li>• Alexander, G. (2010). "The GROW Model". <em>The Coaching Manual</em>.</li>
+                                    <li>• Whitmore, J. (1992). <em>Coaching for Performance: Growing Human Potential and Purpose</em>. Nicholas Brealey Publishing.</li>
+                                    <li>• Alexander, G. (2010). "The GROW Model". <em>The Coaching Manual</em>. Pearson Education.</li>
+                                    <li>• Passmore, J. (2006). <em>Excellence in Coaching: The Industry Guide</em>. Kogan Page Publishers.</li>
                                 </ul>
                             </div>
                         </div>
