@@ -18,7 +18,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1.5rem; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1.5rem; }
         @media print { .no-print { display: none; } }
     </style>
 </head>
@@ -98,18 +98,8 @@
                         <span className={`${color} font-black text-sm uppercase tracking-widest`}>{key} Strategy</span>
                         <h2 className="text-4xl font-black text-slate-900 mt-2">{title}</h2>
                     </div>
-                    <textarea 
-                        value={data.strategies[key]} 
-                        onChange={e => setData({...data, strategies: {...data.strategies, [key]: e.target.value}, isDefault: false})} 
-                        className="w-full h-64 p-8 bg-slate-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" 
-                        placeholder="구체적인 실행 전략을 입력하세요..."
-                    />
-                    <div className="flex gap-4">
-                        <button onClick={() => setStep(step-1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button>
-                        <button onClick={() => setStep(step+1)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">
-                            {step === 5 ? "최종 리포트 생성" : "다음 단계"}
-                        </button>
-                    </div>
+                    <textarea value={data.strategies[key]} onChange={e => setData({...data, strategies: {...data.strategies, [key]: e.target.value}, isDefault: false})} className="w-full h-64 p-8 bg-slate-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="구체적인 실행 전략을 입력하세요..." />
+                    <div className="flex gap-4"><button onClick={() => setStep(step-1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(step+1)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">{step === 5 ? "최종 리포트 생성" : "다음 단계"}</button></div>
                 </div>
             );
 
@@ -122,17 +112,22 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Growth Science</p>
-                            <p className="font-bold text-sm">PARAN LAB ANSOFF v7.8</p>
+                            <p className="font-bold text-sm">PARAN LAB ANSOFF v7.8.1</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-8 mb-16 no-print border-b-2 border-slate-200 overflow-x-auto whitespace-nowrap">
+                    <nav className="flex justify-center gap-4 md:gap-8 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto whitespace-nowrap">
                         {['주제', '침투', '제품개발', '시장개척', '다각화', '리포트'].map((name, i) => (
                             <div key={i} className={`pb-6 text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
+
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {(data.scenarioContext || data.isDefault) && step === 6 && (
@@ -159,29 +154,25 @@
                         {step === 6 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Ansoff Product-Market Growth Matrix</span>
+                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Ansoff Matrix</span>
                                     <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">성장 전략 매트릭스</h2>
                                     <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject}</p>
                                 </div>
                                 <div className="matrix-grid mb-12">
                                     <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 min-h-[250px] relative">
-                                        <div className="absolute top-4 right-6 text-blue-200 font-black text-4xl opacity-30">01</div>
-                                        <h3 className="font-black text-blue-800 mb-4 text-lg">시장 침투 (Market Penetration)</h3>
+                                        <h3 className="font-black text-blue-800 mb-4 text-lg">시장 침투</h3>
                                         <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.penetration}</p>
                                     </div>
                                     <div className="p-8 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 min-h-[250px] relative">
-                                        <div className="absolute top-4 right-6 text-emerald-200 font-black text-4xl opacity-30">02</div>
-                                        <h3 className="font-black text-emerald-800 mb-4 text-lg">제품 개발 (Product Development)</h3>
+                                        <h3 className="font-black text-emerald-800 mb-4 text-lg">제품 개발</h3>
                                         <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.productDev}</p>
                                     </div>
                                     <div className="p-8 bg-amber-50 rounded-[3rem] border-2 border-amber-100 min-h-[250px] relative">
-                                        <div className="absolute top-4 right-6 text-amber-200 font-black text-4xl opacity-30">03</div>
-                                        <h3 className="font-black text-amber-800 mb-4 text-lg">시장 개척 (Market Development)</h3>
+                                        <h3 className="font-black text-amber-800 mb-4 text-lg">시장 개척</h3>
                                         <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.marketDev}</p>
                                     </div>
                                     <div className="p-8 bg-rose-50 rounded-[3rem] border-2 border-rose-100 min-h-[250px] relative">
-                                        <div className="absolute top-4 right-6 text-rose-200 font-black text-4xl opacity-30">04</div>
-                                        <h3 className="font-black text-rose-800 mb-4 text-lg">다각화 (Diversification)</h3>
+                                        <h3 className="font-black text-rose-800 mb-4 text-lg">다각화</h3>
                                         <p className="text-sm text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{data.strategies.diversification}</p>
                                     </div>
                                 </div>
@@ -189,6 +180,12 @@
                         )}
                     </div>
 
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 6 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
                             <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
@@ -201,29 +198,12 @@
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">안소프 매트릭스: 성장의 방향을 결정하는 지도</h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    안소프 매트릭스(Ansoff Matrix)는 1957년 '전략 경영의 아버지'라 불리는 <strong>이고르 안소프(Igor Ansoff)</strong>가 제안한 전략 수립 도구입니다. 이 모델은 제품과 시장의 신규성을 기준으로 기업이 나아갈 4가지 성장 경로를 제시합니다.
-                                </p>
-                                <p>
-                                    1. <strong>시장 침투(Market Penetration):</strong> 기존 시장에서 기존 제품의 점유율을 높이는 전략입니다. 마케팅 강화, 가격 정책 변경, 고객 충성도 프로그램 등이 포함됩니다. 가장 위험도가 낮은 전략입니다.
-                                </p>
-                                <p>
-                                    2. <strong>제품 개발(Product Development):</strong> 기존 시장의 고객들에게 새로운 제품을 선보이는 전략입니다. 신제품 출시, 제품 개선, 라인업 확장 등이 해당됩니다.
-                                </p>
-                                <p>
-                                    3. <strong>시장 개척(Market Development):</strong> 기존 제품을 새로운 시장(지리적 확장, 새로운 타겟층)에 판매하는 전략입니다. 해외 진출이나 B2B 시장으로의 확장이 대표적입니다.
-                                </p>
-                                <p>
-                                    4. <strong>다각화(Diversification):</strong> 새로운 시장에 새로운 제품으로 진출하는 가장 공격적이고 위험도가 높은 전략입니다. 관련 다각화와 비관련 다각화로 나뉩니다.
-                                </p>
-                            </div>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">안소프 매트릭스(Ansoff Matrix)는 1957년 '전략 경영의 아버지'라 불리는 <strong>이고르 안소프(Igor Ansoff)</strong>가 제안한 전략 수립 도구입니다. 제품과 시장의 신규성을 기준으로 기업이 나아갈 4가지 성장 경로를 제시합니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Ansoff, H. I. (1957). "Strategies for Diversification". <em>Harvard Business Review</em>, 35(5), 113-124.</li>
-                                    <li>• Ansoff, H. I. (1965). <em>Corporate Strategy: An Analytic Approach to Business Policy for Growth and Expansion</em>. McGraw-Hill.</li>
-                                    <li>• Richardson, J., & Evans, C. (2007). "Strategy in Action: The Ansoff Matrix". <em>The British Journal of Administrative Management</em>.</li>
+                                    <li>• Ansoff, H. I. (1957). "Strategies for Diversification". <em>Harvard Business Review</em>.</li>
+                                    <li>• Ansoff, H. I. (1965). <em>Corporate Strategy</em>. McGraw-Hill.</li>
                                 </ul>
                             </div>
                         </div>
