@@ -13,52 +13,92 @@
         body { font-family: 'Pretendard', sans-serif; scroll-behavior: smooth; }
         .gradient-text { background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
         .tool-card:hover { transform: translateY(-5px); border-color: #2563eb; box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.2); }
+        .hero-bg { background: radial-gradient(circle at top right, #eff6ff, transparent); }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="header-root"></div>
-    <section class="pt-24 pb-20 bg-white border-b border-slate-100">
+
+    <!-- Hero Section -->
+    <section class="pt-48 pb-32 hero-bg">
         <div class="container mx-auto px-6 text-center">
-            <h1 class="text-5xl md:text-7xl font-black mb-8 tracking-tighter">결정하기 힘들 때,<br/><span class="gradient-text">데이터와 논리</span>를 꺼내세요.</h1>
-            <p class="text-xl text-slate-500 font-bold max-w-2xl mx-auto leading-relaxed">막연한 직관 대신 31가지 경영학 프레임워크가<br/>당신의 고민에 명쾌한 결론을 더해드립니다.</p>
+            <span class="bg-blue-100 text-blue-700 px-6 py-2 rounded-full text-xs font-black uppercase tracking-widest mb-8 inline-block">Decision Science Platform</span>
+            <h1 class="text-5xl md:text-8xl font-black mb-8 tracking-tighter leading-tight">
+                결정하기 힘들 때,<br/><span class="gradient-text">데이터와 논리</span>를 꺼내세요.
+            </h1>
+            <p class="text-xl md:text-2xl text-slate-500 font-bold max-w-3xl mx-auto leading-relaxed mb-12">
+                막연한 직관 대신 31가지 경영학 프레임워크가<br/>당신의 고민에 명쾌한 결론을 더해드립니다.
+            </p>
+            <div class="flex flex-col md:flex-row gap-4 justify-center">
+                <a href="#tool-categories" class="px-12 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">도구함 바로가기</a>
+                <a href="#scenario-grid" class="px-12 py-6 bg-white text-slate-900 rounded-[2rem] font-black text-xl shadow-xl border border-slate-200 hover:bg-slate-50 transition-all">실전 사례 보기</a>
+            </div>
         </div>
     </section>
-    <main class="container mx-auto px-6 py-16">
-        <section class="mb-24">
-            <h2 class="text-2xl font-black mb-10 flex items-center gap-3">🚀 실전 고민 해결 시나리오</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-grid"></div>
+
+    <main class="container mx-auto px-6 py-24">
+        <!-- Scenario Section -->
+        <section id="scenario-grid" class="mb-40 scroll-mt-32">
+            <div class="flex justify-between items-end mb-12">
+                <div>
+                    <h2 class="text-3xl font-black text-slate-900">🚀 실전 고민 해결 시나리오</h2>
+                    <p class="text-slate-500 font-bold mt-2">실제 사례를 통해 도구 활용법을 익혀보세요.</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-container"></div>
         </section>
-        <section>
-            <h2 class="text-2xl font-black mb-10">🛠️ 의사결정 엔진</h2>
-            <div id="tool-categories" class="space-y-12"></div>
+
+        <!-- Tool Categories Section -->
+        <section id="tool-categories" class="scroll-mt-32">
+            <div class="mb-16">
+                <h2 class="text-3xl font-black text-slate-900">🛠️ 의사결정 엔진</h2>
+                <p class="text-slate-500 font-bold mt-2">목적에 맞는 최적의 분석 도구를 선택하세요.</p>
+            </div>
+            <div id="tool-container" class="space-y-24"></div>
         </section>
     </main>
+
     <div id="footer-root"></div>
+
     <script>
         window.addEventListener('load', () => {
-            const scenarioGrid = document.getElementById('scenario-grid');
-            scenarioGrid.innerHTML = ParanLabCore.scenariosList.map(s => `
-                <a href="/scenarios/?id=${s.id}" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
-                    <div class="text-5xl mb-6">${s.icon}</div>
-                    <h3 class="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">${s.subtitle}</h3>
-                    <p class="text-slate-400 mt-3 line-clamp-2 font-medium">${s.story}</p>
-                </a>
-            `).join('');
-            const toolCategories = document.getElementById('tool-categories');
+            // 시나리오 렌더링
+            const scenarioContainer = document.getElementById('scenario-container');
+            if (scenarioContainer && ParanLabCore.scenariosList) {
+                scenarioContainer.innerHTML = ParanLabCore.scenariosList.map(s => `
+                    <a href="/scenarios/?id=${s.id}" class="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl transition-all group relative overflow-hidden">
+                        <div class="absolute top-0 right-0 p-8 opacity-10 text-6xl group-hover:scale-125 transition-transform">${s.icon}</div>
+                        <span class="text-blue-600 font-black text-xs uppercase tracking-widest mb-2 block">${s.title}</span>
+                        <h3 class="text-2xl font-black text-slate-800 group-hover:text-blue-600 transition-colors mb-4">${s.subtitle}</h3>
+                        <p class="text-slate-500 font-medium leading-relaxed line-clamp-3">${s.story}</p>
+                        <div class="mt-8 flex items-center gap-2 text-blue-600 font-black text-sm">
+                            분석 시작하기 <span class="group-hover:translate-x-2 transition-transform">→</span>
+                        </div>
+                    </a>
+                `).join('');
+            }
+
+            // 도구 카테고리 렌더링
+            const toolContainer = document.getElementById('tool-container');
             const cats = ['Decision', 'Strategy', 'Goal', 'Problem', 'Self', 'Time', 'Creative', 'Team'];
-            toolCategories.innerHTML = cats.map(cat => `
-                <div>
-                    <h3 class="text-sm font-black text-slate-400 uppercase tracking-widest mb-6 pl-2">${cat} Tools</h3>
-                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        ${ParanLabCore.toolsList.filter(t => t.category === cat).map(t => `
-                            <a href="${t.href}" class="tool-card bg-white p-6 rounded-2xl border border-slate-100 transition-all text-center group">
-                                <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">${t.icon}</div>
-                                <div class="font-bold text-sm text-slate-700">${t.name}</div>
-                            </a>
-                        `).join('')}
+            if (toolContainer && ParanLabCore.toolsList) {
+                toolContainer.innerHTML = cats.map(cat => `
+                    <div>
+                        <div class="flex items-center gap-4 mb-8">
+                            <h3 class="text-xl font-black text-slate-900">${cat} Tools</h3>
+                            <div class="h-px bg-slate-200 flex-1"></div>
+                        </div>
+                        <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
+                            ${ParanLabCore.toolsList.filter(t => t.category === cat).map(t => `
+                                <a href="${t.href}" class="tool-card bg-white p-8 rounded-[2rem] border border-slate-100 transition-all text-center group">
+                                    <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${t.icon}</div>
+                                    <div class="font-black text-slate-800 group-hover:text-blue-600 transition-colors">${t.name}</div>
+                                </a>
+                            `).join('')}
+                        </div>
                     </div>
-                </div>
-            `).join('');
+                `).join('');
+            }
         });
     </script>
 </body>
