@@ -1,12 +1,13 @@
 /**
- * Paran Lab Master Core v7.8.1
- * 내비게이션 정상화 및 푸터 법적 고지 추가 버전
+ * Paran Lab Master Core v7.8.2
+ * 패밀리 사이트(Fact Bomber) 추가 및 내비게이션 최적화 버전
  */
 
 window.ParanLabCore = {
     config: {
         adsenseId: "ca-pub-6902579674102145",
         contactEmail: "paranbreak@gmail.com",
+        sisterSite: "https://factbomber.kr",
         baseKey: "paranlab-"
     },
 
@@ -64,13 +65,6 @@ window.ParanLabCore = {
         this.renderFooter();
     },
 
-    tossData(toolId, scenarioId) {
-        // 시나리오별 페이로드 로직 (기존과 동일)
-        const scenario = this.scenariosList.find(s => s.id === scenarioId);
-        // 실제 구현 시에는 payloads 객체에서 데이터를 가져와 localStorage에 저장
-        window.location.href = '../' + toolId + '/';
-    },
-
     renderHeader() {
         const header = document.getElementById('header-root');
         if (header) {
@@ -108,14 +102,17 @@ window.ParanLabCore = {
                                 </ul>
                             </div>
                             <div>
-                                <p class="font-black mb-4">Legal</p>
+                                <p class="font-black mb-4">Family Sites</p>
                                 <ul class="text-slate-400 text-sm space-y-2">
-                                    <li><a href="/privacy/" class="hover:text-white transition-colors">개인정보처리방침</a></li>
+                                    <li><a href="${this.config.sisterSite}" target="_blank" class="hover:text-blue-400 transition-colors flex items-center gap-1">🚀 Fact Bomber (팩트밤버)</a></li>
                                 </ul>
                             </div>
                             <div>
-                                <p class="font-black mb-4">Contact</p>
-                                <p class="text-slate-400 text-sm">${this.config.contactEmail}</p>
+                                <p class="font-black mb-4">Legal & Contact</p>
+                                <ul class="text-slate-400 text-sm space-y-2">
+                                    <li><a href="/privacy/" class="hover:text-white transition-colors">개인정보처리방침</a></li>
+                                    <li class="pt-2 text-xs opacity-60">${this.config.contactEmail}</li>
+                                </ul>
                             </div>
                         </div>
                         <div class="border-t border-slate-800 pt-8 flex flex-col md:flex-row justify-between items-center gap-4">
