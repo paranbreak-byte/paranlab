@@ -4,9 +4,9 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>비용-편익 분석(CBA) | 경제적 타당성 진단 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. B/C 비율 계산을 통해 투자의 경제적 타당성을 과학적으로 검토합니다.">
+    <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. B/C 비율 계산을 통해 경제적 타당성을 과학적으로 검토합니다.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
     
-    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -32,7 +32,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (민수의 내 집 마련)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "민수의 내 집 마련 경제성 분석",
             costs: [
@@ -50,6 +49,7 @@
 
         function CbaApp() {
             const [isLoaded, setIsLoaded] = useState(false);
+            const [isSharing, setIsSharing] = useState(false);
             const [step, setStep] = useState(4); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
@@ -63,7 +63,7 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Init Error:", e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -74,6 +74,27 @@
                     localStorage.setItem('paranlab-cba', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'cba-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] CBA 분석: ${data.subject}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'cba-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             const results = useMemo(() => {
                 const totalCost = (data.costs || []).reduce((a, b) => a + Number(b.value || 0), 0);
@@ -86,18 +107,20 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-cba'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-cba'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Economic Science</p>
-                            <p className="font-bold text-sm">PARAN LAB CBA v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.1</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['주제', '비용', '편익', '리포트'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
@@ -105,7 +128,13 @@
                         ))}
                     </nav>
 
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -117,8 +146,8 @@
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-4xl font-black text-slate-900 text-center">분석 주제를 입력하세요</h2>
-                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200" />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음 단계</button>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200" placeholder="예: 민수의 내 집 마련 경제성 분석" />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계</button>
                             </div>
                         )}
 
@@ -130,14 +159,15 @@
                                         <div key={c.id} className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 space-y-6">
                                             <div className="flex gap-4 items-center">
                                                 <input type="text" value={c.text} onChange={e => { const n = [...data.costs]; n[i].text = e.target.value; setData({...data, costs: n, isDefault: false}); }} className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" placeholder="비용 항목" />
-                                                <button onClick={() => setData({...data, costs: data.costs.filter(it => it.id !== c.id), isDefault: false})} className="text-rose-400 font-black">삭제</button>
+                                                <button onClick={() => setData({...data, costs: data.costs.filter(it => it.id !== c.id), isDefault: false})} className="text-rose-400 font-black hover:text-rose-600 transition-colors">삭제</button>
                                             </div>
+                                            <div className="flex justify-between text-xs font-black text-rose-400"><span>가중치/금액</span><span>{c.value}</span></div>
                                             <input type="range" min="1" max="100" value={c.value} onChange={e => { const n = [...data.costs]; n[i].value = parseInt(e.target.value); setData({...data, costs: n, isDefault: false}); }} />
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setData({...data, costs: [...data.costs, {id: Date.now(), text: "", value: 50}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-rose-200 rounded-2xl text-rose-400 font-black">+ 비용 추가</button>
-                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">다음</button></div>
+                                <button onClick={() => setData({...data, costs: [...data.costs, {id: Date.now(), text: "", value: 50}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-rose-200 rounded-2xl text-rose-400 font-black hover:bg-rose-50 transition-all">+ 비용 추가</button>
+                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계</button></div>
                             </div>
                         )}
 
@@ -149,14 +179,15 @@
                                         <div key={b.id} className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 space-y-6">
                                             <div className="flex gap-4 items-center">
                                                 <input type="text" value={b.text} onChange={e => { const n = [...data.benefits]; n[i].text = e.target.value; setData({...data, benefits: n, isDefault: false}); }} className="flex-1 p-4 bg-white rounded-xl border-none font-bold text-lg shadow-sm" placeholder="편익 항목" />
-                                                <button onClick={() => setData({...data, benefits: data.benefits.filter(it => it.id !== b.id), isDefault: false})} className="text-emerald-400 font-black">삭제</button>
+                                                <button onClick={() => setData({...data, benefits: data.benefits.filter(it => it.id !== b.id), isDefault: false})} className="text-emerald-400 font-black hover:text-emerald-600 transition-colors">삭제</button>
                                             </div>
+                                            <div className="flex justify-between text-xs font-black text-emerald-400"><span>가중치/금액</span><span>{b.value}</span></div>
                                             <input type="range" min="1" max="100" value={b.value} onChange={e => { const n = [...data.benefits]; n[i].value = parseInt(e.target.value); setData({...data, benefits: n, isDefault: false}); }} />
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setData({...data, benefits: [...data.benefits, {id: Date.now(), text: "", value: 50}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-emerald-200 rounded-2xl text-emerald-400 font-black">+ 편익 추가</button>
-                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black shadow-2xl">리포트 생성</button></div>
+                                <button onClick={() => setData({...data, benefits: [...data.benefits, {id: Date.now(), text: "", value: 50}], isDefault: false})} className="w-full py-4 border-2 border-dashed border-emerald-200 rounded-2xl text-emerald-400 font-black hover:bg-emerald-50 transition-all">+ 편익 추가</button>
+                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button></div>
                             </div>
                         )}
 
@@ -164,7 +195,8 @@
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
                                     <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Cost-Benefit Analysis Report</span>
-                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">{data.subject}</h2>
+                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">경제적 타당성 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject}</p>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
                                     <div className="p-10 bg-rose-50 rounded-[3.5rem] text-center relative overflow-hidden">
@@ -188,24 +220,42 @@
                         )}
                     </div>
 
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/cba/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택의 경제학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">비용-편익 분석(Cost-Benefit Analysis)은 특정 결정이나 프로젝트에서 발생하는 모든 비용과 그로 인해 얻게 되는 모든 편익을 화폐 단위로 환산하여 비교하는 기법입니다. 19세기 프랑스 경제학자 <strong>쥘 뒤피(Jules Dupuit)</strong>에 의해 체계화되었습니다.</p>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    비용-편익 분석(Cost-Benefit Analysis)은 특정 결정이나 프로젝트에서 발생하는 모든 비용과 그로 인해 얻게 되는 모든 편익을 화폐 단위로 환산하여 비교하는 기법입니다. 19세기 프랑스 경제학자 <strong>쥘 뒤피(Jules Dupuit)</strong>에 의해 체계화되었습니다.
+                                </p>
+                                <p>
+                                    CBA의 핵심 지표는 <strong>B/C 비율(Benefit-Cost Ratio)</strong>입니다. 이 비율이 1보다 크면 경제적 타당성이 있다고 판단하며, 여러 대안 중 B/C 비율이 가장 높은 것을 선택하는 것이 경제적으로 가장 합리적입니다.
+                                </p>
+                                <p>
+                                    파란랩의 CBA 도구는 정량적 수치뿐만 아니라 심리적 만족도와 같은 정성적 요소를 가중치로 환산하여 분석에 포함할 수 있도록 설계되었습니다. 이를 통해 단순한 회계적 계산을 넘어선 입체적인 의사결정을 지원합니다.
+                                </p>
+                            </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Boardman, A. E., et al. (2017). <em>Cost-Benefit Analysis: Concepts and Practice</em>. Cambridge University Press.</li>
                                     <li>• Dupuit, J. (1844). "On the Measurement of the Utility of Public Works". <em>Annales des Ponts et Chaussées</em>.</li>
+                                    <li>• Mishan, E. J., & Quah, E. (2007). <em>Cost-Benefit Analysis</em>. Routledge.</li>
                                 </ul>
                             </div>
                         </div>
