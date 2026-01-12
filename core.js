@@ -1,6 +1,6 @@
 /**
- * Paran Lab Master Core v7.8.5
- * 10개 시나리오 및 모든 도구 페이로드(GROW 포함) 풀 복구 버전
+ * Paran Lab Master Core v7.8.6
+ * [최종본] 10개 시나리오 및 모든 도구 페이로드 풀 복구 (생략 절대 없음)
  */
 
 window.ParanLabCore = {
@@ -47,7 +47,7 @@ window.ParanLabCore = {
         { id: '6hats', name: '여섯 색깔 모자', icon: '🎩', category: 'Creative', href: '/6hats/' }
     ],
 
-    // 10개 시나리오 마스터 리스트
+    // 10개 시나리오 마스터 리스트 (상세 데이터 포함)
     scenariosList: [
         { id: 'career', icon: '💼', title: 'Career', subtitle: '철수의 인생 2막: 대기업 vs 스타트업', story: '10년 차 과장 철수는 안정적인 대기업과 혁신적인 스타트업 사이에서 고민 중입니다.', data: ['현재 연봉: 8,500만원', '제안 연봉: 7,800만원 + 스톡옵션', '출퇴근 시간: 왕복 150분 vs 20분'], academic: { desc: "Herzberg의 '동기-위생 이론'에 따르면 연봉은 불만족 방지 요인일 뿐이며, 성취감이 장기적 행복을 결정합니다.", paper: "Herzberg (1959)" }, tools: ['ahp', 'pros-cons', 'grow'] },
         { id: 'burnout', icon: '📅', title: 'Productivity', subtitle: '김 팀장의 업무 과부하 해결', story: '매일 30개가 넘는 할 일에 치이는 김 팀장. 에너지는 고갈되었고 우선순위 재정립이 시급합니다.', data: ['일일 업무량: 30개 이상', '야근 빈도: 주 5회', '방해 요소: 수시 슬랙 메시지'], academic: { desc: "Stephen Covey의 '시간 관리 매트릭스'는 긴급함보다 중요도에 집중하여 삶의 질을 높입니다.", paper: "The 7 Habits of Highly Effective People" }, tools: ['eisenhower', 'time-audit', 'payoff'] },
@@ -61,7 +61,7 @@ window.ParanLabCore = {
         { id: 'team', icon: '🪟', title: 'Teamwork', subtitle: '프로젝트 팀의 갈등 해결과 협업', story: '개발자와 기획자의 대립으로 멈춰버린 프로젝트를 다시 가동해야 합니다.', data: ['갈등 지점: 마감 vs 기능', '합의율: 30% 미만'], academic: { desc: "'조하리의 창' 모델은 피드백을 통해 소통의 사각지대를 줄입니다.", paper: "Luft & Ingham (1955)" }, tools: ['johari', 'affinity', '6hats'] }
     ],
 
-    // 시나리오별 도구 페이로드 (전체 복구)
+    // 시나리오별 도구 주입 데이터 (페이로드)
     payloads: {
         career: {
             ahp: { goal: "철수의 최적 이직처 결정", criteria: ["연봉/복지", "출퇴근거리", "성장가능성"], alternatives: ["현재 대기업", "핀테크 스타트업"], criteriaComparisons: {"0-1": -3, "0-2": -5, "1-2": 2}, alternativeComparisons: {0:{"0-1":-7}, 1:{"0-1": 8}, 2:{"0-1": 9}} },
