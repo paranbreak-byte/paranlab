@@ -3,47 +3,157 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>파란랩(Paran Lab) | 데이터 기반 의사결정 과학 플랫폼</title>
+    
+    <!-- [SEO & Favicon] -->
+    <title>파란랩(Paran Lab) | 당신의 복잡한 고민을 과학적 결론으로</title>
+    <meta name="description" content="직관에 의존하는 결정은 이제 그만. 31가지 경영학 도구와 실전 시나리오로 당신의 문제를 논리적으로 해결하세요.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
+    
     <script src="https://cdn.tailwindcss.com"></script>
-    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     <script src="/core.js" defer></script>
-    <style>@import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap'); body{font-family:'Pretendard',sans-serif;}</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; scroll-behavior: smooth; }
+        .gradient-text { background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .tool-card:hover { transform: translateY(-5px); border-color: #2563eb; }
+        .scenario-card:hover { box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.15); }
+    </style>
 </head>
-<body class="bg-slate-50">
+<body class="bg-slate-50 text-slate-900">
     <div id="header-root"></div>
-    <main class="container mx-auto px-6 py-16">
-        <div class="adsbygoogle-placeholder mb-16 flex justify-center"></div>
-        <section class="text-center mb-20">
-            <h1 class="text-5xl md:text-7xl font-black text-slate-900 mb-6 tracking-tighter">의사결정에도 <span class="text-blue-600">과학</span>이 필요합니다.</h1>
-            <p class="text-xl text-slate-500 font-bold">31가지 경영학 도구와 10가지 실전 시나리오로 당신의 문제를 해결하세요.</p>
+
+    <!-- [Hero Section] -->
+    <section class="relative pt-20 pb-32 overflow-hidden">
+        <div class="container mx-auto px-6 relative z-10">
+            <div class="max-w-4xl mx-auto text-center">
+                <div class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-widest text-blue-600 uppercase bg-blue-50 rounded-full">
+                    Decision Science Platform
+                </div>
+                <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tighter">
+                    밤잠 설치는 당신의 고민,<br/>
+                    <span class="gradient-text">데이터와 논리</span>로 끝내세요.
+                </h1>
+                <p class="text-xl md:text-2xl text-slate-500 font-medium mb-12 leading-relaxed">
+                    막연한 직관은 불안을 낳습니다. 파란랩은 경영학 방법론을 통해<br class="hidden md:block"/>
+                    당신의 복잡한 상황을 명쾌한 리포트로 바꿔드립니다.
+                </p>
+                <div class="flex flex-col md:flex-row gap-4 justify-center">
+                    <a href="#scenarios" class="px-10 py-5 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all">
+                        실전 시나리오 보기
+                    </a>
+                    <a href="#tools" class="px-10 py-5 bg-white text-slate-900 border-2 border-slate-200 rounded-[2rem] font-black text-xl hover:bg-slate-50 transition-all">
+                        모든 도구 탐색
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- 배경 장식 요소 -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-20">
+            <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full blur-[120px]"></div>
+            <div class="absolute bottom-10 right-10 w-96 h-96 bg-purple-400 rounded-full blur-[120px]"></div>
+        </div>
+    </section>
+
+    <!-- [How It Works] -->
+    <section class="py-20 bg-white border-y border-slate-100">
+        <div class="container mx-auto px-6">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">1</div>
+                    <h3 class="text-xl font-black mb-3">시나리오 선택</h3>
+                    <p class="text-slate-500 font-medium">나와 가장 비슷한 상황의<br/>성공 사례를 고르세요.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">2</div>
+                    <h3 class="text-xl font-black mb-3">내 데이터 대입</h3>
+                    <p class="text-slate-500 font-medium">샘플 리포트를 보며<br/>자신의 수치를 입력하세요.</p>
+                </div>
+                <div class="text-center">
+                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">3</div>
+                    <h3 class="text-xl font-black mb-3">과학적 결론 도출</h3>
+                    <p class="text-slate-500 font-medium">수학적으로 계산된<br/>최적의 해답을 얻으세요.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <main class="container mx-auto px-6 py-24">
+        <!-- [Scenarios Section] -->
+        <section id="scenarios" class="mb-32">
+            <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
+                <div>
+                    <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4">🚀 실전 시나리오 가이드</h2>
+                    <p class="text-slate-500 font-bold text-lg">어떤 도구를 써야 할지 모르겠다면? 시나리오로 시작하세요.</p>
+                </div>
+                <div class="text-blue-600 font-black text-sm uppercase tracking-widest">10 Cases Available</div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-grid">
+                <!-- JS로 렌더링 -->
+            </div>
         </section>
-        <section class="mb-24">
-            <h2 class="text-2xl font-black mb-10 flex items-center gap-3">🚀 실전 시나리오 가이드</h2>
-            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-grid"></div>
-        </section>
-        <div class="adsbygoogle-placeholder mb-24 flex justify-center"></div>
-        <section>
-            <h2 class="text-2xl font-black mb-10 flex items-center gap-3">🛠️ 모든 의사결정 도구</h2>
-            <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4" id="tool-grid"></div>
+
+        <!-- [Tools Section] -->
+        <section id="tools">
+            <div class="text-center mb-16">
+                <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4">🛠️ 31가지 의사결정 엔진</h2>
+                <p class="text-slate-500 font-bold text-lg">필요한 도구를 직접 선택하여 분석을 시작하세요.</p>
+            </div>
+            
+            <!-- 카테고리 탭 (시각적 구분용) -->
+            <div id="tool-categories" class="space-y-16">
+                <!-- JS로 카테고리별 렌더링 -->
+            </div>
         </section>
     </main>
+
     <div id="footer-root"></div>
+
     <script>
         window.addEventListener('load', () => {
+            // 1. 시나리오 렌더링
             const scenarioGrid = document.getElementById('scenario-grid');
             scenarioGrid.innerHTML = ParanLabCore.scenariosList.map(s => `
-                <a href="/scenarios/?id=${s.id}" class="bg-white p-8 rounded-[2.5rem] shadow-sm border border-slate-100 hover:shadow-xl transition-all group">
-                    <div class="text-5xl mb-6">${s.icon}</div>
-                    <h3 class="text-xl font-black text-slate-800 group-hover:text-blue-600 transition-colors">${s.subtitle}</h3>
-                    <p class="text-slate-400 mt-3 line-clamp-2 font-medium">${s.story}</p>
+                <a href="/scenarios/?id=${s.id}" class="scenario-card bg-white p-10 rounded-[3rem] border border-slate-100 transition-all group relative overflow-hidden">
+                    <div class="text-6xl mb-8 group-hover:scale-110 transition-transform duration-500">${s.icon}</div>
+                    <div class="relative z-10">
+                        <span class="text-blue-600 font-black text-xs uppercase tracking-widest mb-3 block">${s.title}</span>
+                        <h3 class="text-2xl font-black text-slate-800 group-hover:text-blue-600 transition-colors mb-4 leading-tight">${s.subtitle}</h3>
+                        <p class="text-slate-400 font-medium line-clamp-2 leading-relaxed">${s.story}</p>
+                    </div>
+                    <div class="mt-8 flex gap-2">
+                        ${s.tools.slice(0, 3).map(tId => {
+                            const t = ParanLabCore.toolsList.find(tool => tool.id === tId);
+                            return `<span class="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black rounded-full uppercase">${t ? t.name : ''}</span>`;
+                        }).join('')}
+                    </div>
                 </a>
             `).join('');
-            const toolGrid = document.getElementById('tool-grid');
-            toolGrid.innerHTML = ParanLabCore.toolsList.map(t => `
-                <a href="${t.href}" class="bg-white p-6 rounded-2xl border border-slate-100 hover:border-blue-600 hover:shadow-md transition-all text-center group">
-                    <div class="text-3xl mb-3 group-hover:scale-110 transition-transform">${t.icon}</div>
-                    <div class="font-bold text-sm text-slate-700">${t.name}</div>
-                </a>
+
+            // 2. 도구 카테고리별 렌더링
+            const toolCategories = document.getElementById('tool-categories');
+            const categories = [
+                { id: 'Decision', name: '합리적 의사결정', desc: '여러 대안 중 최적의 선택지를 수학적으로 도출합니다.' },
+                { id: 'Strategy', name: '비즈니스 전략', desc: '시장 환경을 분석하고 경쟁 우위를 설계합니다.' },
+                { id: 'Goal', name: '목표 및 성과', desc: '막연한 꿈을 실행 가능한 계획으로 구체화합니다.' },
+                { id: 'Problem', name: '문제 해결', desc: '현상의 근본 원인을 파악하고 해결책을 찾습니다.' },
+                { id: 'Self', name: '자기 성찰', desc: '나의 가치관과 삶의 균형을 객관적으로 들여다봅니다.' }
+            ];
+
+            toolCategories.innerHTML = categories.map(cat => `
+                <div>
+                    <div class="mb-8 border-l-4 border-blue-600 pl-6">
+                        <h3 class="text-2xl font-black text-slate-800">${cat.name}</h3>
+                        <p class="text-slate-500 font-medium">${cat.desc}</p>
+                    </div>
+                    <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                        ${ParanLabCore.toolsList.filter(t => t.category === cat.id).map(t => `
+                            <a href="${t.href}" class="tool-card bg-white p-6 rounded-[2rem] border border-slate-100 transition-all text-center group shadow-sm">
+                                <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${t.icon}</div>
+                                <div class="font-black text-sm text-slate-700 group-hover:text-blue-600">${t.name}</div>
+                            </a>
+                        `).join('')}
+                    </div>
+                </div>
             `).join('');
         });
     </script>
