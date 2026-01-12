@@ -15,93 +15,70 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; scroll-behavior: smooth; }
         .gradient-text { background: linear-gradient(135deg, #2563eb, #7c3aed); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .tool-card:hover { transform: translateY(-5px); border-color: #2563eb; }
-        .scenario-card:hover { box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.15); }
+        .tool-card:hover { transform: translateY(-5px); border-color: #2563eb; box-shadow: 0 10px 30px -10px rgba(37, 99, 235, 0.2); }
+        .scenario-card:hover { transform: scale(1.02); box-shadow: 0 25px 50px -12px rgba(37, 99, 235, 0.15); }
+        .category-badge { transition: all 0.3s; }
+        .category-badge:hover { background-color: #2563eb; color: white; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-900">
     <div id="header-root"></div>
 
     <!-- [Hero Section] -->
-    <section class="relative pt-20 pb-32 overflow-hidden">
+    <section class="relative pt-24 pb-32 overflow-hidden bg-white">
         <div class="container mx-auto px-6 relative z-10">
             <div class="max-w-4xl mx-auto text-center">
-                <div class="inline-block px-4 py-1.5 mb-6 text-sm font-bold tracking-widest text-blue-600 uppercase bg-blue-50 rounded-full">
+                <div class="inline-block px-4 py-1.5 mb-6 text-sm font-black tracking-widest text-blue-600 uppercase bg-blue-50 rounded-full">
                     Decision Science Platform
                 </div>
-                <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tighter">
-                    밤잠 설치는 당신의 고민,<br/>
-                    <span class="gradient-text">데이터와 논리</span>로 끝내세요.
+                <h1 class="text-5xl md:text-7xl font-black mb-8 leading-[1.1] tracking-tighter text-slate-900">
+                    결정하기 힘들 때,<br/>
+                    <span class="gradient-text">데이터와 논리</span>를 꺼내세요.
                 </h1>
-                <p class="text-xl md:text-2xl text-slate-500 font-medium mb-12 leading-relaxed">
-                    막연한 직관은 불안을 낳습니다. 파란랩은 경영학 방법론을 통해<br class="hidden md:block"/>
+                <p class="text-xl md:text-2xl text-slate-500 font-bold mb-12 leading-relaxed">
+                    막연한 직관은 불안을 낳습니다. 파란랩은 31가지 경영학 도구로<br class="hidden md:block"/>
                     당신의 복잡한 상황을 명쾌한 리포트로 바꿔드립니다.
                 </p>
                 <div class="flex flex-col md:flex-row gap-4 justify-center">
-                    <a href="#scenarios" class="px-10 py-5 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all">
-                        실전 시나리오 보기
+                    <a href="#scenarios" class="px-12 py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl shadow-blue-200 hover:bg-blue-700 transition-all">
+                        실전 고민 해결하기
                     </a>
-                    <a href="#tools" class="px-10 py-5 bg-white text-slate-900 border-2 border-slate-200 rounded-[2rem] font-black text-xl hover:bg-slate-50 transition-all">
+                    <a href="#tools" class="px-12 py-6 bg-white text-slate-900 border-2 border-slate-200 rounded-[2rem] font-black text-xl hover:bg-slate-50 transition-all">
                         모든 도구 탐색
                     </a>
                 </div>
             </div>
         </div>
-        <!-- 배경 장식 요소 -->
-        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-20">
+        <!-- 배경 장식 -->
+        <div class="absolute top-0 left-1/2 -translate-x-1/2 w-full h-full -z-10 opacity-30">
             <div class="absolute top-20 left-10 w-72 h-72 bg-blue-400 rounded-full blur-[120px]"></div>
             <div class="absolute bottom-10 right-10 w-96 h-96 bg-purple-400 rounded-full blur-[120px]"></div>
         </div>
     </section>
 
-    <!-- [How It Works] -->
-    <section class="py-20 bg-white border-y border-slate-100">
-        <div class="container mx-auto px-6">
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-12">
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">1</div>
-                    <h3 class="text-xl font-black mb-3">시나리오 선택</h3>
-                    <p class="text-slate-500 font-medium">나와 가장 비슷한 상황의<br/>성공 사례를 고르세요.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">2</div>
-                    <h3 class="text-xl font-black mb-3">내 데이터 대입</h3>
-                    <p class="text-slate-500 font-medium">샘플 리포트를 보며<br/>자신의 수치를 입력하세요.</p>
-                </div>
-                <div class="text-center">
-                    <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mx-auto mb-6 font-black">3</div>
-                    <h3 class="text-xl font-black mb-3">과학적 결론 도출</h3>
-                    <p class="text-slate-500 font-medium">수학적으로 계산된<br/>최적의 해답을 얻으세요.</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
     <main class="container mx-auto px-6 py-24">
-        <!-- [Scenarios Section] -->
+        <!-- [Problem-Solving Scenarios] -->
         <section id="scenarios" class="mb-32">
             <div class="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
                 <div>
-                    <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4">🚀 실전 시나리오 가이드</h2>
-                    <p class="text-slate-500 font-bold text-lg">어떤 도구를 써야 할지 모르겠다면? 시나리오로 시작하세요.</p>
+                    <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4">🚀 이런 고민 중이신가요?</h2>
+                    <p class="text-slate-500 font-bold text-lg">나와 가장 비슷한 상황을 선택하면 해결 도구를 추천해 드립니다.</p>
                 </div>
-                <div class="text-blue-600 font-black text-sm uppercase tracking-widest">10 Cases Available</div>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="scenario-grid">
-                <!-- JS로 렌더링 -->
+                <!-- core.js 데이터를 기반으로 동적 생성 -->
             </div>
         </section>
 
-        <!-- [Tools Section] -->
+        <!-- [Categorized Tools] -->
         <section id="tools">
-            <div class="text-center mb-16">
+            <div class="text-center mb-20">
                 <h2 class="text-3xl md:text-4xl font-black tracking-tight mb-4">🛠️ 31가지 의사결정 엔진</h2>
-                <p class="text-slate-500 font-bold text-lg">필요한 도구를 직접 선택하여 분석을 시작하세요.</p>
+                <p class="text-slate-500 font-bold text-lg">목적에 맞는 도구를 선택하여 직접 분석을 시작하세요.</p>
             </div>
             
-            <!-- 카테고리 탭 (시각적 구분용) -->
-            <div id="tool-categories" class="space-y-16">
-                <!-- JS로 카테고리별 렌더링 -->
+            <div id="tool-categories" class="space-y-20">
+                <!-- core.js 데이터를 기반으로 카테고리별 생성 -->
             </div>
         </section>
     </main>
@@ -110,43 +87,52 @@
 
     <script>
         window.addEventListener('load', () => {
-            // 1. 시나리오 렌더링
+            if (!window.ParanLabCore) return;
+
+            // 1. 시나리오 렌더링 (문제 해결 중심)
             const scenarioGrid = document.getElementById('scenario-grid');
             scenarioGrid.innerHTML = ParanLabCore.scenariosList.map(s => `
-                <a href="/scenarios/?id=${s.id}" class="scenario-card bg-white p-10 rounded-[3rem] border border-slate-100 transition-all group relative overflow-hidden">
+                <div onclick="window.ParanLabCore.tossData('${s.tools[0]}', '${s.id}')" class="scenario-card bg-white p-10 rounded-[3rem] border border-slate-100 transition-all group cursor-pointer relative overflow-hidden">
                     <div class="text-6xl mb-8 group-hover:scale-110 transition-transform duration-500">${s.icon}</div>
                     <div class="relative z-10">
-                        <span class="text-blue-600 font-black text-xs uppercase tracking-widest mb-3 block">${s.title}</span>
+                        <span class="text-blue-600 font-black text-xs uppercase tracking-widest mb-3 block">${s.title} Case</span>
                         <h3 class="text-2xl font-black text-slate-800 group-hover:text-blue-600 transition-colors mb-4 leading-tight">${s.subtitle}</h3>
-                        <p class="text-slate-400 font-medium line-clamp-2 leading-relaxed">${s.story}</p>
+                        <p class="text-slate-400 font-medium line-clamp-2 leading-relaxed mb-6">${s.story}</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${s.tools.map(tId => {
+                                const t = ParanLabCore.toolsList.find(tool => tool.id === tId);
+                                return t ? `<span class="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black rounded-full uppercase border border-slate-100">${t.name}</span>` : '';
+                            }).join('')}
+                        </div>
                     </div>
-                    <div class="mt-8 flex gap-2">
-                        ${s.tools.slice(0, 3).map(tId => {
-                            const t = ParanLabCore.toolsList.find(tool => tool.id === tId);
-                            return `<span class="px-3 py-1 bg-slate-50 text-slate-400 text-[10px] font-black rounded-full uppercase">${t ? t.name : ''}</span>`;
-                        }).join('')}
-                    </div>
-                </a>
+                </div>
             `).join('');
 
             // 2. 도구 카테고리별 렌더링
             const toolCategories = document.getElementById('tool-categories');
-            const categories = [
-                { id: 'Decision', name: '합리적 의사결정', desc: '여러 대안 중 최적의 선택지를 수학적으로 도출합니다.' },
-                { id: 'Strategy', name: '비즈니스 전략', desc: '시장 환경을 분석하고 경쟁 우위를 설계합니다.' },
-                { id: 'Goal', name: '목표 및 성과', desc: '막연한 꿈을 실행 가능한 계획으로 구체화합니다.' },
-                { id: 'Problem', name: '문제 해결', desc: '현상의 근본 원인을 파악하고 해결책을 찾습니다.' },
-                { id: 'Self', name: '자기 성찰', desc: '나의 가치관과 삶의 균형을 객관적으로 들여다봅니다.' }
-            ];
+            const categoryMeta = {
+                'Decision': { name: '합리적 의사결정', desc: '여러 대안 중 최적의 선택지를 수학적으로 도출합니다.' },
+                'Strategy': { name: '비즈니스 전략', desc: '시장 환경을 분석하고 경쟁 우위를 설계합니다.' },
+                'Goal': { name: '목표 및 성과', desc: '막연한 꿈을 실행 가능한 계획으로 구체화합니다.' },
+                'Problem': { name: '문제 해결', desc: '현상의 근본 원인을 파악하고 해결책을 찾습니다.' },
+                'Self': { name: '자기 성찰', desc: '나의 가치관과 삶의 균형을 객관적으로 들여다봅니다.' },
+                'Time': { name: '시간 관리', desc: '한정된 자원을 효율적으로 배분합니다.' },
+                'Creative': { name: '창의적 사고', desc: '고정관념을 깨고 새로운 아이디어를 발굴합니다.' },
+                'Team': { name: '팀워크 및 소통', desc: '조직 내 갈등을 해결하고 협업 효율을 높입니다.' }
+            };
 
-            toolCategories.innerHTML = categories.map(cat => `
-                <div>
-                    <div class="mb-8 border-l-4 border-blue-600 pl-6">
-                        <h3 class="text-2xl font-black text-slate-800">${cat.name}</h3>
-                        <p class="text-slate-500 font-medium">${cat.desc}</p>
+            const categories = [...new Set(ParanLabCore.toolsList.map(t => t.category))];
+            
+            toolCategories.innerHTML = categories.map(catId => {
+                const meta = categoryMeta[catId] || { name: catId, desc: '' };
+                return `
+                <div class="animate-in fade-in slide-in-from-bottom-4 duration-700">
+                    <div class="mb-10 border-l-4 border-blue-600 pl-6">
+                        <h3 class="text-2xl font-black text-slate-800">${meta.name}</h3>
+                        <p class="text-slate-500 font-bold">${meta.desc}</p>
                     </div>
                     <div class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
-                        ${ParanLabCore.toolsList.filter(t => t.category === cat.id).map(t => `
+                        ${ParanLabCore.toolsList.filter(t => t.category === catId).map(t => `
                             <a href="${t.href}" class="tool-card bg-white p-6 rounded-[2rem] border border-slate-100 transition-all text-center group shadow-sm">
                                 <div class="text-4xl mb-4 group-hover:scale-110 transition-transform">${t.icon}</div>
                                 <div class="font-black text-sm text-slate-700 group-hover:text-blue-600">${t.name}</div>
@@ -154,7 +140,8 @@
                         `).join('')}
                     </div>
                 </div>
-            `).join('');
+                `;
+            }).join('');
         });
     </script>
 </body>
