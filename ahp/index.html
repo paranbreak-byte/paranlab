@@ -56,15 +56,7 @@
                         const saved = localStorage.getItem('paranlab-ahp');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData({
-                                goal: parsed.goal || DEFAULT_TOOL_SAMPLE.goal,
-                                criteria: Array.isArray(parsed.criteria) ? parsed.criteria : DEFAULT_TOOL_SAMPLE.criteria,
-                                alternatives: Array.isArray(parsed.alternatives) ? parsed.alternatives : DEFAULT_TOOL_SAMPLE.alternatives,
-                                criteriaComparisons: parsed.criteriaComparisons || {},
-                                alternativeComparisons: parsed.alternativeComparisons || {},
-                                scenarioContext: parsed.scenarioContext || null,
-                                isDefault: false
-                            });
+                            setData({ ...parsed, isDefault: false });
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
@@ -131,12 +123,8 @@
             const results = useMemo(() => {
                 if (step !== 5) return null;
                 const critRes = calculateAHP(data.criteria, data.criteriaComparisons);
-                const altRes = data.criteria.map((_, idx) => 
-                    calculateAHP(data.alternatives, data.alternativeComparisons[idx] || {})
-                );
-                const finalScores = data.alternatives.map((_, altIdx) => 
-                    altRes.reduce((sum, res, critIdx) => sum + (res.weights[altIdx] * (critRes.weights[critIdx] || 0)), 0)
-                );
+                const altRes = data.criteria.map((_, idx) => calculateAHP(data.alternatives, data.alternativeComparisons[idx] || {}));
+                const finalScores = data.alternatives.map((_, altIdx) => altRes.reduce((sum, res, critIdx) => sum + (res.weights[altIdx] * (critRes.weights[critIdx] || 0)), 0));
                 return { criteriaWeights: critRes.weights, cr: critRes.cr, finalScores };
             }, [data, step]);
 
@@ -167,18 +155,23 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
-                            <p className="font-bold text-sm">PARAN LAB AHP v7.8</p>
+                            <p className="font-bold text-sm">PARAN LAB AHP v7.8.1</p>
                         </div>
                     </div>
 
                     {/* 위저드 네비게이션 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['목표/기준', '대안설정', '기준비교', '대안비교', '최종결과'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
+
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {/* 시나리오 배지 */}
@@ -190,7 +183,6 @@
                             </div>
                         )}
 
-                        {/* Step 1: Goal & Criteria */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
                                 <h2 className="text-3xl font-black text-slate-900">1. 의사결정 목표와 평가 기준</h2>
@@ -208,7 +200,6 @@
                             </div>
                         )}
 
-                        {/* Step 2: Alternatives */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-6">
                                 <h2 className="text-3xl font-black text-slate-900">2. 비교할 대안(선택지) 입력</h2>
@@ -226,7 +217,6 @@
                             </div>
                         )}
 
-                        {/* Step 3: Criteria Comparison */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center"><h2 className="text-3xl font-black text-slate-900">3. 평가 기준 간 중요도 비교</h2></div>
@@ -254,7 +244,6 @@
                             </div>
                         )}
 
-                        {/* Step 4: Alternative Comparison */}
                         {step === 4 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center">
@@ -291,7 +280,6 @@
                             </div>
                         )}
 
-                        {/* Step 5: Final Report */}
                         {step === 5 && results && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-20">
@@ -330,6 +318,11 @@
                         )}
                     </div>
 
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
                     {/* 액션 버튼 세트 */}
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
@@ -351,16 +344,12 @@
                                 <p>
                                     AHP의 가장 큰 특징은 인간의 주관적인 판단을 수학적인 수치로 변환하면서도, 그 판단이 얼마나 논리적으로 일관되었는지를 <strong>일관성 지수(CI)</strong>와 <strong>일관성 비율(CR)</strong>을 통해 검증한다는 점입니다. 일반적으로 CR 값이 0.1(10%) 미만일 때 의사결정자가 논리적 일관성을 유지하며 응답한 것으로 간주합니다.
                                 </p>
-                                <p>
-                                    파란랩의 AHP 엔진은 기하평균법을 사용하여 가중치를 산출하며, 사용자가 입력한 모든 쌍대비교 행렬을 실시간으로 연산하여 가장 과학적인 결론을 제시합니다.
-                                </p>
                             </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Saaty, T. L. (1980). <em>The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation</em>. McGraw-Hill.</li>
                                     <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". <em>European Journal of Operational Research</em>, 48(1), 9-26.</li>
-                                    <li>• Vargas, L. G. (1990). "An overview of the Analytic Hierarchy Process and its applications". <em>European Journal of Operational Research</em>.</li>
                                 </ul>
                             </div>
                         </div>
