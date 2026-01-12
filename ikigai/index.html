@@ -106,17 +106,22 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Purpose Science</p>
-                            <p className="font-bold text-sm">PARAN LAB IKIGAI v7.8</p>
+                            <p className="font-bold text-sm">PARAN LAB IKIGAI v7.8.1</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['주제', '열정/재능', '가치/수익', '정의', '리포트'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
+
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
@@ -140,12 +145,10 @@
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="p-10 bg-rose-50 rounded-[3rem] border border-rose-100 space-y-4">
                                         <h3 className="text-2xl font-black text-rose-600">❤️ What you LOVE</h3>
-                                        <p className="text-xs text-rose-400 font-bold">당신이 진심으로 사랑하고 즐기는 일은?</p>
                                         <textarea value={data.love} onChange={e => setData({...data, love: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" />
                                     </div>
                                     <div className="p-10 bg-blue-50 rounded-[3rem] border border-blue-100 space-y-4">
                                         <h3 className="text-2xl font-black text-blue-600">💪 What you are GOOD AT</h3>
-                                        <p className="text-xs text-blue-400 font-bold">당신이 남들보다 잘하거나 재능이 있는 분야는?</p>
                                         <textarea value={data.good} onChange={e => setData({...data, good: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" />
                                     </div>
                                 </div>
@@ -158,12 +161,10 @@
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <div className="p-10 bg-emerald-50 rounded-[3rem] border border-emerald-100 space-y-4">
                                         <h3 className="text-2xl font-black text-emerald-600">🌍 What the world NEEDS</h3>
-                                        <p className="text-xs text-emerald-400 font-bold">세상이 필요로 하거나 가치 있는 일은?</p>
                                         <textarea value={data.need} onChange={e => setData({...data, need: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" />
                                     </div>
                                     <div className="p-10 bg-amber-50 rounded-[3rem] border border-amber-100 space-y-4">
                                         <h3 className="text-2xl font-black text-amber-600">💰 What you can be PAID FOR</h3>
-                                        <p className="text-xs text-amber-400 font-bold">당신에게 경제적 수익을 가져다줄 수 있는 일은?</p>
                                         <textarea value={data.paid} onChange={e => setData({...data, paid: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" />
                                     </div>
                                 </div>
@@ -173,7 +174,7 @@
 
                         {step === 4 && (
                             <div className="animate-in fade-in space-y-8">
-                                <h2 className="text-4xl font-black text-slate-900 text-center">당신의 '이키가이'를 한 문장으로 정의하세요</h2>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">당신의 '이키가이'를 정의하세요</h2>
                                 <input type="text" value={data.ikigai} onChange={e => setData({...data, ikigai: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-900 text-white rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-xl" placeholder="예: 디자인 교육을 통해 창의성을 깨우는 멘토" />
                                 <div className="flex gap-4"><button onClick={() => setStep(3)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button></div>
                             </div>
@@ -195,10 +196,15 @@
                                 </div>
                                 <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
                                     <h3 className="text-2xl font-black mb-4">존재의 이유(Ikigai) 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">당신의 이키가이는 <strong>[{data.ikigai}]</strong>입니다. 이 지점은 행복과 사회적 기여, 경제적 자립이 균형을 이루는 곳입니다. 이 목적을 나침반 삼아 당신의 커리어와 삶을 설계해 나가십시오.</p>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">당신의 이키가이는 <strong>[{data.ikigai}]</strong>입니다. 이 지점은 행복과 사회적 기여, 경제적 자립이 균형을 이루는 곳입니다.</p>
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
                     </div>
 
                     {/* 액션 버튼 세트 */}
@@ -211,31 +217,15 @@
                         </div>
                     )}
 
-                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">이키가이(Ikigai): 삶의 의미를 찾는 과학</h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    이키가이(Ikigai, 生き甲斐)는 '살아가는 보람' 혹은 '존재의 이유'를 뜻하는 일본어입니다. 오키나와 장수 마을의 비결로 알려진 이 개념은 현대 심리학과 경영학에서 개인의 자아실현과 커리어 설계를 위한 강력한 프레임워크로 재해석되었습니다.
-                                </p>
-                                <p>
-                                    이키가이 모델은 다음 4가지 질문의 교집합을 찾는 과정입니다:
-                                    1. <strong>당신이 사랑하는 것(Passion & Mission):</strong> 보상 없이도 즐겁게 할 수 있는 일.
-                                    2. <strong>당신이 잘하는 것(Passion & Profession):</strong> 당신의 재능과 기술이 발휘되는 영역.
-                                    3. <strong>세상이 필요로 하는 것(Mission & Vocation):</strong> 타인에게 가치를 전달하고 사회에 기여하는 일.
-                                    4. <strong>수익이 되는 것(Profession & Vocation):</strong> 지속 가능한 삶을 가능하게 하는 경제적 보상.
-                                </p>
-                                <p>
-                                    이 4가지가 모두 만나는 중앙 지점이 바로 '이키가이'입니다. 어느 하나라도 부족하면 공허함(수익은 있지만 가치가 없음), 불안함(사랑하지만 수익이 없음), 혹은 무력감(잘하지만 사랑하지 않음)을 느낄 수 있습니다. 파란랩의 이키가이 도구는 당신의 내면을 객관화하여 이 균형점을 찾도록 돕습니다.
-                                </p>
-                            </div>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">이키가이는 '살아가는 보람' 혹은 '존재의 이유'를 뜻하는 일본어입니다. 현대 심리학에서는 이를 열정, 미션, 직업, 천직의 네 가지 요소가 만나는 지점으로 정의합니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• García, H., & Miralles, F. (2016). <em>Ikigai: The Japanese Secret to a Long and Happy Life</em>. Penguin Books.</li>
-                                    <li>• Buettner, D. (2008). <em>The Blue Zones: Lessons for Living Longer From the People Who've Lived the Longest</em>. National Geographic.</li>
-                                    <li>• Mogi, K. (2017). <em>The Little Book of Ikigai: The Essential Japanese Way to Finding Your Purpose in Life</em>. Quercus.</li>
+                                    <li>• García, H., & Miralles, F. (2016). <em>Ikigai: The Japanese Secret to a Long and Happy Life</em>.</li>
+                                    <li>• Buettner, D. (2008). <em>The Blue Zones</em>. National Geographic.</li>
                                 </ul>
                             </div>
                         </div>
