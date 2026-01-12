@@ -11,7 +11,7 @@
     <meta property="og:title" content="파란랩 Pros-Cons 분석 엔진">
     <meta property="og:description" content="장단점의 나열을 넘어, 무게를 달아 결정하세요.">
     <meta property="og:type" content="website">
-    <link rel="canonical" href="https://paranlab.com/pros-cons/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚖️</text></svg>">
     
     <!-- [구조화 데이터 표준] -->
     <script type="application/ld+json">
@@ -52,7 +52,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (철수의 스타트업 이직 고민)
+        // [v7.8.1] 원본 로직 보존: 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "성장 가능성이 높은 스타트업으로의 이직",
             pros: [
@@ -70,11 +70,11 @@
 
         function ProsConsApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 샘플 우선 노출
+            const [step, setStep] = useState(4); // 결과 우선 노출
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [v7.8.1] Toss & Catch: 시나리오 데이터 로드 로직
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -91,14 +91,13 @@
                 return () => clearTimeout(timer);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-pros-cons', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
-            // 연산 엔진
+            // [원본 로직 보존] 연산 엔진
             const results = useMemo(() => {
                 const totalPros = (data.pros || []).reduce((acc, cur) => acc + Number(cur.score || 0), 0);
                 const totalCons = (data.cons || []).reduce((acc, cur) => acc + Number(cur.score || 0), 0);
@@ -132,7 +131,7 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
+                    {/* [v7.8.1] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
                             <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
@@ -140,11 +139,11 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
-                            <p className="font-bold text-sm">PARAN LAB PROS-CONS v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB PROS-CONS v7.8.1</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
+                    {/* [v7.8.1] 위저드 네비게이션 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
                         {['주제 정의', '항목 입력', '가중치 설정', '최종 리포트'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
@@ -153,13 +152,13 @@
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">ADVERTISEMENT</div>
 
                     {/* 메인 컨텐츠 카드 */}
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                        {/* 샘플/시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -168,7 +167,7 @@
                             </div>
                         )}
 
-                        {/* Step 1: Subject */}
+                        {/* Step 1: Subject (원본 로직 유지) */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
                                 <div className="text-center">
@@ -186,7 +185,7 @@
                             </div>
                         )}
 
-                        {/* Step 2: Items Entry */}
+                        {/* Step 2: Items Entry (원본 로직 유지) */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-10">
                                 <div className="text-center">
@@ -222,7 +221,7 @@
                             </div>
                         )}
 
-                        {/* Step 3: Weighting */}
+                        {/* Step 3: Weighting (원본 로직 유지) */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-12">
                                 <div className="text-center">
@@ -257,7 +256,7 @@
                             </div>
                         )}
 
-                        {/* Step 4: Result Report */}
+                        {/* Step 4: Result Report (원본 로직 유지) */}
                         {step === 4 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
@@ -309,58 +308,36 @@
                         )}
                     </div>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">ADVERTISEMENT</div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/pros-cons/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
+                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">찬반 분석(Pros-Cons): 합리적 의사결정의 고전</h3>
                             <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
                                 <p>
-                                    <strong>찬반 분석(Pros and Cons Analysis)</strong>은 인류 역사상 가장 오래되고 검증된 의사결정 도구입니다. 이 기법의 학술적 뿌리는 미국의 건국 아버지 중 한 명인 <strong>벤자민 프랭클린(Benjamin Franklin)</strong>이 1772년 친구 조셉 프리스틀리에게 보낸 편지에서 언급한 <strong>'도덕적 대수학(Prudential Algebra)'</strong>에 있습니다. 프랭클린은 복잡한 결정을 내릴 때 종이 한 장을 반으로 나눠 한쪽에는 찬성(Pros)을, 다른 쪽에는 반대(Cons)를 적고 며칠간 숙고하며 각 항목의 무게를 비교하라고 조언했습니다.
+                                    <strong>찬반 분석(Pros and Cons Analysis)</strong>은 인류 역사상 가장 오래되고 검증된 의사결정 도구입니다. 이 기법의 학술적 뿌리는 미국의 건국 아버지 중 한 명인 <strong>벤자민 프랭클린(Benjamin Franklin)</strong>이 1772년 언급한 <strong>'도덕적 대수학(Prudential Algebra)'</strong>에 있습니다.
                                 </p>
                                 <p>
-                                    현대 심리학과 행동경제학 관점에서 찬반 분석은 <strong>'인지적 부하(Cognitive Load)'</strong>를 줄이는 데 결정적인 역할을 합니다. 인간의 단기 기억력은 한 번에 7개 이상의 정보를 동시에 처리하기 어렵기 때문에, 머릿속으로만 고민하면 특정 요인에 매몰되거나 중요한 리스크를 놓치기 쉽습니다. 장단점을 시각적으로 나열하고 기록하는 행위는 뇌의 작업 기억 공간을 확보하여 더 객관적이고 다각적인 판단을 가능하게 합니다.
-                                </p>
-                                <p>
-                                    특히 파란랩의 찬반 분석 엔진은 단순한 나열을 넘어 <strong>'가중치 부여(Weighting)'</strong> 시스템을 도입했습니다. 모든 장단점의 가치는 동일하지 않습니다. 사소한 장점 10개가 치명적인 단점 1개를 이길 수 없는 경우가 많기 때문입니다. 각 항목에 1~10점의 가중치를 부여함으로써, 의사결정자는 자신의 가치관과 우선순위를 수학적으로 정렬하고 최종적인 '결정의 무게'를 확인할 수 있습니다.
+                                    현대 심리학 관점에서 찬반 분석은 <strong>'인지적 부하(Cognitive Load)'</strong>를 줄이는 데 결정적인 역할을 합니다. 장단점을 시각적으로 나열하고 가중치를 부여하는 행위는 뇌의 작업 기억 공간을 확보하여 더 객관적이고 다각적인 판단을 가능하게 합니다.
                                 </p>
                             </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 인지적 편향의 극복</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">인간은 자신이 원하는 방향으로만 정보를 해석하는 '확증 편향'에 빠지기 쉽습니다. 의도적으로 반대 의견(Cons)을 적는 과정은 이러한 심리적 오류를 방어하는 강력한 장치가 됩니다.</p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">2. 가중치 기반의 정량화</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">단순 개수가 아닌 '중요도의 합'으로 승부를 가립니다. 이를 통해 감정적인 선호도에 휘둘리지 않고, 나에게 진짜 중요한 가치가 무엇인지 데이터로 확인할 수 있습니다.</p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">3. 후회 없는 선택 (Regret Minimization)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">모든 리스크를 미리 검토하고 내린 결정은 결과와 상관없이 심리적 만족도가 높습니다. 찬반 분석은 미래의 후회를 최소화하는 '심리적 보험' 역할을 수행합니다.</p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 소통과 합의의 도구</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">팀이나 가족과 함께 의사결정을 내릴 때, 각자의 가중치를 비교해보면 갈등의 핵심 원인을 파악할 수 있습니다. 이는 단순한 투표보다 훨씬 고차원적인 합의를 이끌어냅니다.</p>
-                                </div>
-                            </div>
-
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Franklin, B. (1772). <em>Letter to Joseph Priestley on "Prudential Algebra"</em>.</li>
-                                    <li>• Janis, I. L., & Mann, L. (1977). <em>Decision making: A psychological analysis of conflict, choice, and commitment</em>. Free Press.</li>
-                                    <li>• Tversky, A., & Kahneman, D. (1974). "Judgment under Uncertainty: Heuristics and Biases". <em>Science</em>, 185(4157), 1124-1131.</li>
-                                    <li>• Hammond, J. S., Keeney, R. L., & Raiffa, H. (1999). <em>Smart Choices: A Practical Guide to Making Better Decisions</em>. Harvard Business School Press.</li>
+                                    <li>• Janis, I. L., & Mann, L. (1977). <em>Decision making</em>. Free Press.</li>
                                 </ul>
                             </div>
                         </div>
@@ -369,9 +346,7 @@
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(ProsConsApp));
     </script>
 </body>
