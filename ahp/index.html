@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AHP 분석 도구 | 정석 계층화 분석법 의사결정 | 파란랩(Paran Lab)</title>
     <meta name="description" content="Thomas Saaty의 AHP 이론을 바탕으로 복잡한 문제를 수학적으로 해결하세요. 실제 일관성 지수(CR) 계산을 통해 분석의 신뢰성을 보장합니다.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
     
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
@@ -44,6 +45,7 @@
 
         function AhpApp() {
             const [isLoaded, setIsLoaded] = useState(false);
+            const [isSharing, setIsSharing] = useState(false);
             const [step, setStep] = useState(5); 
             const [subStep, setSubStep] = useState(0);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
@@ -66,7 +68,7 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Init Error:", e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -77,6 +79,27 @@
                     localStorage.setItem('paranlab-ahp', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'ahp-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] AHP 분석 결과: ${data.goal}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'ahp-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
 
             const calculateAHP = (items, comparisons) => {
                 const n = items.length;
@@ -136,10 +159,11 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
@@ -147,6 +171,7 @@
                         </div>
                     </div>
 
+                    {/* 위저드 네비게이션 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
                         {['목표/기준', '대안설정', '기준비교', '대안비교', '최종결과'].map((name, i) => (
                             <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
@@ -156,6 +181,7 @@
                     </nav>
 
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -164,6 +190,7 @@
                             </div>
                         )}
 
+                        {/* Step 1: Goal & Criteria */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-10">
                                 <h2 className="text-3xl font-black text-slate-900">1. 의사결정 목표와 평가 기준</h2>
@@ -177,10 +204,11 @@
                                     ))}
                                 </div>
                                 <button onClick={() => setData({...data, criteria: [...data.criteria, ""], isDefault: false})} className="text-blue-600 font-black text-sm">+ 기준 추가</button>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700">다음 단계로</button>
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계로</button>
                             </div>
                         )}
 
+                        {/* Step 2: Alternatives */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-6">
                                 <h2 className="text-3xl font-black text-slate-900">2. 비교할 대안(선택지) 입력</h2>
@@ -198,6 +226,7 @@
                             </div>
                         )}
 
+                        {/* Step 3: Criteria Comparison */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center"><h2 className="text-3xl font-black text-slate-900">3. 평가 기준 간 중요도 비교</h2></div>
@@ -225,6 +254,7 @@
                             </div>
                         )}
 
+                        {/* Step 4: Alternative Comparison */}
                         {step === 4 && (
                             <div className="animate-in fade-in space-y-16">
                                 <div className="text-center">
@@ -261,6 +291,7 @@
                             </div>
                         )}
 
+                        {/* Step 5: Final Report */}
                         {step === 5 && results && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-20">
@@ -299,24 +330,37 @@
                         )}
                     </div>
 
+                    {/* 액션 버튼 세트 */}
                     {step === 5 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process)의 학술적 토대</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">본 도구는 펜실베이니아 대학교 와튼스쿨의 <strong>Thomas L. Saaty</strong> 교수가 창안한 계층 분석 과정을 충실히 따릅니다. AHP는 복잡한 의사결정 문제를 계층적으로 분해하고, 쌍대비교를 통해 정량적 우선순위를 도출하는 과학적 방법론입니다.</p>
+                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
+                                <p>
+                                    본 도구는 펜실베이니아 대학교 와튼스쿨의 <strong>Thomas L. Saaty</strong> 교수가 창안한 계층 분석 과정을 충실히 따릅니다. AHP는 복잡한 의사결정 문제를 계층적으로 분해하고, 쌍대비교(Pairwise Comparison)를 통해 정량적 우선순위를 도출하는 과학적 방법론입니다.
+                                </p>
+                                <p>
+                                    AHP의 가장 큰 특징은 인간의 주관적인 판단을 수학적인 수치로 변환하면서도, 그 판단이 얼마나 논리적으로 일관되었는지를 <strong>일관성 지수(CI)</strong>와 <strong>일관성 비율(CR)</strong>을 통해 검증한다는 점입니다. 일반적으로 CR 값이 0.1(10%) 미만일 때 의사결정자가 논리적 일관성을 유지하며 응답한 것으로 간주합니다.
+                                </p>
+                                <p>
+                                    파란랩의 AHP 엔진은 기하평균법을 사용하여 가중치를 산출하며, 사용자가 입력한 모든 쌍대비교 행렬을 실시간으로 연산하여 가장 과학적인 결론을 제시합니다.
+                                </p>
+                            </div>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Saaty, T. L. (1980). <em>The Analytic Hierarchy Process</em>. McGraw-Hill.</li>
-                                    <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". <em>European Journal of Operational Research</em>.</li>
+                                    <li>• Saaty, T. L. (1980). <em>The Analytic Hierarchy Process: Planning, Priority Setting, Resource Allocation</em>. McGraw-Hill.</li>
+                                    <li>• Saaty, T. L. (1990). "How to make a decision: The Analytic Hierarchy Process". <em>European Journal of Operational Research</em>, 48(1), 9-26.</li>
+                                    <li>• Vargas, L. G. (1990). "An overview of the Analytic Hierarchy Process and its applications". <em>European Journal of Operational Research</em>.</li>
                                 </ul>
                             </div>
                         </div>
