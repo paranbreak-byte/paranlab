@@ -3,14 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    
-    <!-- [SEO 표준] -->
     <title>3C 분석 도구 | 고객·경쟁사·자사 기반 전략 수립 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="오마에 겐이치의 3C 모델을 통해 비즈니스 환경을 과학적으로 분석하세요. 고객(Customer), 경쟁사(Competitor), 자사(Company)의 조화를 통해 최적의 KFS를 도출합니다.">
-    <meta name="keywords" content="3C분석, 전략삼각형, 경영전략도구, 시장분석, 오마에겐이치, 파란랩, KFS">
-    <link rel="canonical" href="https://paranlab.com/3c/">
+    <meta name="description" content="오마에 겐이치의 3C 모델을 통해 비즈니스 환경을 과학적으로 분석하세요. 고객, 경쟁사, 자사의 조화를 통해 최적의 전략을 도출합니다.">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
     
-    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -31,20 +27,19 @@
     <div id="footer-root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo } = React;
+        const { useState, useEffect } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (스타벅스의 국내 시장 전략)
         const DEFAULT_TOOL_SAMPLE = {
-            customer: "고급스러운 공간 경험과 일관된 커피 품질을 원하는 2040 직장인 및 카공족. 모바일 주문(사이렌 오더) 편의성 중시.",
-            competitor: "저가형 프랜차이즈(메가커피 등)의 공세와 스페셜티 전문점(블루보틀 등) 사이의 샌드위치 압박.",
-            company: "압도적인 브랜드 파워, 전국 핵심 상권의 직영 매장망, 강력한 로열티 프로그램 및 IT 결합 서비스.",
+            customer: "고급스러운 공간 경험과 일관된 커피 품질을 원하는 2040 직장인 및 카공족. 모바일 주문 편의성 중시.",
+            competitor: "저가형 프랜차이즈의 공세와 스페셜티 전문점 사이의 샌드위치 압박.",
+            company: "압도적인 브랜드 파워, 전국 핵심 상권의 직영 매장망, 강력한 로열티 프로그램.",
             isDefault: true
         };
 
         function ThreeCApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 리포트 우선 노출
             const [isSharing, setIsSharing] = useState(false);
+            const [step, setStep] = useState(4); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
             useEffect(() => {
@@ -94,30 +89,31 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-3c'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-3c'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Strategy Science</p>
-                            <p className="font-bold text-sm">PARAN LAB 3C v7.7</p>
+                            <p className="font-bold text-sm">PARAN LAB 3C v7.8.1</p>
                         </div>
                     </div>
 
-                    {/* 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
                         {['고객 분석', '경쟁사 분석', '자사 분석', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm md:text-base font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
+                    {/* 상단 광고 영역 */}
+                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
                     <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-8 right-8 no-print">
                                 <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
@@ -126,121 +122,82 @@
                             </div>
                         )}
 
-                        {/* Step 1: Customer */}
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Customer</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">시장의 니즈와 고객을 정의하세요</h2>
-                                </div>
-                                <textarea 
-                                    value={data.customer} 
-                                    onChange={e => setData({...data, customer: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all"
-                                    placeholder="고객 분석 내용 입력..."
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700">다음: 경쟁사 분석</button>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">고객(Customer) 분석</h2>
+                                <textarea value={data.customer} onChange={e => setData({...data, customer: e.target.value, isDefault: false})} className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="시장의 니즈와 고객의 특성을 입력하세요..." />
+                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 경쟁사 분석</button>
                             </div>
                         )}
 
-                        {/* Step 2: Competitor */}
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-rose-600 font-black text-sm uppercase tracking-widest">Step 02. Competitor</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">경쟁자의 전략과 약점을 파악하세요</h2>
-                                </div>
-                                <textarea 
-                                    value={data.competitor} 
-                                    onChange={e => setData({...data, competitor: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-rose-100 transition-all"
-                                    placeholder="경쟁사 분석 내용 입력..."
-                                />
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 자사 분석</button>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">경쟁사(Competitor) 분석</h2>
+                                <textarea value={data.competitor} onChange={e => setData({...data, competitor: e.target.value, isDefault: false})} className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-rose-100 transition-all" placeholder="경쟁자의 전략과 강약점을 입력하세요..." />
+                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 자사 분석</button></div>
                             </div>
                         )}
 
-                        {/* Step 3: Company */}
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <span className="text-emerald-600 font-black text-sm uppercase tracking-widest">Step 03. Company</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">우리의 핵심 역량을 정의하세요</h2>
-                                </div>
-                                <textarea 
-                                    value={data.company} 
-                                    onChange={e => setData({...data, company: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-emerald-100 transition-all"
-                                    placeholder="자사 분석 내용 입력..."
-                                />
-                                <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
-                                </div>
+                                <h2 className="text-4xl font-black text-slate-900 text-center">자사(Company) 분석</h2>
+                                <textarea value={data.company} onChange={e => setData({...data, company: e.target.value, isDefault: false})} className="w-full h-64 p-8 bg-slate-50 rounded-[2rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-emerald-100 transition-all" placeholder="우리의 핵심 역량과 자원을 입력하세요..." />
+                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button></div>
                             </div>
                         )}
 
-                        {/* Step 4: Result Report */}
                         {step === 4 && (
                             <div className="animate-in zoom-in duration-700">
                                 <div className="text-center mb-16">
                                     <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">3C Strategic Triangle Report</span>
                                     <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">비즈니스 전략 분석 결과</h2>
                                 </div>
-
                                 <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
                                     <div className="p-10 bg-blue-50 rounded-[3.5rem] border border-blue-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
                                         <h3 className="font-black text-blue-800 mb-6 text-xl">👥 Customer</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.customer || "데이터 없음"}</p>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.customer}</p>
                                     </div>
                                     <div className="p-10 bg-rose-50 rounded-[3.5rem] border border-rose-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
                                         <h3 className="font-black text-rose-800 mb-6 text-xl">⚔️ Competitor</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.competitor || "데이터 없음"}</p>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.competitor}</p>
                                     </div>
                                     <div className="p-10 bg-emerald-50 rounded-[3.5rem] border border-emerald-100 shadow-sm relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-5 font-black">C</div>
                                         <h3 className="font-black text-emerald-800 mb-6 text-xl">🏢 Company</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.company || "데이터 없음"}</p>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">{data.company}</p>
                                     </div>
                                 </div>
-
                                 <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
-                                    <h3 className="text-2xl font-black mb-4">전략적 시사점 (KFS 도출)</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        성공적인 전략은 <strong>'고객이 원하고'</strong>, <strong>'경쟁사가 제공하지 못하며'</strong>, <strong>'우리가 잘할 수 있는'</strong> 영역의 교집합에서 탄생합니다. 위 분석을 바탕으로 귀사의 핵심 성공 요인(Key Factors for Success)을 정의하십시오.
-                                    </p>
+                                    <h3 className="text-2xl font-black mb-4">전략적 시사점</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">성공적인 전략은 고객이 원하고, 경쟁사가 제공하지 못하며, 우리가 잘할 수 있는 영역의 교집합에서 탄생합니다.</p>
                                 </div>
                             </div>
                         )}
                     </div>
 
-                    {/* 하단 액션 버튼 */}
+                    {/* 하단 광고 영역 */}
+                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
+                        ADVERTISEMENT
+                    </div>
+
+                    {/* 액션 버튼 세트 */}
                     {step === 4 && (
                         <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">📄 HTML 다운로드</button>
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
                             <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/3c/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl">🔗 링크 복사</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
                         </div>
                     )}
 
-                    {/* 학술적 배경 */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <div className="prose prose-slate max-w-none">
                             <h3 className="text-4xl font-black text-slate-900 mb-12">3C 분석: 전략 수립의 삼각형</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">
-                                3C 분석은 세계적인 경영 컨설턴트 <strong>오마에 겐이치(Kenichi Ohmae)</strong>가 제안한 프레임워크입니다. 비즈니스 성공을 위해 반드시 고려해야 할 3가지 핵심 이해관계자인 고객(Customer), 경쟁사(Competitor), 자사(Company)를 분석하여 지속 가능한 경쟁 우위를 확보하는 데 목적이 있습니다.
-                            </p>
+                            <p className="text-xl text-slate-600 leading-relaxed mb-12">3C 분석은 세계적인 경영 컨설턴트 <strong>오마에 겐이치(Kenichi Ohmae)</strong>가 제안한 프레임워크입니다. 비즈니스 성공을 위해 반드시 고려해야 할 3가지 핵심 이해관계자인 고객(Customer), 경쟁사(Competitor), 자사(Company)를 분석하여 지속 가능한 경쟁 우위를 확보하는 데 목적이 있습니다.</p>
                             <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                 <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                 <ul className="text-base text-slate-500 space-y-4 font-medium">
                                     <li>• Ohmae, K. (1982). <em>The Mind of the Strategist: The Art of Japanese Business</em>. McGraw-Hill.</li>
-                                    <li>• Ohmae, K. (1991). <em>The Borderless World: Power and Strategy in the Interlinked Economy</em>. Harper Business.</li>
+                                    <li>• Ohmae, K. (1991). <em>The Borderless World</em>. Harper Business.</li>
                                 </ul>
                             </div>
                         </div>
@@ -248,7 +205,6 @@
                 </main>
             );
         }
-
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(ThreeCApp));
     </script>
