@@ -13,10 +13,10 @@
         @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
     </style>
 </head>
-<body>
+<body class="bg-slate-50">
     <div id="header-root"></div>
     
-    <main class="max-w-4xl mx-auto py-16 px-6" id="scenario-content">
+    <main class="max-w-4xl mx-auto py-32 px-6" id="scenario-content">
         <!-- 로딩 표시 -->
         <div class="flex items-center justify-center min-h-[50vh]">
             <div class="text-center">
@@ -45,7 +45,11 @@
             const scenario = window.ParanLabCore.scenariosList.find(s => s.id === scenarioId);
             
             if (!scenario) {
-                document.getElementById('scenario-content').innerHTML = `<div class="text-center py-20"><h2 class="text-2xl font-black text-slate-800">시나리오를 찾을 수 없습니다.</h2><a href="/" class="text-blue-600 font-bold underline mt-4 block">홈으로 돌아가기</a></div>`;
+                document.getElementById('scenario-content').innerHTML = `
+                    <div class="text-center py-20">
+                        <h2 class="text-2xl font-black text-slate-800">시나리오를 찾을 수 없습니다.</h2>
+                        <a href="/" class="text-blue-600 font-bold underline mt-4 block">홈으로 돌아가기</a>
+                    </div>`;
                 return;
             }
 
@@ -65,12 +69,17 @@
                         <div>
                             <h3 class="text-xl font-black text-slate-800 mb-6 flex items-center gap-2">📊 핵심 분석 데이터</h3>
                             <ul class="space-y-4">
-                                ${scenario.data ? scenario.data.map(d => `<li class="flex items-center gap-3 text-slate-500 font-bold"><span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>${d}</li>`).join('') : '<li class="text-slate-400">데이터 준비 중...</li>'}
+                                ${scenario.data ? scenario.data.map(d => `
+                                    <li class="flex items-center gap-3 text-slate-500 font-bold">
+                                        <span class="w-1.5 h-1.5 bg-blue-600 rounded-full"></span>${d}
+                                    </li>`).join('') : '<li class="text-slate-400">데이터 준비 중...</li>'}
                             </ul>
                         </div>
                         <div class="bg-blue-50 p-8 rounded-[2.5rem] border border-blue-100">
                             <h3 class="text-xl font-black text-blue-900 mb-4 flex items-center gap-2">🔬 학술적 근거</h3>
-                            <p class="text-blue-700 text-sm font-bold mb-4 leading-relaxed">${scenario.academic ? scenario.academic.desc : '이론적 배경 준비 중...'}</p>
+                            <p class="text-blue-700 text-sm font-bold mb-4 leading-relaxed">
+                                ${scenario.academic ? scenario.academic.desc : '이론적 배경 준비 중...'}
+                            </p>
                             <div class="text-[10px] text-blue-400 font-black uppercase tracking-widest border-t border-blue-200 pt-4">
                                 Reference: ${scenario.academic ? scenario.academic.paper : 'Pending'}
                             </div>
