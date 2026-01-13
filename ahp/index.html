@@ -55,7 +55,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.8.3] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             goal: "최적의 창업 입지 선정",
             criteria: ["임대료", "유동인구", "경쟁강도"],
@@ -70,11 +69,10 @@
         function AhpApp() {
             const [isLoaded, setIsLoaded] = useState(false);
             const [isSharing, setIsSharing] = useState(false);
-            const [step, setStep] = useState(5); // 결과 우선 노출
+            const [step, setStep] = useState(5); 
             const [subStep, setSubStep] = useState(0);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [v7.8.3] 데이터 로드 및 시나리오 연동
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -118,7 +116,6 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            // [원본 로직 보존] AHP 연산 엔진
             const calculateAHP = (items, comparisons) => {
                 const n = items.length;
                 if (n <= 1) return { weights: [1], cr: 0 };
@@ -161,7 +158,7 @@
                 const winner = val < 0 ? itemA : itemB;
                 const loser = val < 0 ? itemB : itemA;
                 return (
-                    <span className="text-xl md:text-4xl leading-tight">
+                    <span className="text-xl md:text-4xl leading-tight break-keep">
                         <strong className={val < 0 ? "text-blue-600" : "text-red-600"}>[{winner}]</strong>이(가)<br/>
                         <span className="text-slate-400 text-lg md:text-xl">[{loser}]보다</span><br/>
                         <strong className="underline decoration-blue-500 underline-offset-8">{intensity} 중요</strong>합니다.
@@ -173,11 +170,11 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [v7.8.3] 마스터 컨트롤 바 */}
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-base md:text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-base md:text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-red-500 transition-all break-keep">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
@@ -186,7 +183,7 @@
                     </div>
 
                     {/* 위저드 네비게이션 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto pb-4">
+                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto pb-4 scrollbar-hide">
                         {['목표/기준', '대안설정', '기준비교', '대안비교', '최종결과'].map((name, i) => (
                             <div key={i} className={`whitespace-nowrap pb-2 text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
@@ -256,8 +253,8 @@
                                                 <p className="font-black text-slate-800 leading-tight">{getComparisonText(val, data.criteria[i], data.criteria[j])}</p>
                                             </div>
                                             <div className="flex justify-between items-center mb-8 md:mb-10 px-4 md:px-6">
-                                                <span className={`text-xl md:text-3xl font-black ${val < 0 ? 'text-blue-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
-                                                <span className={`text-xl md:text-3xl font-black ${val > 0 ? 'text-red-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
+                                                <span className={`text-xl md:text-3xl font-black break-keep ${val < 0 ? 'text-blue-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.criteria[i]}</span>
+                                                <span className={`text-xl md:text-3xl font-black break-keep ${val > 0 ? 'text-red-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.criteria[j]}</span>
                                             </div>
                                             <input type="range" min="-8" max="8" step="1" value={val} onChange={e => setData({...data, criteriaComparisons: {...data.criteriaComparisons, [pairKey]: parseInt(e.target.value)}, isDefault: false})} />
                                         </div>
@@ -286,8 +283,8 @@
                                                 <p className="font-black text-slate-800 leading-tight">{getComparisonText(val, data.alternatives[i], data.alternatives[j])}</p>
                                             </div>
                                             <div className="flex justify-between items-center mb-8 md:mb-10 px-4 md:px-6">
-                                                <span className={`text-xl md:text-3xl font-black ${val < 0 ? 'text-blue-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
-                                                <span className={`text-xl md:text-3xl font-black ${val > 0 ? 'text-red-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
+                                                <span className={`text-xl md:text-3xl font-black break-keep ${val < 0 ? 'text-blue-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.alternatives[i]}</span>
+                                                <span className={`text-xl md:text-3xl font-black break-keep ${val > 0 ? 'text-red-600 scale-110 md:scale-125' : 'text-slate-300'}`}>{data.alternatives[j]}</span>
                                             </div>
                                             <input type="range" min="-8" max="8" step="1" value={val} onChange={e => {
                                                 const newAltComp = {...data.alternativeComparisons};
@@ -349,13 +346,13 @@
                         ADVERTISEMENT
                     </div>
 
-                    {/* 액션 버튼 세트 */}
+                    {/* 액션 버튼 세트 (모바일 2x2 그리드 적용) */}
                     {step === 5 && (
-                        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 no-print">
-                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-6 md:py-7 bg-slate-900 text-white rounded-[2rem] md:rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-6 md:py-7 bg-blue-600 text-white rounded-[2rem] md:rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-6 md:py-7 bg-yellow-500 text-slate-900 rounded-[2rem] md:rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-6 md:py-7 bg-emerald-600 text-white rounded-[2rem] md:rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-slate-900 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-blue-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={handleShare} disabled={isSharing} className="h-[64px] md:h-auto py-4 md:py-7 bg-yellow-500 text-slate-900 rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl flex items-center justify-center gap-1 break-keep">{isSharing ? '⌛ 생성중' : '💬 결과 공유'}</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[64px] md:h-auto py-4 md:py-7 bg-emerald-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
                         </div>
                     )}
 
@@ -392,21 +389,21 @@
                                     </p>
                                 </section>
 
-                                {/* [핵심 강화] 완전 무료 외부 권위 사이트 연결 섹션 */}
+                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 */}
                                 <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <a href="https://en.wikipedia.org/wiki/Analytic_hierarchy_process" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                    <a href="https://ko.wikipedia.org/wiki/%EA%B3%84%EC%Beng%99%ED%99%94_%EB%B6%84%EC%84%9D_%EA%B3%BC%EC%A0%95" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
                                         <h4 className="font-black text-xl mb-4 flex items-center gap-2">
-                                            📚 위키백과: AHP 상세 정의 (무료)
+                                            📚 위키백과: AHP 상세 정의
                                             <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
                                         </h4>
-                                        <p className="text-base text-slate-500 font-medium">AHP의 수학적 배경과 역사, 다양한 응용 사례에 대한 학술적 정의를 구독 없이 확인하세요.</p>
+                                        <p className="text-base text-slate-500 font-medium">AHP의 수학적 배경과 역사, 다양한 응용 사례에 대한 학술적 정의를 무료로 확인하세요.</p>
                                     </a>
-                                    <a href="https://www.mindtools.com/pages/article/newTED_03.htm" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                    <a href="https://www.sciencedirect.com/topics/social-sciences/analytic-hierarchy-process" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
                                         <h4 className="font-black text-xl mb-4 flex items-center gap-2">
-                                            💡 MindTools: 의사결정 매트릭스 가이드
+                                            🔬 ScienceDirect: AHP 연구 동향
                                             <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
                                         </h4>
-                                        <p className="text-base text-slate-500 font-medium">AHP와 유사한 다기준 의사결정 기법을 실무에 적용하는 방법을 다룬 무료 교육 콘텐츠입니다.</p>
+                                        <p className="text-base text-slate-500 font-medium">글로벌 학술 데이터베이스에서 제공하는 AHP의 최신 연구 사례와 이론적 심화 내용을 확인하세요.</p>
                                     </a>
                                 </section>
 
