@@ -8,12 +8,12 @@
     <title>비용-편익 분석(CBA) 도구 | 경제적 타당성 및 B/C 비율 진단 | 파란랩(Paran Lab)</title>
     <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. 쥘 뒤피의 이론을 바탕으로 B/C 비율을 계산하여 프로젝트의 경제적 타당성을 과학적으로 검토합니다.">
     <meta name="keywords" content="비용편익분석, CBA, BC비율, 경제적타당성, 의사결정모델, 쥘뒤피, 사업타당성, 파란랩, 의사결정과학">
-    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.6">
+    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.7">
     <meta property="og:description" content="숫자로 증명하는 합리적 선택. 비용-편익 분석으로 당신의 결정에 경제적 근거를 더하세요.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
     
-    <!-- 라이브러리 로드 -->
+    <!-- 라이브러리 로드 (안정적인 CDN 사용) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -34,12 +34,21 @@
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root">
+        <!-- 로딩 중 표시 -->
+        <div class="flex items-center justify-center min-h-screen">
+            <div class="text-center">
+                <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                <p class="text-slate-500 font-bold">분석 엔진을 가동 중입니다...</p>
+            </div>
+        </div>
+    </div>
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.8.7] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "민수의 내 집 마련 경제성 분석",
             costs: [
@@ -61,6 +70,7 @@
             const [step, setStep] = useState(4); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [가드 1] 초강력 방어적 데이터 로드
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -68,18 +78,26 @@
                         if (saved && saved !== "null" && saved !== "undefined") {
                             const parsed = JSON.parse(saved);
                             if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+                                // 내부 배열 구조까지 검증
+                                const validatedCosts = Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs;
+                                const validatedBenefits = Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits;
+                                
                                 setData({
                                     subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
-                                    costs: Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs,
-                                    benefits: Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits,
+                                    costs: validatedCosts,
+                                    benefits: validatedBenefits,
                                     scenarioContext: parsed.scenarioContext || null,
                                     isDefault: false
                                 });
                             }
                         }
-                    } catch (e) { console.error(e); }
-                    finally { setIsLoaded(true); }
-                }, 500);
+                    } catch (e) {
+                        console.error("Data Validation Failed:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    } finally {
+                        setIsLoaded(true);
+                    }
+                }, 600); // 지연 시간 소폭 증가로 안정성 확보
                 return () => clearTimeout(timer);
             }, []);
 
@@ -89,13 +107,16 @@
                 }
             }, [data, isLoaded]);
 
+            // [가드 2] 연산 엔진 안전성 확보
             const results = useMemo(() => {
-                const safeCosts = Array.isArray(data.costs) ? data.costs : [];
-                const safeBenefits = Array.isArray(data.benefits) ? data.benefits : [];
-                const totalCost = safeCosts.reduce((a, b) => a + Number(b.value || 0), 0);
-                const totalBenefit = safeBenefits.reduce((a, b) => a + Number(b.value || 0), 0);
-                const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
-                return { totalCost, totalBenefit, ratio };
+                try {
+                    const totalCost = (data.costs || []).reduce((a, b) => a + Number(b.value || 0), 0);
+                    const totalBenefit = (data.benefits || []).reduce((a, b) => a + Number(b.value || 0), 0);
+                    const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
+                    return { totalCost, totalBenefit, ratio };
+                } catch (e) {
+                    return { totalCost: 0, totalBenefit: 0, ratio: "0.00" };
+                }
             }, [data]);
 
             const handleShare = async () => {
@@ -131,7 +152,7 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Economic Science</p>
-                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.6</p>
+                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.7</p>
                         </div>
                     </div>
 
@@ -147,6 +168,7 @@
                     <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">ADVERTISEMENT</div>
 
                     <div id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
                                 <span className="bg-blue-600 text-white px-4 py-1 md:px-6 md:py-2 rounded-full text-[10px] md:text-xs font-black animate-bounce shadow-lg">💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}</span>
@@ -244,14 +266,14 @@
                         </div>
                     )}
 
-                    {/* [v7.8.6] 학술적 배경 및 실전 가이드 대폭 보강 (1,500자 이상) */}
+                    {/* [v7.8.7] 학술적 배경 및 실전 가이드 대폭 보강 (2,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택을 위한 경제적 나침반</h1>
                             
                             <div className="space-y-12 text-lg md:text-xl text-slate-600 leading-relaxed">
                                 <section>
-                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 비용-편익 분석(CBA)의 정의와 역사</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 비용-편익 분석(CBA)의 정의와 역사적 배경</h2>
                                     <p>
                                         <strong>비용-편익 분석(Cost-Benefit Analysis)</strong>은 특정 결정이나 프로젝트에서 발생하는 모든 비용과 그로 인해 얻게 되는 모든 편익을 화폐 단위로 환산하여 비교하는 체계적인 기법입니다. 이 방법론의 학술적 뿌리는 19세기 프랑스 경제학자 <strong>쥘 뒤피(Jules Dupuit)</strong>가 공공사업의 사회적 가치를 측정하기 위해 제안한 이론에 있습니다. 이후 20세기 중반 미국 수자원 개발 사업의 타당성 검토를 위해 본격적으로 도입되면서 현대 경영과 행정의 필수 도구로 자리 잡았습니다.
                                     </p>
@@ -261,12 +283,12 @@
                                 </section>
 
                                 <section className="bg-blue-50 p-8 md:p-12 rounded-[3rem] border-2 border-blue-100">
-                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. B/C 비율(Benefit-Cost Ratio)의 정밀 해석</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. B/C 비율(Benefit-Cost Ratio)의 정밀 해석 가이드</h2>
                                     <p className="mb-6">CBA의 가장 대표적인 평가지표는 <strong>B/C 비율</strong>입니다. 이는 총 편익을 총 비용으로 나눈 값으로, 다음과 같이 해석합니다.</p>
                                     <ul className="space-y-6">
-                                        <li><strong>B/C > 1.0:</strong> 경제적 타당성이 충분함. 투입한 1원의 비용보다 1원 이상의 가치가 창출됨을 의미합니다. 비율이 높을수록 사업의 효율성이 우수합니다.</li>
-                                        <li><strong>B/C = 1.0:</strong> 손익분기점(Break-even Point). 비용과 편익이 동일하여 경제적 이득이 중립적인 상태입니다. 이 경우 정성적 요인이 최종 결정의 열쇠가 됩니다.</li>
-                                        <li><strong>B/C < 1.0:</strong> 경제적 타당성이 없음. 투입되는 자원 대비 얻는 가치가 적으므로 프로젝트의 전면 재검토나 중단이 필요합니다.</li>
+                                        <li><strong>B/C > 1.0 (경제적 타당성 충분):</strong> 투입한 1원의 비용보다 1원 이상의 가치가 창출됨을 의미합니다. 비율이 높을수록 사업의 효율성이 우수하며, 일반적으로 1.2 이상일 때 매우 안정적인 사업으로 평가합니다.</li>
+                                        <li><strong>B/C = 1.0 (손익분기점):</strong> 비용과 편익이 동일하여 경제적 이득이 중립적인 상태입니다. 이 경우 전략적 필요성이나 사회적 가치 등 정성적 요인이 최종 결정의 열쇠가 됩니다.</li>
+                                        <li><strong>B/C < 1.0 (경제적 타당성 부족):</strong> 투입되는 자원 대비 얻는 가치가 적으므로 프로젝트의 전면 재검토나 중단이 필요합니다. 다만, 공공 서비스의 경우 B/C가 낮더라도 공익을 위해 추진되는 예외 사례가 있습니다.</li>
                                     </ul>
                                 </section>
 
@@ -281,13 +303,13 @@
                                 </section>
 
                                 <section>
-                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">4. 분석 시 주의사항: 민감도 분석</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">4. 분석 시 주의사항: 민감도 분석(Sensitivity Analysis)</h2>
                                     <p>
-                                        CBA 결과는 입력한 데이터의 정확성에 의존합니다. 따라서 '비용이 10% 증가한다면?' 혹은 '편익이 예상보다 20% 낮다면?'과 같은 시나리오를 가정하는 <strong>민감도 분석(Sensitivity Analysis)</strong>을 병행해야 합니다. 파란랩 도구의 슬라이더를 조절하며 결과값의 변화를 관찰하는 과정이 바로 이 민감도 분석의 실천입니다.
+                                        CBA 결과는 입력한 데이터의 정확성에 의존합니다. 따라서 '비용이 10% 증가한다면?' 혹은 '편익이 예상보다 20% 낮다면?'과 같은 시나리오를 가정하는 <strong>민감도 분석</strong>을 병행해야 합니다. 파란랩 도구의 슬라이더를 조절하며 결과값의 변화를 관찰하는 과정이 바로 이 민감도 분석의 실천입니다. 이를 통해 최악의 상황에서도 의사결정이 유효한지 검증할 수 있습니다.
                                     </p>
                                 </section>
 
-                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 (Investopedia 제외) */}
+                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 */}
                                 <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <a href="https://en.wikipedia.org/wiki/Cost%E2%80%93benefit_analysis" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
                                         <h4 className="font-black text-xl mb-4 flex items-center gap-2">
@@ -312,6 +334,7 @@
                                         <li>• Dupuit, J. (1844). "On the Measurement of the Utility of Public Works". <em>Annales des Ponts et Chaussées</em>.</li>
                                         <li>• Mishan, E. J., & Quah, E. (2007). <em>Cost-Benefit Analysis</em>. Routledge.</li>
                                         <li>• Nas, T. F. (1996). <em>Cost-Benefit Analysis: Theory and Application</em>. SAGE Publications.</li>
+                                        <li>• Brent, R. J. (2006). <em>Applied Cost-Benefit Analysis</em>. Edward Elgar Publishing.</li>
                                     </ul>
                                 </section>
                             </div>
@@ -329,6 +352,7 @@
             );
         }
 
+        // React 18 마운트 방식 (가장 안전한 형태)
         const rootElement = document.getElementById('root');
         if (rootElement) {
             const root = ReactDOM.createRoot(rootElement);
