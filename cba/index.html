@@ -8,7 +8,7 @@
     <title>비용-편익 분석(CBA) 도구 | 경제적 타당성 및 B/C 비율 진단 | 파란랩(Paran Lab)</title>
     <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. 쥘 뒤피의 이론을 바탕으로 B/C 비율을 계산하여 프로젝트의 경제적 타당성을 과학적으로 검토합니다.">
     <meta name="keywords" content="비용편익분석, CBA, BC비율, 경제적타당성, 의사결정모델, 쥘뒤피, 사업타당성, 파란랩, 의사결정과학">
-    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.3">
+    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.4">
     <meta property="og:description" content="숫자로 증명하는 합리적 선택. 비용-편익 분석으로 당신의 결정에 경제적 근거를 더하세요.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
@@ -56,7 +56,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.8.3] 기본 샘플 데이터 (민수의 내 집 마련)
+        // [v7.8.4] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "민수의 내 집 마련 경제성 분석",
             costs: [
@@ -78,18 +78,27 @@
             const [step, setStep] = useState(4); // 결과 우선 노출
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [v7.8.3] 데이터 로드 및 시나리오 연동
+            // [v7.8.4] 방어적 데이터 로드 로직 강화
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
                         const saved = localStorage.getItem('paranlab-cba');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            setData({ ...parsed, isDefault: false });
+                            setData({
+                                subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
+                                costs: Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs,
+                                benefits: Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits,
+                                scenarioContext: parsed.scenarioContext || null,
+                                isDefault: false
+                            });
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) { 
+                        console.error("Init Error:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -134,7 +143,7 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [v7.8.3] 마스터 컨트롤 바 */}
+                    {/* [v7.8.4] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4 w-full md:w-auto">
                             <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
@@ -142,7 +151,7 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Economic Science</p>
-                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.3</p>
+                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.4</p>
                         </div>
                     </div>
 
@@ -276,7 +285,7 @@
                         </div>
                     )}
 
-                    {/* [v7.8.3] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
+                    {/* [v7.8.4] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택을 위한 경제적 나침반</h1>
