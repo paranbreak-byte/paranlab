@@ -8,25 +8,12 @@
     <title>비용-편익 분석(CBA) 도구 | 경제적 타당성 및 B/C 비율 진단 | 파란랩(Paran Lab)</title>
     <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. 쥘 뒤피의 이론을 바탕으로 B/C 비율을 계산하여 프로젝트의 경제적 타당성을 과학적으로 검토합니다.">
     <meta name="keywords" content="비용편익분석, CBA, BC비율, 경제적타당성, 의사결정모델, 쥘뒤피, 사업타당성, 파란랩, 의사결정과학">
-    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.4">
+    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.5">
     <meta property="og:description" content="숫자로 증명하는 합리적 선택. 비용-편익 분석으로 당신의 결정에 경제적 근거를 더하세요.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
     
-    <!-- [구조화 데이터 표준] -->
-    <script type="application/ld+json">
-    {
-      "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 CBA 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "비용과 편익을 정량화하여 B/C 비율을 산출하고 의사결정의 경제적 타당성을 평가하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
-    }
-    </script>
-
-    <!-- 라이브러리 로드 -->
+    <!-- 라이브러리 로드 (CDN) -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -38,25 +25,22 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        
-        /* 모바일 터치 최적화 슬라이더 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 12px; cursor: pointer; background: #e2e8f0; border-radius: 6px; }
         input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        
         @media print { .no-print { display: none; } }
         .break-keep { word-break: keep-all; }
     </style>
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root"></div>
+    <div id="root"></div> <!-- React 마운트 포인트 -->
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.8.4] 기본 샘플 데이터
+        // [v7.8.5] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "민수의 내 집 마련 경제성 분석",
             costs: [
@@ -78,37 +62,48 @@
             const [step, setStep] = useState(4); // 결과 우선 노출
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [v7.8.4] 방어적 데이터 로드 로직 강화
+            // 데이터 로드 로직 (초강력 방어적 코딩)
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
                         const saved = localStorage.getItem('paranlab-cba');
-                        if (saved) {
+                        if (saved && saved !== "undefined") {
                             const parsed = JSON.parse(saved);
-                            setData({
-                                subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
-                                costs: Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs,
-                                benefits: Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits,
-                                scenarioContext: parsed.scenarioContext || null,
-                                isDefault: false
-                            });
-                        } else {
-                            setData(DEFAULT_TOOL_SAMPLE);
+                            if (parsed && typeof parsed === 'object') {
+                                setData({
+                                    subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
+                                    costs: Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs,
+                                    benefits: Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits,
+                                    scenarioContext: parsed.scenarioContext || null,
+                                    isDefault: false
+                                });
+                            }
                         }
-                    } catch (e) { 
-                        console.error("Init Error:", e);
-                        setData(DEFAULT_TOOL_SAMPLE);
+                    } catch (e) {
+                        console.error("Data Load Error:", e);
+                    } finally {
+                        setIsLoaded(true);
                     }
-                    setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
             }, []);
 
+            // 데이터 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-cba', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
+
+            // 연산 엔진 (안전한 reduce 처리)
+            const results = useMemo(() => {
+                const safeCosts = Array.isArray(data.costs) ? data.costs : [];
+                const safeBenefits = Array.isArray(data.benefits) ? data.benefits : [];
+                const totalCost = safeCosts.reduce((a, b) => a + Number(b.value || 0), 0);
+                const totalBenefit = safeBenefits.reduce((a, b) => a + Number(b.value || 0), 0);
+                const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
+                return { totalCost, totalBenefit, ratio };
+            }, [data]);
 
             const handleShare = async () => {
                 const element = document.getElementById('report-card');
@@ -131,19 +126,11 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            // [원본 로직 보존] CBA 연산 엔진
-            const results = useMemo(() => {
-                const totalCost = (data.costs || []).reduce((a, b) => a + Number(b.value || 0), 0);
-                const totalBenefit = (data.benefits || []).reduce((a, b) => a + Number(b.value || 0), 0);
-                const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
-                return { totalCost, totalBenefit, ratio };
-            }, [data]);
-
             if (!isLoaded) return null;
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [v7.8.4] 마스터 컨트롤 바 */}
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4 w-full md:w-auto">
                             <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
@@ -151,7 +138,7 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Economic Science</p>
-                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.4</p>
+                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.5</p>
                         </div>
                     </div>
 
@@ -190,7 +177,6 @@
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-2xl md:text-4xl font-black text-slate-900 text-center">비용(Costs) 항목 입력</h2>
-                                <p className="text-center text-slate-500 font-medium break-keep">투입되는 모든 금전적, 시간적, 심리적 비용을 입력하세요.</p>
                                 <div className="space-y-4">
                                     {data.costs.map((c, i) => (
                                         <div key={c.id} className="p-6 md:p-8 bg-rose-50 rounded-[2rem] md:rounded-[2.5rem] border border-rose-100 space-y-6">
@@ -211,7 +197,6 @@
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
                                 <h2 className="text-2xl md:text-4xl font-black text-slate-900 text-center">편익(Benefits) 항목 입력</h2>
-                                <p className="text-center text-slate-500 font-medium break-keep">얻게 될 모든 수익, 절감액, 유무형의 가치를 입력하세요.</p>
                                 <div className="space-y-4">
                                     {data.benefits.map((b, i) => (
                                         <div key={b.id} className="p-6 md:p-8 bg-emerald-50 rounded-[2rem] md:rounded-[2.5rem] border border-emerald-100 space-y-6">
@@ -285,7 +270,7 @@
                         </div>
                     )}
 
-                    {/* [v7.8.4] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
+                    {/* [v7.8.5] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택을 위한 경제적 나침반</h1>
@@ -362,8 +347,12 @@
             );
         }
 
-        const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(CbaApp));
+        // React 18 마운트 방식 (가장 안전한 형태)
+        const rootElement = document.getElementById('root');
+        if (rootElement) {
+            const root = ReactDOM.createRoot(rootElement);
+            root.render(React.createElement(CbaApp));
+        }
     </script>
 </body>
 </html>
