@@ -3,10 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- [SEO 표준] -->
     <title>여섯 색깔 모자 사고법 | 다각도 관점 분석 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="에드워드 드 보노의 여섯 색깔 모자 기법으로 편향 없는 의사결정을 내리세요. 6가지 관점을 과학적으로 통합합니다.">
+    <meta name="description" content="에드워드 드 보노의 여섯 색깔 모자 기법으로 편향 없는 의사결정을 내리세요. 사실, 감정, 비판, 낙관, 창의, 조절의 6가지 관점을 과학적으로 통합하여 최적의 결론을 도출합니다.">
+    <meta name="keywords" content="여섯색깔모자, SixThinkingHats, 에드워드드보노, 수평적사고, 창의적의사결정, 회의기법, 파란랩, 의사결정과학">
+    <meta property="og:title" content="파란랩 여섯 색깔 모자 분석 엔진 v7.8.3">
+    <meta property="og:description" content="한 번에 하나의 모자만 쓰세요. 복잡한 문제를 해결하는 가장 명쾌한 병렬적 사고법.">
+    <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🎩</text></svg>">
     
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 여섯 색깔 모자 분석 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "description": "여섯 가지 색상의 모자를 번갈아 쓰며 서로 다른 관점에서 문제를 분석하고 통합하는 의사결정 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -20,6 +40,7 @@
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         .hat-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
         @media print { .no-print { display: none; } }
+        .break-keep { word-break: keep-all; }
     </style>
 </head>
 <body>
@@ -30,6 +51,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.8.3] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "사내 카페테리아 신설 안건",
             hats: {
@@ -55,9 +77,10 @@
         function SixHatsApp() {
             const [isLoaded, setIsLoaded] = useState(false);
             const [isSharing, setIsSharing] = useState(false);
-            const [step, setStep] = useState(5); 
+            const [step, setStep] = useState(5); // 결과 우선 노출
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [v7.8.3] 데이터 로드 및 시나리오 연동
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -68,7 +91,7 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Init Error:", e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -104,33 +127,36 @@
             if (!isLoaded) return null;
 
             const renderInput = (key) => (
-                <div className={`p-8 rounded-[3rem] ${HAT_CONFIGS[key].c} ${HAT_CONFIGS[key].t} shadow-xl hat-card`}>
-                    <h3 className="font-black text-2xl mb-2">{HAT_CONFIGS[key].icon} {HAT_CONFIGS[key].n}</h3>
-                    <p className="text-sm mb-6 font-bold opacity-80">{HAT_CONFIGS[key].q}</p>
+                <div className={`p-6 md:p-8 rounded-[2.5rem] md:rounded-[3rem] ${HAT_CONFIGS[key].c} ${HAT_CONFIGS[key].t} shadow-xl hat-card`}>
+                    <h3 className="font-black text-xl md:text-2xl mb-2">{HAT_CONFIGS[key].icon} {HAT_CONFIGS[key].n}</h3>
+                    <p className="text-xs md:text-sm mb-4 md:mb-6 font-bold opacity-80">{HAT_CONFIGS[key].q}</p>
                     <textarea 
                         value={data.hats[key]} 
                         onChange={e => setData({...data, hats: {...data.hats, [key]: e.target.value}, isDefault: false})}
-                        className="w-full h-40 p-6 bg-black/5 rounded-[2rem] border-none outline-none text-lg font-bold shadow-inner"
+                        className="w-full h-32 md:h-40 p-4 md:p-6 bg-black/5 rounded-[1.5rem] md:rounded-[2rem] border-none outline-none text-base md:text-lg font-bold shadow-inner"
+                        placeholder="내용을 입력하세요..."
                     />
                 </div>
             );
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [v7.8.3] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-6hats'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-6hats'); location.reload();}} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-red-500 transition-all break-keep">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Creative Science</p>
-                            <p className="font-bold text-sm">PARAN LAB 6HATS v7.8.1</p>
+                            <p className="font-bold text-sm">PARAN LAB 6HATS v7.8.3</p>
                         </div>
                     </div>
 
-                    <nav className="flex justify-center gap-4 md:gap-8 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto whitespace-nowrap">
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-center gap-4 md:gap-8 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto pb-4 scrollbar-hide">
                         {['주제', '사실/감정', '위험/이익', '창의/결론', '리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                            <div key={i} className={`whitespace-nowrap pb-2 text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
@@ -141,10 +167,11 @@
                         ADVERTISEMENT
                     </div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                    <div id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 md:px-6 md:py-2 rounded-full text-[10px] md:text-xs font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
@@ -152,51 +179,52 @@
 
                         {step === 1 && (
                             <div className="animate-in fade-in space-y-8">
-                                <h2 className="text-4xl font-black text-slate-900 text-center">분석할 주제를 입력하세요</h2>
-                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all" placeholder="예: 사내 카페테리아 신설 안건" />
+                                <h2 className="text-3xl md:text-4xl font-black text-slate-900 text-center">분석할 주제를 입력하세요</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-6 md:p-8 bg-slate-50 rounded-[2rem] md:rounded-[2.5rem] border-none outline-none text-xl md:text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all" placeholder="예: 사내 카페테리아 신설 안건" />
                                 <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계</button>
                             </div>
                         )}
 
                         {step === 2 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{renderInput('white')}{renderInput('red')}</div>
-                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음</button></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">{renderInput('white')}{renderInput('red')}</div>
+                                <div className="flex gap-4 md:gap-6"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-lg">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음</button></div>
                             </div>
                         )}
 
                         {step === 3 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{renderInput('black')}{renderInput('yellow')}</div>
-                                <div className="flex gap-4"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음</button></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">{renderInput('black')}{renderInput('yellow')}</div>
+                                <div className="flex gap-4 md:gap-6"><button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-lg">이전</button><button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음</button></div>
                             </div>
                         )}
 
                         {step === 4 && (
                             <div className="animate-in fade-in space-y-8">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">{renderInput('green')}{renderInput('blue')}</div>
-                                <div className="flex gap-4"><button onClick={() => setStep(3)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">리포트 생성</button></div>
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 md:gap-8">{renderInput('green')}{renderInput('blue')}</div>
+                                <div className="flex gap-4 md:gap-6"><button onClick={() => setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-lg">이전</button><button onClick={() => setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">리포트 생성</button></div>
                             </div>
                         )}
 
                         {step === 5 && (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">6 Hats Parallel Thinking Report</span>
-                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">{data.subject}</h2>
+                                <div className="text-center mb-12 md:mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 md:px-8 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest">6 Hats Parallel Thinking Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 md:mt-8 tracking-tight break-keep">{data.subject}</h2>
                                 </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6 mb-12">
                                     {Object.keys(HAT_CONFIGS).map(key => (
-                                        <div key={key} className={`p-8 rounded-[3rem] ${HAT_CONFIGS[key].c} ${HAT_CONFIGS[key].t} shadow-lg relative overflow-hidden hat-card`}>
-                                            <div className="absolute -top-4 -right-4 text-6xl opacity-10 font-black">{HAT_CONFIGS[key].icon}</div>
-                                            <h3 className="font-black text-xl mb-1">{HAT_CONFIGS[key].n}</h3>
-                                            <p className="text-sm font-bold leading-relaxed whitespace-pre-wrap min-h-[100px]">{data.hats[key] || "기록 없음"}</p>
+                                        <div key={key} className={`p-6 md:p-8 rounded-[2rem] md:rounded-[3rem] ${HAT_CONFIGS[key].c} ${HAT_CONFIGS[key].t} shadow-lg relative overflow-hidden hat-card`}>
+                                            <div className="absolute -top-4 -right-4 text-6xl md:text-7xl opacity-10 font-black">{HAT_CONFIGS[key].icon}</div>
+                                            <h3 className="font-black text-lg md:text-xl mb-2">{HAT_CONFIGS[key].n}</h3>
+                                            <p className="text-sm md:text-base font-bold leading-relaxed whitespace-pre-wrap min-h-[80px] md:min-h-[100px] break-keep">{data.hats[key] || "기록 없음"}</p>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
-                                    <h3 className="text-2xl font-black mb-4">종합적 의사결정 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">여섯 가지 관점의 병렬적 사고를 통해 리스크를 점검하고 가치를 극대화했습니다. 파란 모자의 결론을 바탕으로 실행 계획을 수립하십시오.</p>
+                                <div className="p-8 md:p-12 bg-slate-900 text-white rounded-[3rem] md:rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💡</div>
+                                    <h3 className="text-xl md:text-2xl font-black mb-4">종합적 의사결정 제언</h3>
+                                    <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">여섯 가지 관점의 병렬적 사고를 통해 리스크를 점검하고 가치를 극대화했습니다. 파란 모자의 결론을 바탕으로 실행 계획을 수립하십시오.</p>
                                 </div>
                             </div>
                         )}
@@ -207,46 +235,95 @@
                         ADVERTISEMENT
                     </div>
 
-                    {/* 액션 버튼 세트 */}
+                    {/* 액션 버튼 세트 (모바일 2x2 그리드 적용) */}
                     {step === 5 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-slate-900 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-blue-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={handleShare} disabled={isSharing} className="h-[64px] md:h-auto py-4 md:py-7 bg-yellow-500 text-slate-900 rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl flex items-center justify-center gap-1 break-keep">{isSharing ? '⌛ 생성중' : '💬 결과 공유'}</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[64px] md:h-auto py-4 md:py-7 bg-emerald-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [v7.8.3] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">여섯 색깔 모자: 병렬적 사고의 과학</h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    여섯 색깔 모자(Six Thinking Hats)는 창의적 사고의 대가 <strong>에드워드 드 보노(Edward de Bono)</strong>가 개발한 기법입니다. 인간의 뇌가 한 번에 논리, 감정, 비판, 창의를 동시에 처리하려 할 때 발생하는 혼란을 방지하기 위해, 의도적으로 한 번에 한 가지 관점만 갖도록 강제하는 '병렬적 사고(Parallel Thinking)' 방법론입니다.
-                                </p>
-                                <p>
-                                    각 모자는 고유한 사고 방식을 상징합니다:
-                                    1. <strong>하얀 모자:</strong> 객관적인 사실과 데이터에만 집중합니다.
-                                    2. <strong>빨간 모자:</strong> 직관, 감정, 느낌을 자유롭게 표현합니다. 논리적 근거는 필요 없습니다.
-                                    3. <strong>검은 모자:</strong> 비판적 시각으로 리스크, 약점, 잠재적 위험을 찾아냅니다.
-                                    4. <strong>노란 모자:</strong> 낙관적 시각으로 이익, 가치, 성공 가능성을 탐색합니다.
-                                    5. <strong>초록 모자:</strong> 창의적 대안, 새로운 아이디어, 가능성을 제안합니다.
-                                    6. <strong>파란 모자:</strong> 전체 과정을 조절하고 결론을 도출하는 사회자 역할을 합니다.
-                                </p>
+                        <article className="prose prose-slate max-w-none">
+                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">여섯 색깔 모자: 병렬적 사고를 통한 의사결정의 혁신</h1>
+                            
+                            <div className="space-y-12 text-lg md:text-xl text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 여섯 색깔 모자(Six Thinking Hats)란 무엇인가?</h2>
+                                    <p>
+                                        <strong>여섯 색깔 모자</strong>는 창의적 사고의 대가 <strong>에드워드 드 보노(Edward de Bono)</strong>가 1985년 개발한 의사결정 및 토론 기법입니다. 이 방법론의 핵심은 인간의 뇌가 한 번에 논리, 감정, 비판, 창의를 동시에 처리하려 할 때 발생하는 인지적 혼란을 방지하는 데 있습니다.
+                                    </p>
+                                    <p>
+                                        참가자들은 의도적으로 한 번에 한 가지 색상의 모자만 '씀'으로써, 해당 관점에만 집중하는 <strong>'병렬적 사고(Parallel Thinking)'</strong>를 수행합니다. 이는 소모적인 논쟁을 줄이고, 문제의 모든 측면을 빠짐없이 검토하게 만드는 강력한 도구입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[3rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 각 모자의 상징과 역할</h2>
+                                    <ul className="space-y-6">
+                                        <li><strong>⚪ 하얀 모자 (Facts):</strong> 중립적이고 객관적인 데이터, 사실, 정보에만 집중합니다. "우리가 알고 있는 사실은 무엇인가?"</li>
+                                        <li><strong>🔴 빨간 모자 (Feelings):</strong> 직관, 감정, 느낌을 자유롭게 표현합니다. 논리적 근거 없이도 "내 느낌은 이렇다"라고 말할 수 있는 유일한 단계입니다.</li>
+                                        <li><strong>⚫ 검은 모자 (Caution):</strong> 비판적 시각으로 잠재적 위험, 리스크, 약점을 찾아냅니다. 생존을 위한 가장 중요한 모자입니다.</li>
+                                        <li><strong>🟡 노란 모자 (Benefits):</strong> 낙관적 시각으로 이익, 가치, 성공 가능성을 탐색합니다. "이 아이디어가 왜 좋은가?"에 집중합니다.</li>
+                                        <li><strong>🟢 초록 모자 (Creativity):</strong> 창의적 대안, 새로운 아이디어, 가능성을 제안합니다. 비판 없이 사고를 확장하는 단계입니다.</li>
+                                        <li><strong>🔵 파란 모자 (Process):</strong> 전체 과정을 조절하고 결론을 도출하는 사회자 역할을 합니다. 사고의 순서를 정하고 요약합니다.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 편향 없는 결론 도출</h2>
+                                    <p>
+                                        여섯 색깔 모자를 효과적으로 사용하려면 <strong>'모자 바꾸기'</strong>의 규칙을 엄격히 지켜야 합니다. 검은 모자 단계에서 아이디어를 내거나(초록 모자), 하얀 모자 단계에서 감정을 섞어서는 안 됩니다. 
+                                    </p>
+                                    <p>
+                                        특히 조직 내 회의에서 이 기법을 사용하면, 평소 비판만 하던 사람에게 '노란 모자'를 씌워 긍정적 가치를 찾게 하거나, 감정적인 사람에게 '하얀 모자'를 씌워 데이터에 집중하게 함으로써 개인의 성향에 매몰되지 않는 균형 잡힌 결론을 얻을 수 있습니다.
+                                    </p>
+                                </section>
+
+                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 */}
+                                <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <a href="https://en.wikipedia.org/wiki/Six_Thinking_Hats" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            📚 위키백과: 여섯 색깔 모자 상세 정의
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">여섯 색깔 모자 기법의 역사적 배경과 에드워드 드 보노의 사고 이론에 대한 학술적 정의를 무료로 확인하세요.</p>
+                                    </a>
+                                    <a href="https://www.mindtools.com/pages/article/newTED_07.htm" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            💡 MindTools: 6 Hats 실무 활용 가이드
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">실제 비즈니스 미팅이나 개인 의사결정에서 여섯 색깔 모자를 사용하는 구체적인 순서와 팁을 제공합니다.</p>
+                                    </a>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• De Bono, E. (1985). <em>Six Thinking Hats: An Essential Approach to Business Management</em>. Little, Brown and Company.</li>
+                                        <li>• De Bono, E. (1999). <em>Six Thinking Hats</em>. Penguin Books.</li>
+                                        <li>• Kivunja, C. (2015). "Using De Bono’s Six Thinking Hats Model to Teach Critical Thinking". <em>Creative Education</em>, 6(03), 380.</li>
+                                    </ul>
+                                </section>
                             </div>
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• De Bono, E. (1985). <em>Six Thinking Hats</em>. Little, Brown and Company.</li>
-                                    <li>• De Bono, E. (1970). <em>Lateral Thinking: Creativity Step by Step</em>. Harper & Row.</li>
-                                    <li>• Kivunja, C. (2015). "Using De Bono’s Six Thinking Hats Model to Teach Critical Thinking and Problem Solving Skills". <em>Creative Education</em>.</li>
-                                </ul>
-                            </div>
-                        </div>
+                        </article>
                     </section>
+                    
+                    {/* 패밀리 사이트 연결 (푸터 상단) */}
+                    <div className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 팩트 체크가 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all shadow-lg">
+                            🚀 팩트폭격연구소 바로가기
+                        </a>
+                    </div>
                 </main>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(SixHatsApp));
     </script>
