@@ -61,7 +61,6 @@
             const [step, setStep] = useState(4); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [v7.8.6] Null-Safe 데이터 로드 로직
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -78,11 +77,8 @@
                                 });
                             }
                         }
-                    } catch (e) { 
-                        console.error("Data Load Error:", e);
-                    } finally {
-                        setIsLoaded(true);
-                    }
+                    } catch (e) { console.error(e); }
+                    finally { setIsLoaded(true); }
                 }, 500);
                 return () => clearTimeout(timer);
             }, []);
@@ -127,6 +123,7 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4 w-full md:w-auto">
                             <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
@@ -138,6 +135,7 @@
                         </div>
                     </div>
 
+                    {/* 위저드 네비게이션 */}
                     <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200 overflow-x-auto pb-4 scrollbar-hide">
                         {['주제 정의', '비용 입력', '편익 입력', '최종 리포트'].map((name, i) => (
                             <div key={i} className={`whitespace-nowrap pb-2 text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
@@ -210,6 +208,7 @@
                                     <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 md:mt-8 tracking-tight break-keep">경제적 타당성 분석 결과</h2>
                                     <p className="mt-4 text-slate-400 font-bold text-lg md:text-xl break-keep">주제: {data.subject}</p>
                                 </div>
+                                
                                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 md:gap-8 mb-12">
                                     <div className="p-8 md:p-10 bg-rose-50 rounded-[2.5rem] text-center relative overflow-hidden">
                                         <h3 className="text-[10px] font-black text-rose-400 uppercase tracking-widest mb-4">Total Cost</h3>
@@ -245,30 +244,86 @@
                         </div>
                     )}
 
+                    {/* [v7.8.6] 학술적 배경 및 실전 가이드 대폭 보강 (1,500자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택을 위한 경제적 나침반</h1>
+                            
                             <div className="space-y-12 text-lg md:text-xl text-slate-600 leading-relaxed">
                                 <section>
-                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 비용-편익 분석(CBA)이란 무엇인가?</h2>
-                                    <p><strong>비용-편익 분석(Cost-Benefit Analysis)</strong>은 특정 결정이나 프로젝트에서 발생하는 모든 비용과 그로 인해 얻게 되는 모든 편익을 화폐 단위로 환산하여 비교하는 체계적인 기법입니다. 19세기 프랑스 경제학자 <strong>쥘 뒤피(Jules Dupuit)</strong>에 의해 기초가 마련되었습니다.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 비용-편익 분석(CBA)의 정의와 역사</h2>
+                                    <p>
+                                        <strong>비용-편익 분석(Cost-Benefit Analysis)</strong>은 특정 결정이나 프로젝트에서 발생하는 모든 비용과 그로 인해 얻게 되는 모든 편익을 화폐 단위로 환산하여 비교하는 체계적인 기법입니다. 이 방법론의 학술적 뿌리는 19세기 프랑스 경제학자 <strong>쥘 뒤피(Jules Dupuit)</strong>가 공공사업의 사회적 가치를 측정하기 위해 제안한 이론에 있습니다. 이후 20세기 중반 미국 수자원 개발 사업의 타당성 검토를 위해 본격적으로 도입되면서 현대 경영과 행정의 필수 도구로 자리 잡았습니다.
+                                    </p>
+                                    <p>
+                                        CBA의 핵심은 단순히 '얼마를 벌 것인가'를 넘어, '기회비용'을 포함한 모든 투입 자원과 '무형의 가치'를 포함한 모든 산출 결과를 하나의 저울 위에 올려놓는 것입니다. 이를 통해 감정적인 선호가 아닌, 데이터에 기반한 객관적인 타당성을 검토할 수 있습니다.
+                                    </p>
                                 </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[3rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. B/C 비율(Benefit-Cost Ratio)의 정밀 해석</h2>
+                                    <p className="mb-6">CBA의 가장 대표적인 평가지표는 <strong>B/C 비율</strong>입니다. 이는 총 편익을 총 비용으로 나눈 값으로, 다음과 같이 해석합니다.</p>
+                                    <ul className="space-y-6">
+                                        <li><strong>B/C > 1.0:</strong> 경제적 타당성이 충분함. 투입한 1원의 비용보다 1원 이상의 가치가 창출됨을 의미합니다. 비율이 높을수록 사업의 효율성이 우수합니다.</li>
+                                        <li><strong>B/C = 1.0:</strong> 손익분기점(Break-even Point). 비용과 편익이 동일하여 경제적 이득이 중립적인 상태입니다. 이 경우 정성적 요인이 최종 결정의 열쇠가 됩니다.</li>
+                                        <li><strong>B/C < 1.0:</strong> 경제적 타당성이 없음. 투입되는 자원 대비 얻는 가치가 적으므로 프로젝트의 전면 재검토나 중단이 필요합니다.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 정성적 요소의 수치화 기법</h2>
+                                    <p>
+                                        CBA를 수행할 때 가장 어려운 점은 '주거 안정성', '브랜드 가치', '시간 절약'과 같은 정성적 요소를 어떻게 계산하느냐입니다. 실무에서는 이를 위해 <strong>'가상 가치 평가법(CVM)'</strong>이나 <strong>'현시 선호 이론'</strong>을 활용합니다. 즉, "이 가치를 얻기 위해 당신은 기꺼이 얼마를 지불할 용의가 있는가?"를 기준으로 점수화하는 것입니다.
+                                    </p>
+                                    <p>
+                                        파란랩의 CBA 엔진은 사용자가 각 항목에 1~100 사이의 가중치 점수를 부여하게 함으로써, 복잡한 화폐 환산 과정을 직관적인 상대 비교 시스템으로 대체했습니다. 이를 통해 개인의 이사 결정부터 기업의 신규 프로젝트 투자까지 누구나 쉽게 경제성 분석을 수행할 수 있습니다.
+                                    </p>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">4. 분석 시 주의사항: 민감도 분석</h2>
+                                    <p>
+                                        CBA 결과는 입력한 데이터의 정확성에 의존합니다. 따라서 '비용이 10% 증가한다면?' 혹은 '편익이 예상보다 20% 낮다면?'과 같은 시나리오를 가정하는 <strong>민감도 분석(Sensitivity Analysis)</strong>을 병행해야 합니다. 파란랩 도구의 슬라이더를 조절하며 결과값의 변화를 관찰하는 과정이 바로 이 민감도 분석의 실천입니다.
+                                    </p>
+                                </section>
+
+                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 (Investopedia 제외) */}
                                 <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <a href="https://en.wikipedia.org/wiki/Cost%E2%80%93benefit_analysis" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
-                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">📚 위키백과: CBA 상세 정의 (무료) <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span></h4>
-                                        <p className="text-base text-slate-500 font-medium">비용-편익 분석의 역사적 배경과 수학적 모델링에 대한 학술적 정의를 확인하세요.</p>
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            📚 위키백과: CBA 상세 정의 (무료)
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">비용-편익 분석의 역사적 배경과 수학적 모델링, 그리고 한계점에 대한 학술적 정의를 확인하세요.</p>
                                     </a>
-                                    <a href="https://www.investopedia.com/terms/c/cost-benefit-analysis.asp" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
-                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">💰 Investopedia: CBA 실무 가이드 (무료) <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span></h4>
-                                        <p className="text-base text-slate-500 font-medium">금융 전문 백과사전에서 제공하는 CBA의 단계별 수행 방법과 실제 비즈니스 사례를 확인하세요.</p>
+                                    <a href="https://www.britannica.com/topic/cost-benefit-analysis" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            📖 브리태니커: 경제학적 CBA 가이드
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">세계적인 백과사전 브리태니커에서 제공하는 비용-편익 분석의 핵심 원리와 사회적 가치 측정법을 확인하세요.</p>
                                     </a>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Boardman, A. E., et al. (2017). <em>Cost-Benefit Analysis: Concepts and Practice</em>. Cambridge University Press.</li>
+                                        <li>• Dupuit, J. (1844). "On the Measurement of the Utility of Public Works". <em>Annales des Ponts et Chaussées</em>.</li>
+                                        <li>• Mishan, E. J., & Quah, E. (2007). <em>Cost-Benefit Analysis</em>. Routledge.</li>
+                                        <li>• Nas, T. F. (1996). <em>Cost-Benefit Analysis: Theory and Application</em>. SAGE Publications.</li>
+                                    </ul>
                                 </section>
                             </div>
                         </article>
                     </section>
+                    
+                    {/* 패밀리 사이트 연결 (푸터 상단) */}
                     <div className="mt-20 py-12 border-t border-slate-200 text-center no-print">
                         <p className="text-slate-400 font-bold mb-4">더 날카로운 팩트 체크가 필요하다면?</p>
-                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all shadow-lg">🚀 팩트폭격연구소 바로가기</a>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all shadow-lg">
+                            🚀 팩트폭격연구소 바로가기
+                        </a>
                     </div>
                 </main>
             );
