@@ -8,12 +8,12 @@
     <title>비용-편익 분석(CBA) 도구 | 경제적 타당성 및 B/C 비율 진단 | 파란랩(Paran Lab)</title>
     <meta name="description" content="투입되는 비용 대비 얻을 수 있는 편익을 수치화하여 합리적인 결정을 내리세요. 쥘 뒤피의 이론을 바탕으로 B/C 비율을 계산하여 프로젝트의 경제적 타당성을 과학적으로 검토합니다.">
     <meta name="keywords" content="비용편익분석, CBA, BC비율, 경제적타당성, 의사결정모델, 쥘뒤피, 사업타당성, 파란랩, 의사결정과학">
-    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.7">
+    <meta property="og:title" content="파란랩 CBA 경제적 타당성 분석 엔진 v7.8.8">
     <meta property="og:description" content="숫자로 증명하는 합리적 선택. 비용-편익 분석으로 당신의 결정에 경제적 근거를 더하세요.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📈</text></svg>">
     
-    <!-- 라이브러리 로드 (안정적인 CDN 사용) -->
+    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -34,21 +34,12 @@
 </head>
 <body>
     <div id="header-root"></div>
-    <div id="root">
-        <!-- 로딩 중 표시 -->
-        <div class="flex items-center justify-center min-h-screen">
-            <div class="text-center">
-                <div class="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                <p class="text-slate-500 font-bold">분석 엔진을 가동 중입니다...</p>
-            </div>
-        </div>
-    </div>
+    <div id="root"></div> <!-- React 마운트 포인트 -->
     <div id="footer-root"></div>
 
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.8.7] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             subject: "민수의 내 집 마련 경제성 분석",
             costs: [
@@ -70,35 +61,27 @@
             const [step, setStep] = useState(4); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [가드 1] 초강력 방어적 데이터 로드
+            // 데이터 로드 로직 (지연 시간 제거 및 안정성 극대화)
             useEffect(() => {
-                const timer = setTimeout(() => {
-                    try {
-                        const saved = localStorage.getItem('paranlab-cba');
-                        if (saved && saved !== "null" && saved !== "undefined") {
-                            const parsed = JSON.parse(saved);
-                            if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
-                                // 내부 배열 구조까지 검증
-                                const validatedCosts = Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs;
-                                const validatedBenefits = Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits;
-                                
-                                setData({
-                                    subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
-                                    costs: validatedCosts,
-                                    benefits: validatedBenefits,
-                                    scenarioContext: parsed.scenarioContext || null,
-                                    isDefault: false
-                                });
-                            }
+                try {
+                    const saved = localStorage.getItem('paranlab-cba');
+                    if (saved && saved !== "null" && saved !== "undefined") {
+                        const parsed = JSON.parse(saved);
+                        if (parsed && typeof parsed === 'object') {
+                            setData({
+                                subject: parsed.subject || DEFAULT_TOOL_SAMPLE.subject,
+                                costs: Array.isArray(parsed.costs) ? parsed.costs : DEFAULT_TOOL_SAMPLE.costs,
+                                benefits: Array.isArray(parsed.benefits) ? parsed.benefits : DEFAULT_TOOL_SAMPLE.benefits,
+                                scenarioContext: parsed.scenarioContext || null,
+                                isDefault: false
+                            });
                         }
-                    } catch (e) {
-                        console.error("Data Validation Failed:", e);
-                        setData(DEFAULT_TOOL_SAMPLE);
-                    } finally {
-                        setIsLoaded(true);
                     }
-                }, 600); // 지연 시간 소폭 증가로 안정성 확보
-                return () => clearTimeout(timer);
+                } catch (e) {
+                    console.error("Data Load Error:", e);
+                } finally {
+                    setIsLoaded(true); // 어떤 경우에도 로딩 해제
+                }
             }, []);
 
             useEffect(() => {
@@ -107,16 +90,13 @@
                 }
             }, [data, isLoaded]);
 
-            // [가드 2] 연산 엔진 안전성 확보
             const results = useMemo(() => {
-                try {
-                    const totalCost = (data.costs || []).reduce((a, b) => a + Number(b.value || 0), 0);
-                    const totalBenefit = (data.benefits || []).reduce((a, b) => a + Number(b.value || 0), 0);
-                    const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
-                    return { totalCost, totalBenefit, ratio };
-                } catch (e) {
-                    return { totalCost: 0, totalBenefit: 0, ratio: "0.00" };
-                }
+                const safeCosts = Array.isArray(data.costs) ? data.costs : [];
+                const safeBenefits = Array.isArray(data.benefits) ? data.benefits : [];
+                const totalCost = safeCosts.reduce((a, b) => a + Number(b.value || 0), 0);
+                const totalBenefit = safeBenefits.reduce((a, b) => a + Number(b.value || 0), 0);
+                const ratio = totalCost > 0 ? (totalBenefit / totalCost).toFixed(2) : "0.00";
+                return { totalCost, totalBenefit, ratio };
             }, [data]);
 
             const handleShare = async () => {
@@ -140,7 +120,14 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return (
+                <div className="flex items-center justify-center min-h-[60vh]">
+                    <div className="text-center">
+                        <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-slate-500 font-bold">데이터를 불러오는 중입니다...</p>
+                    </div>
+                </div>
+            );
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
@@ -152,7 +139,7 @@
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Economic Science</p>
-                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.7</p>
+                            <p className="font-bold text-sm">PARAN LAB CBA v7.8.8</p>
                         </div>
                     </div>
 
@@ -168,7 +155,6 @@
                     <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">ADVERTISEMENT</div>
 
                     <div id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
                                 <span className="bg-blue-600 text-white px-4 py-1 md:px-6 md:py-2 rounded-full text-[10px] md:text-xs font-black animate-bounce shadow-lg">💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}</span>
@@ -266,7 +252,7 @@
                         </div>
                     )}
 
-                    {/* [v7.8.7] 학술적 배경 및 실전 가이드 대폭 보강 (2,000자 이상) */}
+                    {/* [v7.8.8] 학술적 배경 및 실전 가이드 대폭 보강 (2,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">비용-편익 분석(CBA): 합리적 선택을 위한 경제적 나침반</h1>
@@ -334,7 +320,6 @@
                                         <li>• Dupuit, J. (1844). "On the Measurement of the Utility of Public Works". <em>Annales des Ponts et Chaussées</em>.</li>
                                         <li>• Mishan, E. J., & Quah, E. (2007). <em>Cost-Benefit Analysis</em>. Routledge.</li>
                                         <li>• Nas, T. F. (1996). <em>Cost-Benefit Analysis: Theory and Application</em>. SAGE Publications.</li>
-                                        <li>• Brent, R. J. (2006). <em>Applied Cost-Benefit Analysis</em>. Edward Elgar Publishing.</li>
                                     </ul>
                                 </section>
                             </div>
