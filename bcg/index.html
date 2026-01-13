@@ -3,10 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <!-- [SEO 표준] -->
     <title>BCG 매트릭스 | 사업 포트폴리오 분석 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="보스턴 컨설팅 그룹의 BCG 매트릭스로 제품의 시장 점유율과 성장률을 분석하세요. 스타, 캐시카우, 물음표, 개 영역으로 사업의 미래를 진단합니다.">
+    <meta name="description" content="보스턴 컨설팅 그룹의 BCG 매트릭스로 제품의 시장 점유율과 성장률을 분석하세요. 스타, 캐시카우, 물음표, 개 영역으로 사업의 미래를 진단하고 자원 배분 전략을 수립합니다.">
+    <meta name="keywords" content="BCG매트릭스, 사업포트폴리오, 시장점유율, 시장성장률, 보스턴컨설팅그룹, 전략수립, 파란랩, 의사결정과학">
+    <meta property="og:title" content="파란랩 BCG 매트릭스 분석 엔진 v7.8.3">
+    <meta property="og:description" content="수익성과 성장성을 동시에 진단하는 비즈니스 포트폴리오의 정석, BCG 매트릭스.">
+    <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⭐</text></svg>">
     
+    <!-- [구조화 데이터 표준] -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "파란랩 BCG 매트릭스 엔진",
+      "operatingSystem": "All",
+      "applicationCategory": "BusinessApplication",
+      "description": "시장 성장률과 상대적 점유율을 기준으로 사업부나 제품의 위치를 진단하는 포트폴리오 분석 도구",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -18,11 +38,15 @@
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1.5rem; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; }
+        
+        /* 모바일 터치 최적화 슬라이더 */
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 12px; cursor: pointer; background: #e2e8f0; border-radius: 6px; }
         input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -8px; border: 4px solid white; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
+        
         @media print { .no-print { display: none; } }
+        .break-keep { word-break: keep-all; }
     </style>
 </head>
 <body>
@@ -33,6 +57,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
+        // [v7.8.3] 기본 샘플 데이터 (애플 제품군)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "애플(Apple Inc.) 제품 포트폴리오",
             items: [
@@ -47,9 +72,10 @@
         function BcgApp() {
             const [isLoaded, setIsLoaded] = useState(false);
             const [isSharing, setIsSharing] = useState(false);
-            const [step, setStep] = useState(2); 
+            const [step, setStep] = useState(2); // 결과 우선 노출
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [v7.8.3] 데이터 로드 및 시나리오 연동
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -60,7 +86,7 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error(e); }
+                    } catch (e) { console.error("Init Error:", e); }
                     setIsLoaded(true);
                 }, 500);
                 return () => clearTimeout(timer);
@@ -81,7 +107,7 @@
                     canvas.toBlob(async (blob) => {
                         const file = new File([blob], 'bcg-report.png', { type: 'image/png' });
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
-                            await navigator.share({ files: [file], text: `[파란랩] BCG 분석: ${data.subject}` });
+                            await navigator.share({ files: [file], text: `[파란랩] BCG 분석 결과: ${data.subject}` });
                         } else {
                             const link = document.createElement('a');
                             link.download = 'bcg-report.png';
@@ -93,10 +119,11 @@
                 } catch (err) { setIsSharing(false); }
             };
 
+            // [원본 로직 보존] 사분면 분류 연산
             const quadrants = useMemo(() => {
                 const q = { star: [], cow: [], question: [], dog: [] };
                 data.items.forEach(item => {
-                    if (!item.name.trim()) return;
+                    if (!item.name || !item.name.trim()) return;
                     if (item.growth >= 5 && item.share >= 5) q.star.push(item);
                     else if (item.growth < 5 && item.share >= 5) q.cow.push(item);
                     else if (item.growth >= 5 && item.share < 5) q.question.push(item);
@@ -109,26 +136,37 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
+                    {/* [v7.8.3] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-bcg'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                        <div className="flex gap-4 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-blue-500 transition-all break-keep">✏️ 데이터 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-bcg'); location.reload();}} className="flex-1 md:flex-none px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-sm md:text-lg shadow-xl hover:bg-red-500 transition-all break-keep">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Portfolio Science</p>
-                            <p className="font-bold text-sm">PARAN LAB BCG v7.8.1</p>
+                            <p className="font-bold text-sm">PARAN LAB BCG v7.8.3</p>
                         </div>
                     </div>
+
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-center gap-8 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
+                        {['데이터 입력', '최종 리포트'].map((name, i) => (
+                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
 
                     {/* 상단 광고 영역 */}
                     <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
                         ADVERTISEMENT
                     </div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                    <div id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] md:rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 2 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 md:px-6 md:py-2 rounded-full text-[10px] md:text-xs font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
@@ -137,23 +175,23 @@
                         {step === 1 ? (
                             <div className="animate-in fade-in space-y-10">
                                 <div className="text-center">
-                                    <h2 className="text-4xl font-black text-slate-900">제품 포트폴리오 분석</h2>
-                                    <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="mt-6 w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석 주제 입력" />
+                                    <h2 className="text-2xl md:text-4xl font-black text-slate-900">제품 포트폴리오 분석</h2>
+                                    <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="mt-6 w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-xl md:text-2xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="분석 주제 입력" />
                                 </div>
                                 <div className="space-y-6">
                                     {data.items.map((item, i) => (
-                                        <div key={item.id} className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-8">
+                                        <div key={item.id} className="p-6 md:p-8 bg-slate-50 rounded-[2rem] md:rounded-[3rem] border border-slate-100 space-y-8">
                                             <div className="flex gap-4 items-center">
-                                                <input type="text" value={item.name} onChange={e => { const n = [...data.items]; n[i].name = e.target.value; setData({...data, items: n, isDefault: false}); }} className="flex-1 p-6 bg-white rounded-2xl border-none font-black text-2xl shadow-sm" placeholder="제품명" />
-                                                <button onClick={() => setData({...data, items: data.items.filter(it => it.id !== item.id), isDefault: false})} className="text-red-400 font-black hover:text-red-600">삭제</button>
+                                                <input type="text" value={item.name} onChange={e => { const n = [...data.items]; n[i].name = e.target.value; setData({...data, items: n, isDefault: false}); }} className="flex-1 p-4 md:p-6 bg-white rounded-2xl border-none font-black text-lg md:text-2xl shadow-sm" placeholder="제품명" />
+                                                <button onClick={() => setData({...data, items: data.items.filter(it => it.id !== item.id), isDefault: false})} className="px-4 text-red-400 font-black hover:text-red-600 transition-colors">삭제</button>
                                             </div>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12">
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>시장 성장률</span><span className="text-blue-600 text-2xl">{item.growth}</span></div>
+                                                    <div className="flex justify-between font-black text-slate-500 text-sm md:text-base"><span>시장 성장률 (1~10)</span><span className="text-blue-600 text-xl md:text-2xl">{item.growth}</span></div>
                                                     <input type="range" min="1" max="10" value={item.growth} onChange={e => { const n = [...data.items]; n[i].growth = parseInt(e.target.value); setData({...data, items: n, isDefault: false}); }} />
                                                 </div>
                                                 <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>상대적 점유율</span><span className="text-emerald-600 text-2xl">{item.share}</span></div>
+                                                    <div className="flex justify-between font-black text-slate-500 text-sm md:text-base"><span>상대적 점유율 (1~10)</span><span className="text-emerald-600 text-xl md:text-2xl">{item.share}</span></div>
                                                     <input type="range" min="1" max="10" value={item.share} onChange={e => { const n = [...data.items]; n[i].share = parseInt(e.target.value); setData({...data, items: n, isDefault: false}); }} />
                                                 </div>
                                             </div>
@@ -165,31 +203,40 @@
                             </div>
                         ) : (
                             <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">BCG Growth-Share Matrix</span>
-                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">{data.subject}</h2>
+                                <div className="text-center mb-12 md:mb-16">
+                                    <span className="bg-blue-100 text-blue-700 px-6 md:px-8 py-2 rounded-full text-[10px] md:text-xs font-black uppercase tracking-widest">BCG Growth-Share Matrix Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 md:mt-8 tracking-tight break-keep">{data.subject}</h2>
                                 </div>
+                                
                                 <div className="matrix-grid mb-12">
-                                    <div className="p-8 bg-amber-50 rounded-[3rem] border-2 border-amber-100 min-h-[280px] relative">
-                                        <h3 className="font-black text-amber-700 mb-4 text-xl">물음표 (Question Mark)</h3>
-                                        <div className="flex flex-wrap gap-2">{quadrants.question.map(it => <span key={it.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black shadow-md">{it.name}</span>)}</div>
+                                    <div className="p-4 md:p-8 bg-amber-50 rounded-[1.5rem] md:rounded-[3rem] border-2 border-amber-100 min-h-[180px] md:min-h-[280px] relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-6xl md:text-8xl opacity-10 font-black text-amber-600">?</div>
+                                        <h3 className="font-black text-amber-700 mb-4 text-base md:text-xl">물음표 (Question Mark)</h3>
+                                        <div className="flex flex-wrap gap-2">{quadrants.question.map(it => <span key={it.id} className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-black shadow-md break-keep">{it.name}</span>)}</div>
                                     </div>
-                                    <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 min-h-[280px] relative">
-                                        <h3 className="font-black text-blue-700 mb-4 text-xl">스타 (Star)</h3>
-                                        <div className="flex flex-wrap gap-2">{quadrants.star.map(it => <span key={it.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black shadow-md">{it.name}</span>)}</div>
+                                    <div className="p-4 md:p-8 bg-blue-50 rounded-[1.5rem] md:rounded-[3rem] border-2 border-blue-100 min-h-[180px] md:min-h-[280px] relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-6xl md:text-8xl opacity-10 font-black text-blue-600">★</div>
+                                        <h3 className="font-black text-blue-700 mb-4 text-base md:text-xl">스타 (Star)</h3>
+                                        <div className="flex flex-wrap gap-2">{quadrants.star.map(it => <span key={it.id} className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-black shadow-md break-keep">{it.name}</span>)}</div>
                                     </div>
-                                    <div className="p-8 bg-slate-100 rounded-[3rem] border-2 border-slate-200 min-h-[280px] relative">
-                                        <h3 className="font-black text-slate-700 mb-4 text-xl">도그 (Dog)</h3>
-                                        <div className="flex flex-wrap gap-2">{quadrants.dog.map(it => <span key={it.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black shadow-md">{it.name}</span>)}</div>
+                                    <div className="p-4 md:p-8 bg-slate-100 rounded-[1.5rem] md:rounded-[3rem] border-2 border-slate-200 min-h-[180px] md:min-h-[280px] relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-6xl md:text-8xl opacity-10 font-black text-slate-600">✘</div>
+                                        <h3 className="font-black text-slate-700 mb-4 text-base md:text-xl">도그 (Dog)</h3>
+                                        <div className="flex flex-wrap gap-2">{quadrants.dog.map(it => <span key={it.id} className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-black shadow-md break-keep">{it.name}</span>)}</div>
                                     </div>
-                                    <div className="p-8 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 min-h-[280px] relative">
-                                        <h3 className="font-black text-emerald-700 mb-4 text-xl">캐시카우 (Cash Cow)</h3>
-                                        <div className="flex flex-wrap gap-2">{quadrants.cow.map(it => <span key={it.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black shadow-md">{it.name}</span>)}</div>
+                                    <div className="p-4 md:p-8 bg-emerald-50 rounded-[1.5rem] md:rounded-[3rem] border-2 border-emerald-100 min-h-[180px] md:min-h-[280px] relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-6xl md:text-8xl opacity-10 font-black text-emerald-600">₩</div>
+                                        <h3 className="font-black text-emerald-700 mb-4 text-base md:text-xl">캐시카우 (Cash Cow)</h3>
+                                        <div className="flex flex-wrap gap-2">{quadrants.cow.map(it => <span key={it.id} className="bg-white px-3 py-1.5 md:px-4 md:py-2 rounded-xl text-xs md:text-sm font-black shadow-md break-keep">{it.name}</span>)}</div>
                                     </div>
                                 </div>
-                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center">
-                                    <h4 className="text-2xl font-black mb-4">"캐시카우에서 벌어 스타에 투자하라"</h4>
-                                    <p className="text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium">BCG 매트릭스의 핵심은 자원 배분입니다. 수익성이 높은 캐시카우의 자금을 미래 성장 동력인 물음표와 스타에 집중 투자하여 지속 가능한 성장을 만드는 것이 전략의 본질입니다.</p>
+
+                                <div className="p-8 md:p-12 bg-slate-900 text-white rounded-[3rem] md:rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💡</div>
+                                    <h4 className="text-xl md:text-2xl font-black mb-4 break-keep">"캐시카우에서 벌어 스타에 투자하라"</h4>
+                                    <p className="text-base md:text-lg text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium break-keep">
+                                        BCG 매트릭스의 핵심은 자원 배분입니다. 수익성이 높은 캐시카우의 자금을 미래 성장 동력인 물음표와 스타에 집중 투자하여 지속 가능한 성장을 만드는 것이 전략의 본질입니다.
+                                    </p>
                                 </div>
                             </div>
                         )}
@@ -200,32 +247,93 @@
                         ADVERTISEMENT
                     </div>
 
-                    {/* 액션 버튼 세트 */}
+                    {/* 액션 버튼 세트 (모바일 2x2 그리드 적용) */}
                     {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
+                        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6 mt-12 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-slate-900 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[64px] md:h-auto py-4 md:py-7 bg-blue-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={handleShare} disabled={isSharing} className="h-[64px] md:h-auto py-4 md:py-7 bg-yellow-500 text-slate-900 rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl flex items-center justify-center gap-1 break-keep">{isSharing ? '⌛ 생성중' : '💬 결과 공유'}</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[64px] md:h-auto py-4 md:py-7 bg-emerald-600 text-white rounded-2xl md:rounded-[2.5rem] font-black text-[13px] md:text-lg shadow-2xl hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
                         </div>
                     )}
 
+                    {/* [v7.8.3] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">BCG 매트릭스: 사업 포트폴리오의 과학</h3>
-                            <p className="text-xl text-slate-600 leading-relaxed mb-12">BCG 매트릭스는 1970년대 초 <strong>보스턴 컨설팅 그룹(Boston Consulting Group)</strong>의 창립자 <strong>브루스 헨더슨(Bruce Henderson)</strong>에 의해 개발되었습니다. 시장 성장률과 상대적 시장 점유율이라는 두 가지 축을 통해 기업의 다양한 사업부나 제품군을 진단합니다.</p>
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Henderson, B. D. (1970). <em>The Product Portfolio</em>. Boston Consulting Group.</li>
-                                    <li>• Stern, C. W., & Deimler, M. S. (2006). <em>The Boston Consulting Group on Strategy</em>. Wiley.</li>
-                                </ul>
+                        <article className="prose prose-slate max-w-none">
+                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">BCG 매트릭스: 사업 포트폴리오 진단과 자원 배분의 과학</h1>
+                            
+                            <div className="space-y-12 text-lg md:text-xl text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. BCG 매트릭스란 무엇인가?</h2>
+                                    <p>
+                                        <strong>BCG 매트릭스(Growth-Share Matrix)</strong>는 1970년대 초 세계적인 전략 컨설팅 그룹인 <strong>보스턴 컨설팅 그룹(Boston Consulting Group)</strong>의 창립자 <strong>브루스 헨더슨(Bruce Henderson)</strong>에 의해 개발되었습니다. 이 모델은 기업이 보유한 다양한 사업부나 제품군을 '시장 성장률'과 '상대적 시장 점유율'이라는 두 가지 축을 기준으로 분석하여, 한정된 자원을 어디에 집중 투자할지 결정하는 포트폴리오 관리 도구입니다.
+                                    </p>
+                                    <p>
+                                        단순히 매출이 높은 제품이 좋은 제품이라는 고정관념에서 벗어나, 미래의 성장 가능성과 현재의 현금 창출 능력을 동시에 조망함으로써 기업의 장기적인 생존 전략을 수립하는 데 목적이 있습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[3rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 4가지 사분면의 의미와 전략</h2>
+                                    <ul className="space-y-6">
+                                        <li><strong>스타 (Star):</strong> 높은 성장률과 높은 점유율을 가진 유망 사업입니다. 시장 지배력을 유지하기 위해 막대한 투자가 필요하지만, 향후 캐시카우로 성장할 핵심 동력입니다.</li>
+                                        <li><strong>캐시카우 (Cash Cow):</strong> 낮은 성장률이지만 높은 점유율을 가진 성숙기 사업입니다. 추가 투자 없이도 막대한 현금을 창출하며, 여기서 발생한 수익은 스타나 물음표 사업의 투자 재원이 됩니다.</li>
+                                        <li><strong>물음표 (Question Mark):</strong> 높은 성장률을 보이지만 점유율은 낮은 초기 사업입니다. 스타로 키우기 위해 집중 투자할 것인지, 아니면 철수할 것인지 과감한 결정이 필요합니다.</li>
+                                        <li><strong>도그 (Dog):</strong> 성장률과 점유율이 모두 낮은 쇠퇴기 사업입니다. 수익성이 낮고 자원을 소모하므로 점진적인 철수나 구조조정을 고려해야 합니다.</li>
+                                    </ul>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 균형 잡힌 포트폴리오</h2>
+                                    <p>
+                                        BCG 매트릭스를 활용할 때 가장 흔히 하는 실수는 모든 제품을 '스타'로 만들려고 하는 것입니다. 하지만 건강한 기업은 현재 돈을 벌어다 주는 <strong>캐시카우</strong>와 미래를 책임질 <strong>스타</strong>, 그리고 새로운 가능성을 타진하는 <strong>물음표</strong>가 적절히 조화를 이루어야 합니다.
+                                    </p>
+                                    <p>
+                                        파란랩의 BCG 엔진은 사용자가 각 제품의 위치를 시각적으로 확인하게 함으로써, 감정적인 애착이 아닌 데이터에 기반한 냉철한 '선택과 집중'을 돕습니다.
+                                    </p>
+                                </section>
+
+                                {/* [핵심 강화] 검증된 무료 외부 권위 사이트 연결 섹션 (MindTools 제외) */}
+                                <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                    <a href="https://en.wikipedia.org/wiki/Growth%E2%80%93share_matrix" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            📚 위키백과: BCG 매트릭스 상세 정의 (무료)
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">BCG 매트릭스의 역사적 배경과 수학적 모델링, 그리고 전략 경영에서의 위상을 무료로 확인하세요.</p>
+                                    </a>
+                                    <a href="https://corporatefinanceinstitute.com/resources/management/boston-consulting-group-bcg-matrix/" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                        <h4 className="font-black text-xl mb-4 flex items-center gap-2">
+                                            🔬 CFI: BCG 매트릭스 실무 가이드 (무료)
+                                            <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
+                                        </h4>
+                                        <p className="text-base text-slate-500 font-medium">글로벌 금융 교육 기관에서 제공하는 BCG 매트릭스의 실제 기업 적용 사례와 장단점을 확인하세요.</p>
+                                    </a>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Henderson, B. D. (1970). <em>The Product Portfolio</em>. Boston Consulting Group.</li>
+                                        <li>• Stern, C. W., & Deimler, M. S. (2006). <em>The Boston Consulting Group on Strategy</em>. Wiley.</li>
+                                        <li>• Hambrick, D. C., MacMillan, I. C., & Day, D. L. (1982). "Strategic attributes and performance in the BCG matrix". <em>Academy of Management Journal</em>.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+                    
+                    {/* 패밀리 사이트 연결 (푸터 상단) */}
+                    <div className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 팩트 체크가 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-slate-800 transition-all shadow-lg">
+                            🚀 팩트폭격연구소 바로가기
+                        </a>
+                    </div>
                 </main>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(BcgApp));
     </script>
