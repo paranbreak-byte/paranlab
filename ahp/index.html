@@ -8,7 +8,7 @@
     <title>AHP 분석 도구 | 정석 계층화 분석법 의사결정 | 파란랩(Paran Lab)</title>
     <meta name="description" content="Thomas Saaty의 AHP 이론을 바탕으로 복잡한 문제를 수학적으로 해결하세요. 실제 일관성 지수(CR) 계산을 통해 분석의 신뢰성을 보장합니다.">
     <meta name="keywords" content="AHP분석, 계층화분석법, 의사결정모델, Thomas Saaty, 일관성지수, CR계산, 파란랩, 의사결정과학">
-    <meta property="og:title" content="파란랩 AHP 분석 엔진 v7.8.1">
+    <meta property="og:title" content="파란랩 AHP 분석 엔진 v7.8.3">
     <meta property="og:description" content="주관적 판단을 과학적 수치로 변환하는 정석 AHP 분석 도구.">
     <meta property="og:type" content="website">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
@@ -55,7 +55,7 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.8.1] 기본 샘플 데이터
+        // [v7.8.3] 기본 샘플 데이터
         const DEFAULT_TOOL_SAMPLE = {
             goal: "최적의 창업 입지 선정",
             criteria: ["임대료", "유동인구", "경쟁강도"],
@@ -74,7 +74,7 @@
             const [subStep, setSubStep] = useState(0);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [v7.8.1] 데이터 로드 및 시나리오 연동
+            // [v7.8.3] 데이터 로드 및 시나리오 연동
             useEffect(() => {
                 const timer = setTimeout(() => {
                     try {
@@ -173,15 +173,15 @@
 
             return (
                 <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [v7.8.1] 마스터 컨트롤 바 */}
+                    {/* [v7.8.3] 마스터 컨트롤 바 */}
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
                         <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-base md:text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-base md:text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                            <button onClick={() => setStep(1)} className="px-6 md:px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-base md:text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-ahp'); location.reload();}} className="px-6 md:px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-base md:text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
                         </div>
                         <div className="text-right hidden md:block text-white">
                             <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Decision Science</p>
-                            <p className="font-bold text-sm">PARAN LAB AHP v7.8.1</p>
+                            <p className="font-bold text-sm">PARAN LAB AHP v7.8.3</p>
                         </div>
                     </div>
 
@@ -359,7 +359,7 @@
                         </div>
                     )}
 
-                    {/* [v7.8.1] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
+                    {/* [v7.8.3] 학술적 배경 및 실전 가이드 (1,000자 이상) */}
                     <section className="mt-40 border-t-4 border-slate-200 pt-24">
                         <article className="prose prose-slate max-w-none">
                             <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-12">AHP(Analytic Hierarchy Process) 분석의 과학적 원리와 실전 가이드</h1>
@@ -392,20 +392,21 @@
                                     </p>
                                 </section>
 
+                                {/* [핵심 강화] 완전 무료 외부 권위 사이트 연결 섹션 */}
                                 <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                     <a href="https://en.wikipedia.org/wiki/Analytic_hierarchy_process" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
                                         <h4 className="font-black text-xl mb-4 flex items-center gap-2">
-                                            📚 위키백과: AHP 상세 정의 (영문)
+                                            📚 위키백과: AHP 상세 정의 (무료)
                                             <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
                                         </h4>
-                                        <p className="text-base text-slate-500 font-medium">AHP의 수학적 배경과 역사, 다양한 응용 사례에 대한 학술적 정의를 확인하세요.</p>
+                                        <p className="text-base text-slate-500 font-medium">AHP의 수학적 배경과 역사, 다양한 응용 사례에 대한 학술적 정의를 구독 없이 확인하세요.</p>
                                     </a>
-                                    <a href="https://hbr.org/1982/01/decision-making-for-leaders" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
+                                    <a href="https://www.mindtools.com/pages/article/newTED_03.htm" target="_blank" className="p-8 bg-white rounded-[2.5rem] border-2 border-slate-100 hover:border-blue-500 transition-all group shadow-sm">
                                         <h4 className="font-black text-xl mb-4 flex items-center gap-2">
-                                            💡 HBR: 리더를 위한 의사결정
+                                            💡 MindTools: 의사결정 매트릭스 가이드
                                             <span className="text-blue-500 group-hover:translate-x-1 transition-transform">→</span>
                                         </h4>
-                                        <p className="text-base text-slate-500 font-medium">하버드 비즈니스 리뷰에서 제안하는 전략적 의사결정 프레임워크와 AHP의 가치를 알아보세요.</p>
+                                        <p className="text-base text-slate-500 font-medium">AHP와 유사한 다기준 의사결정 기법을 실무에 적용하는 방법을 다룬 무료 교육 콘텐츠입니다.</p>
                                     </a>
                                 </section>
 
