@@ -8,28 +8,28 @@
     <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
     
     <!-- [GEO & SEO 극대화] -->
-    <title>로직 트리(Logic Tree) 분석 도구 v7.8.1 | 논리적 문제 해결 및 MECE 구조화 엔진 | 파란랩</title>
-    <meta name="description" content="복잡한 문제를 논리적으로 분해하여 근본 원인과 해결책을 찾으세요. 맥킨지식 로직 트리와 MECE 원칙을 바탕으로 사고의 깊이를 더하는 전략 분석 도구입니다.">
-    <meta name="keywords" content="로직트리, LogicTree, MECE, 문제해결기법, 맥킨지, 논리적사고, 원인분석, 전략수립, 파란랩, 의사결정과학">
-    <link rel="canonical" href="https://paranlab.com/logic-tree/">
+    <title>조하리의 창 자기분석 도구 v7.8.1 | 소통 진단 및 자아 인식 엔진 | 파란랩</title>
+    <meta name="description" content="나도 모르는 나의 모습과 타인이 보는 나의 모습을 분석하세요. 조하리의 창(Johari Window) 모델을 통해 소통의 사각지대를 발견하고 대인관계 신뢰를 구축하는 심리 분석 도구입니다.">
+    <meta name="keywords" content="조하리의창, JohariWindow, 자기분석, 소통진단, 자아인식, 대인관계, 피드백, 심리학도구, 파란랩, 의사결정과학">
+    <link rel="canonical" href="https://paranlab.com/johari/">
     
     <!-- Open Graph -->
-    <meta property="og:title" content="파란랩 로직 트리 엔진: 복잡함을 단순함으로 바꾸는 논리의 힘">
-    <meta property="og:description" content="문제를 계층적으로 구조화하여 실행 가능한 대안을 도출하세요. MECE 기반 전문 리포트 생성.">
+    <meta property="og:title" content="파란랩 조하리의 창 엔진: 타인의 눈으로 나를 발견하다">
+    <meta property="og:description" content="열린 창, 눈먼 창, 숨겨진 창 분석을 통해 더 건강한 소통과 신뢰 관계를 설계하세요.">
     <meta property="og:type" content="article">
-    <meta property="og:url" content="https://paranlab.com/logic-tree/">
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🌳</text></svg>">
+    <meta property="og:url" content="https://paranlab.com/johari/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🪟</text></svg>">
     
     <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
       "@type": "TechArticle",
-      "headline": "로직 트리(Logic Tree)를 활용한 논리적 문제 해결 방법론",
-      "description": "맥킨지 앤 컴퍼니에서 대중화된 로직 트리의 개념과 MECE 원칙, 그리고 실전 적용 프로세스를 다룹니다.",
+      "headline": "조하리의 창(Johari Window)을 활용한 자아 인식 및 소통 개선 방법론",
+      "description": "조셉 루프트와 해링턴 인검이 개발한 대인관계 모델의 이론적 배경과 4가지 영역 분석 과정을 다룹니다.",
       "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
       "publisher": { "@type": "Organization", "name": "파란랩" },
-      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/logic-tree/" }
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/johari/" }
     }
     </script>
 
@@ -46,8 +46,7 @@
         body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
         .break-keep { word-break: keep-all; }
-        .tree-line { position: relative; }
-        .tree-line::before { content: ''; position: absolute; left: -20px; top: 50%; width: 20px; height: 2px; background: #e2e8f0; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; }
         @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
@@ -59,33 +58,35 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        const DEFAULT_TOOL_SAMPLE = {
-            mainIssue: "식당 매출 하락 원인 분석",
-            branches: [
-                { id: 1, text: "객수 감소", sub: ["경쟁 업체 신규 진입", "주차 공간 부족으로 인한 접근성 저하"] },
-                { id: 2, text: "객단가 하락", sub: ["저가 메뉴 위주의 주문 구성", "세트 메뉴 판매 부진"] }
-            ],
+        const SAMPLE_DATA = {
+            subject: "팀 프로젝트 내에서의 나의 소통 스타일",
+            selectedSelf: ["똑똑한", "논리적인", "자신감 있는", "독립적인", "유능한"],
+            selectedOthers: ["똑똑한", "논리적인", "조용한", "차분한", "믿음직한"],
             isDefault: true
         };
 
-        function LogicTreeApp() {
-            const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(3); 
-            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+        const TRAITS = ["친절한", "자신감 있는", "차분한", "똑똑한", "믿음직한", "활발한", "대담한", "독립적인", "성숙한", "행복한", "인내심 있는", "논리적인", "조용한", "유능한", "따뜻한", "겸손한", "창의적인", "용감한", "관대한", "정직한"];
 
+        function JohariApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [isSharing, setIsSharing] = useState(false);
+            const [step, setStep] = useState(4); 
+            const [data, setData] = useState(SAMPLE_DATA);
+
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
                 const initData = () => {
                     try {
-                        const saved = localStorage.getItem('paranlab-logic-tree');
+                        const saved = localStorage.getItem('paranlab-johari');
                         if (saved) {
                             const parsed = JSON.parse(saved);
                             setData({ ...parsed, isDefault: false });
                         } else {
-                            setData(DEFAULT_TOOL_SAMPLE);
+                            setData(SAMPLE_DATA);
                         }
                     } catch (e) {
                         console.error("Data Recovery Triggered:", e);
-                        setData(DEFAULT_TOOL_SAMPLE);
+                        setData(SAMPLE_DATA);
                     }
                     setIsLoaded(true);
                 };
@@ -94,11 +95,49 @@
 
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
-                    localStorage.setItem('paranlab-logic-tree', JSON.stringify(data));
+                    localStorage.setItem('paranlab-johari', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], 'johari-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] 조하리의 창 분석: ${data.subject}` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = 'johari-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
+            };
+
+            // [로직 보존] 원본 조하리의 창 영역 분류 연산
+            const windows = useMemo(() => {
+                const self = data.selectedSelf || [];
+                const others = data.selectedOthers || [];
+                return {
+                    open: self.filter(t => others.includes(t)),
+                    blind: others.filter(t => !self.includes(t)),
+                    hidden: self.filter(t => !others.includes(t))
+                };
+            }, [data.selectedSelf, data.selectedOthers]);
+
             if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
+
+            const toggleTrait = (key, trait) => {
+                const list = data[key] || [];
+                const newList = list.includes(trait) ? list.filter(t => t !== trait) : [...list, trait];
+                setData({...data, [key]: newList, isDefault: false});
+            };
 
             return (
                 <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
@@ -106,17 +145,17 @@
                     <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
                         <div className="flex gap-3 w-full md:w-auto">
                             <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-logic-tree'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-johari'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
                         <div className="text-right hidden md:block">
-                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Logic Science</p>
-                            <p className="text-white font-bold text-xs">LOGIC TREE ENGINE</p>
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">JOHARI WINDOW ENGINE</p>
                         </div>
                     </div>
 
                     {/* 위저드 네비게이션 */}
                     <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
-                        {['핵심 이슈', '구조화', '결과 리포트'].map((name, i) => (
+                        {['주제', '내가 보는 나', '남이 보는 나', '결과'].map((name, i) => (
                             <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
@@ -131,7 +170,7 @@
                     {/* [디자인 시스템] 중앙 리포트 카드 */}
                     <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {/* 시나리오 배지 */}
-                        {(data.scenarioContext || data.isDefault) && step === 3 && (
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
                             <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
                                 <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
@@ -141,77 +180,76 @@
 
                         {step === 1 && (
                             <section className="space-y-8 animate-in fade-in">
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">핵심 이슈 정의</h2>
-                                <p className="text-center text-slate-500 font-bold break-keep">해결하고자 하는 가장 상위의 문제를 입력하세요.</p>
-                                <input type="text" value={data.mainIssue} onChange={e => setData({...data, mainIssue: e.target.value, isDefault: false})} className="w-full p-6 bg-slate-50 rounded-2xl border-none outline-none text-xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="예: 매출 하락 원인 분석" />
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">분석 주제 설정</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-6 bg-slate-50 rounded-2xl border-none outline-none text-xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="예: 팀 내에서의 나의 소통 스타일" />
                                 <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음 단계</button>
                             </section>
                         )}
 
                         {step === 2 && (
                             <section className="space-y-8 animate-in fade-in">
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">로직 트리 구조화</h2>
-                                <div className="space-y-6">
-                                    {data.branches.map((branch, i) => (
-                                        <div key={branch.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 space-y-4">
-                                            <div className="flex gap-4 items-center">
-                                                <input type="text" value={branch.text} onChange={e => { const n = [...data.branches]; n[i].text = e.target.value; setData({...data, branches: n, isDefault: false}); }} className="flex-1 p-4 bg-white rounded-xl border-none font-black text-lg shadow-sm" placeholder="하위 이슈" />
-                                                <button onClick={() => setData({...data, branches: data.branches.filter(b => b.id !== branch.id), isDefault: false})} className="text-red-400 font-black">×</button>
-                                            </div>
-                                            <div className="pl-8 space-y-2">
-                                                {branch.sub.map((s, si) => (
-                                                    <div key={si} className="flex gap-2">
-                                                        <input type="text" value={s} onChange={e => { const n = [...data.branches]; n[i].sub[si] = e.target.value; setData({...data, branches: n, isDefault: false}); }} className="flex-1 p-3 bg-white/50 rounded-lg border border-slate-200 text-sm font-bold" placeholder="세부 원인/대안" />
-                                                        <button onClick={() => { const n = [...data.branches]; n[i].sub = n[i].sub.filter((_, idx) => idx !== si); setData({...data, branches: n, isDefault: false}); }} className="text-slate-300 hover:text-red-400">×</button>
-                                                    </div>
-                                                ))}
-                                                <button onClick={() => { const n = [...data.branches]; n[i].sub.push(""); setData({...data, branches: n, isDefault: false}); }} className="text-blue-500 text-xs font-black">+ 세부 항목 추가</button>
-                                            </div>
-                                        </div>
-                                    ))}
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">내가 생각하는 나의 모습</h2>
+                                <p className="text-center text-slate-500 font-bold break-keep">자신을 가장 잘 설명하는 형용사를 모두 선택하세요.</p>
+                                <div className="flex flex-wrap gap-2 justify-center p-6 bg-slate-50 rounded-3xl shadow-inner">
+                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedSelf', t)} className={`px-4 py-2 rounded-full text-xs md:text-sm font-black shadow-sm transition-all ${data.selectedSelf.includes(t) ? 'bg-blue-600 text-white scale-110' : 'bg-white text-slate-400 hover:bg-blue-50'}`}>{t}</button>)}
                                 </div>
-                                <button onClick={() => setData({...data, branches: [...data.branches, { id: Date.now(), text: "", sub: [""] }], isDefault: false})} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black">+ 하위 이슈 추가</button>
                                 <div className="flex gap-4">
                                     <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음 단계</button>
                                 </div>
                             </section>
                         )}
 
                         {step === 3 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">남이 말하는 나의 모습</h2>
+                                <p className="text-center text-slate-500 font-bold break-keep">동료나 타인이 나에 대해 자주 언급하는 형용사를 선택하세요.</p>
+                                <div className="flex flex-wrap gap-2 justify-center p-6 bg-slate-50 rounded-3xl shadow-inner">
+                                    {TRAITS.map(t => <button key={t} onClick={() => toggleTrait('selectedOthers', t)} className={`px-4 py-2 rounded-full text-xs md:text-sm font-black shadow-sm transition-all ${data.selectedOthers.includes(t) ? 'bg-rose-600 text-white scale-110' : 'bg-white text-slate-400 hover:bg-rose-50'}`}>{t}</button>)}
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 4 && (
                             <section className="animate-in zoom-in duration-500">
                                 <div className="text-center mb-12">
-                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Logic Tree Analysis Report</span>
-                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">{data.mainIssue}</h2>
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Johari Window Analysis Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">조하리의 창 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">주제: {data.subject}</p>
                                 </div>
                                 
-                                <div className="flex flex-col md:flex-row items-start gap-8 mb-12 overflow-x-auto pb-4">
-                                    <div className="min-w-[200px] p-6 bg-slate-900 text-white rounded-3xl shadow-xl font-black text-center break-keep">
-                                        {data.mainIssue}
+                                <div className="matrix-grid mb-12">
+                                    <div className="p-6 bg-blue-50 rounded-3xl border-2 border-blue-100 min-h-[200px] relative">
+                                        <h3 className="font-black text-blue-700 mb-2 text-base md:text-lg">열린 창 (Open)</h3>
+                                        <p className="text-[10px] text-blue-400 font-black mb-4 uppercase">나도 알고 남도 아는 영역</p>
+                                        <div className="flex flex-wrap gap-2">{windows.open.map(t => <span key={t} className="bg-white px-3 py-1 rounded-lg text-xs font-black text-blue-600 shadow-sm">{t}</span>)}</div>
                                     </div>
-                                    <div className="flex-1 space-y-8">
-                                        {data.branches.map((b, i) => (
-                                            <div key={i} className="flex items-start gap-6">
-                                                <div className="min-w-[180px] p-5 bg-blue-50 border-2 border-blue-100 rounded-2xl font-black text-blue-700 text-sm shadow-sm break-keep">
-                                                    {b.text}
-                                                </div>
-                                                <div className="flex-1 space-y-3">
-                                                    {b.sub.map((s, si) => (
-                                                        <div key={si} className="p-4 bg-white border border-slate-100 rounded-xl shadow-sm text-xs font-bold text-slate-600 tree-line break-keep">
-                                                            {s}
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            </div>
-                                        ))}
+                                    <div className="p-6 bg-rose-50 rounded-3xl border-2 border-rose-100 min-h-[200px] relative">
+                                        <h3 className="font-black text-rose-700 mb-2 text-base md:text-lg">눈먼 창 (Blind)</h3>
+                                        <p className="text-[10px] text-rose-400 font-black mb-4 uppercase">나는 모르지만 남은 아는 영역</p>
+                                        <div className="flex flex-wrap gap-2">{windows.blind.map(t => <span key={t} className="bg-white px-3 py-1 rounded-lg text-xs font-black text-rose-600 shadow-sm">{t}</span>)}</div>
+                                    </div>
+                                    <div className="p-6 bg-emerald-50 rounded-3xl border-2 border-emerald-100 min-h-[200px] relative">
+                                        <h3 className="font-black text-emerald-700 mb-2 text-base md:text-lg">숨겨진 창 (Hidden)</h3>
+                                        <p className="text-[10px] text-emerald-400 font-black mb-4 uppercase">나는 알지만 남은 모르는 영역</p>
+                                        <div className="flex flex-wrap gap-2">{windows.hidden.map(t => <span key={t} className="bg-white px-3 py-1 rounded-lg text-xs font-black text-emerald-600 shadow-sm">{t}</span>)}</div>
+                                    </div>
+                                    <div className="p-6 bg-slate-100 rounded-3xl border-2 border-slate-200 min-h-[200px] relative">
+                                        <h3 className="font-black text-slate-700 mb-2 text-base md:text-lg">미지의 창 (Unknown)</h3>
+                                        <p className="text-[10px] text-slate-400 font-black mb-4 uppercase">나도 모르고 남도 모르는 영역</p>
+                                        <p className="text-[10px] md:text-xs text-slate-400 font-bold leading-relaxed">새로운 경험과 도전을 통해 발견될 잠재적 영역입니다.</p>
                                     </div>
                                 </div>
 
                                 <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
-                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🌳</div>
-                                    <h3 className="text-2xl font-black mb-4">논리적 시사점</h3>
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">🪟</div>
+                                    <h3 className="text-2xl font-black mb-4">소통 개선 제언</h3>
                                     <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
-                                        로직 트리를 통해 복잡한 문제를 MECE(중복 없이, 누락 없이) 원칙에 따라 구조화했습니다. 분해된 각 요소 중 가장 영향력이 큰 핵심 원인을 파악하고, 실행 가능한 대안(Action Item)을 수립하십시오.
+                                        건강한 소통의 핵심은 <strong>'열린 창(Open Window)'</strong>을 넓히는 것입니다. 자기 공개를 통해 숨겨진 창을 줄이고, 타인의 피드백을 수용하여 눈먼 창을 줄여나갈 때 대인관계의 신뢰가 깊어집니다.
                                     </p>
                                 </div>
                             </section>
@@ -219,7 +257,7 @@
                     </article>
 
                     {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
-                    {step === 3 && (
+                    {step === 4 && (
                         <section className="grid grid-cols-2 gap-3 mt-8 no-print">
                             <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
                             <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
@@ -237,62 +275,65 @@
                     <section className="mt-24 border-t border-slate-200 pt-16">
                         <article className="prose prose-slate max-w-none">
                             <header>
-                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">로직 트리(Logic Tree): 복잡한 문제를 해결하는 맥킨지식 논리 구조화 방법론</h1>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">조하리의 창(Johari Window): 자아 인식과 대인관계 소통의 심리학적 모델</h1>
                                 <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
-                                    전략 컨설팅의 핵심 도구인 로직 트리를 통해 문제를 MECE 원칙에 따라 분해하고, 근본 원인 파악과 해결책 도출을 위한 과학적 사고 프로세스를 심층 분석합니다.
+                                    자신과 타인 사이의 정보 공유 정도를 분석하여 소통의 사각지대를 발견하고, 상호 신뢰를 구축하는 조하리의 창 모델을 심층 분석합니다.
                                 </p>
                             </header>
 
                             <div className="space-y-16 text-slate-600 leading-relaxed">
                                 <section>
-                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 로직 트리의 정의와 역사적 배경</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 조하리의 창 정의와 역사적 배경</h2>
                                     <p className="text-lg">
-                                        <strong>로직 트리(Logic Tree)</strong>는 주요 이슈를 계층적으로 분해하여 문제의 전체상을 파악하고 해결책을 도출하는 논리적 사고 도구입니다. 세계적인 전략 컨설팅 펌인 <strong>맥킨지 앤 컴퍼니(McKinsey & Company)</strong>에서 문제 해결의 표준 방법론으로 사용하면서 널리 알려졌습니다.
+                                        <strong>조하리의 창(Johari Window)</strong>은 1955년 미국의 심리학자 <strong>조셉 루프트(Joseph Luft)</strong>와 <strong>해링턴 인검(Harrington Ingham)</strong>이 개발한 자아 인식 및 대인관계 소통 모델입니다. '조하리'라는 명칭은 두 개발자의 이름 앞글자를 합쳐서 만들어졌습니다.
                                     </p>
                                     <p className="text-lg">
-                                        로직 트리는 복잡하게 얽힌 문제를 하위 요소로 쪼개어 나감으로써, 우리가 어디에 집중해야 하는지(Focusing)와 어떤 데이터가 필요한지를 명확하게 해줍니다. 이는 막연한 직관이 아닌 철저한 논리에 기반한 의사결정을 가능하게 합니다.
+                                        이 모델은 인간관계에서 발생하는 정보의 흐름을 '나'와 '타인'이라는 두 가지 축을 기준으로 4개의 영역으로 구분합니다. 이를 통해 개인이 스스로를 어떻게 인식하고 있는지, 그리고 타인에게 어떻게 비춰지고 있는지를 시각화하여 소통의 효율성을 진단하는 데 목적이 있습니다.
                                     </p>
                                 </section>
 
                                 <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
-                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 로직 트리의 핵심 원칙: MECE</h2>
-                                    <div className="space-y-6 text-lg">
-                                        <p>로직 트리가 유효하기 위해서는 반드시 <strong>MECE(Mutually Exclusive, Collectively Exhaustive)</strong> 원칙을 준수해야 합니다.</p>
-                                        <ul className="list-disc pl-6 space-y-4 font-medium">
-                                            <li><strong>Mutually Exclusive (중복 없이):</strong> 각 하위 항목들은 서로 겹치지 않아야 합니다. 중복된 분석은 자원의 낭비를 초래합니다.</li>
-                                            <li><strong>Collectively Exhaustive (누락 없이):</strong> 하위 항목들의 합이 상위 항목의 전체를 구성해야 합니다. 누락된 항목이 있다면 치명적인 전략적 실수를 범할 수 있습니다.</li>
-                                        </ul>
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 조하리의 창 4가지 영역 분석</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-800 mb-3">🪟 열린 창 (Open Area)</h3>
+                                            <p className="text-base font-medium">나도 알고 타인도 아는 영역입니다. 이름, 외모, 공개된 경력 등이 포함됩니다. 이 영역이 넓을수록 상호 간의 오해가 적고 신뢰가 높으며, 건강한 소통이 가능합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-800 mb-3">🙈 눈먼 창 (Blind Area)</h3>
+                                            <p className="text-base font-medium">타인은 알고 있지만 나는 모르는 나의 모습입니다. 무의식적인 습관, 말투, 타인에게 주는 인상 등이 해당합니다. 타인의 피드백을 수용함으로써 이 영역을 줄이고 자아 인식을 높일 수 있습니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-800 mb-3">🤐 숨겨진 창 (Hidden Area)</h3>
+                                            <p className="text-base font-medium">나는 알고 있지만 타인에게는 숨기는 영역입니다. 개인적인 비밀, 두려움, 숨겨진 욕망 등이 포함됩니다. 적절한 자기 공개(Self-disclosure)를 통해 이 영역을 열린 창으로 전환할 수 있습니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-700 mb-3">🌑 미지의 창 (Unknown Area)</h3>
+                                            <p className="text-base font-medium">나도 모르고 타인도 모르는 잠재적 영역입니다. 아직 발견되지 않은 재능이나 무의식의 세계를 의미합니다. 새로운 경험과 깊은 성찰을 통해 이 영역을 탐구할 수 있습니다.</p>
+                                        </div>
                                     </div>
                                 </section>
 
                                 <section>
-                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 로직 트리의 3가지 유형</h2>
-                                    <div className="space-y-8">
-                                        <div>
-                                            <h3 className="text-xl font-black text-blue-800 mb-3">🔍 원인 분석 트리 (Why Tree)</h3>
-                                            <p className="text-base font-medium">"왜 이 문제가 발생하는가?"에 답하기 위해 현상을 원인별로 분해합니다. 근본 원인(Root Cause)을 찾는 데 최적화되어 있습니다.</p>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-black text-emerald-800 mb-3">💡 해결책 도출 트리 (How Tree)</h3>
-                                            <p className="text-base font-medium">"어떻게 문제를 해결할 것인가?"에 집중합니다. 상위 목표를 달성하기 위한 구체적인 실행 방안(Action Item)을 계층적으로 나열합니다.</p>
-                                        </div>
-                                        <div>
-                                            <h3 className="text-xl font-black text-slate-800 mb-3">📊 요소 분해 트리 (What Tree)</h3>
-                                            <p className="text-base font-medium">전체 대상을 구성 요소별로 파악합니다. 예를 들어 '수익'을 '매출'과 '비용'으로 나누는 식의 구조적 파악에 사용됩니다.</p>
-                                        </div>
-                                    </div>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 열린 창을 넓히는 전략</h2>
+                                    <p className="text-lg">
+                                        조하리의 창 모델의 궁극적인 목표는 <strong>'열린 창'의 면적을 극대화</strong>하는 것입니다. 이를 위해 두 가지 핵심 전략이 필요합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        첫째, <strong>자기 공개(Self-disclosure)</strong>입니다. 자신의 생각과 감정을 솔직하게 표현함으로써 '숨겨진 창'을 줄여야 합니다. 둘째, <strong>피드백 수용(Feedback)</strong>입니다. 타인의 조언과 평가를 열린 마음으로 받아들여 '눈먼 창'을 줄여야 합니다. 파란랩의 조하리 엔진은 형용사 선택을 통해 이 과정을 객관화하여, 개인이 더 나은 소통가로 성장하도록 돕습니다.
+                                    </p>
                                 </section>
 
                                 <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
                                     <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
                                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                        <a href="https://en.wikipedia.org/wiki/MECE_principle" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                            <h4 className="font-black mb-2">Wikipedia: MECE Principle</h4>
-                                            <p className="text-xs text-slate-400">로직 트리의 근간이 되는 MECE 원칙의 정의와 역사적 배경</p>
+                                        <a href="https://en.wikipedia.org/wiki/Johari_window" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: Johari Window</h4>
+                                            <p className="text-xs text-slate-400">조하리의 창 모델의 역사적 배경과 심리학적 원리에 대한 상세 정의</p>
                                         </a>
-                                        <a href="https://hbr.org/2007/09/the-logic-of-product-line-extensions" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                            <h4 className="font-black mb-2">HBR: Strategic Logic</h4>
-                                            <p className="text-xs text-slate-400">하버드 비즈니스 리뷰가 다루는 비즈니스 구조화와 논리적 분석 사례</p>
+                                        <a href="https://www.psychologytoday.com/intl/blog/the-path-passionate-happiness/202106/the-johari-window-tool-self-discovery" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Psychology Today: Self-Discovery</h4>
+                                            <p className="text-xs text-slate-400">심리학 전문 매체에서 다루는 조하리의 창 활용법</p>
                                         </a>
                                     </div>
                                 </section>
@@ -300,11 +341,11 @@
                                 <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
                                     <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
                                     <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                        <li>• Rasiel, E. M. (1999). <em>The McKinsey Way</em>. McGraw-Hill.</li>
-                                        <li>• Minto, B. (1987). <em>The Pyramid Principle: Logic in Writing and Thinking</em>. Financial Times Prentice Hall.</li>
-                                        <li>• Ohmae, K. (1982). <em>The Mind of the Strategist: The Art of Japanese Business</em>. McGraw-Hill.</li>
-                                        <li>• Chevallier, A. (2016). <em>Strategic Thinking in Complex Problem Solving</em>. Oxford University Press.</li>
-                                        <li>• Zelazny, G. (2001). <em>Say It with Charts: The Executive's Guide to Visual Communication</em>. McGraw-Hill.</li>
+                                        <li>• Luft, J., & Ingham, H. (1955). "The Johari window, a graphic model of interpersonal awareness". <em>Proceedings of the western training laboratory in group development</em>.</li>
+                                        <li>• Luft, J. (1969). <em>Of Human Interaction</em>. National Press Books.</li>
+                                        <li>• Verklan, M. T. (2007). "Johari Window: A Model for Communication". <em>Journal of Perinatal & Neonatal Nursing</em>.</li>
+                                        <li>• South, B. (2005). "The Johari Window: A Model for Self-awareness, Personal Development, Group Development and Understanding Relationship". <em>Training Journal</em>.</li>
+                                        <li>• Hase, S., et al. (2003). "The Johari Window and the Psychometric Assessment of a Workplace". <em>Australian Journal of Adult Learning</em>.</li>
                                     </ul>
                                 </section>
                             </div>
@@ -323,7 +364,7 @@
         }
 
         const root = ReactDOM.createRoot(document.getElementById('root'));
-        root.render(React.createElement(LogicTreeApp));
+        root.render(React.createElement(JohariApp));
     </script>
 </body>
 </html>
