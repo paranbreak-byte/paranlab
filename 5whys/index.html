@@ -1,325 +1,366 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>5 Whys 분석 도구 v7.8.1 | 근본 원인 추적 및 문제 해결 엔진 | 파란랩</title>
+    <meta name="description" content="도요타의 5 Whys 기법으로 문제의 표면이 아닌 근본 원인(Root Cause)을 찾아내세요. 재발 방지를 위한 과학적 문제 해결 프레임워크를 제공하는 전문 도구입니다.">
+    <meta name="keywords" content="5Whys, 근본원인분석, RCA, 도요타생산방식, 문제해결기법, 오노다이이치, 파란랩, 의사결정과학, 경영학도구">
+    <link rel="canonical" href="https://paranlab.com/5whys/">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 5 Whys 분석 엔진: 현상 뒤의 진짜 원인을 찾다">
+    <meta property="og:description" content="5번의 질문으로 도출하는 근본 원인 분석. 시스템적 재발 방지 대책을 수립하세요.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/5whys/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❓</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "5 Whys 기법을 활용한 근본 원인 분석(Root Cause Analysis) 방법론",
+      "description": "도요타 생산 방식의 핵심인 5 Whys의 이론적 배경과 실전 적용 프로세스를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/5whys/" }
+    }
+    </script>
 
-<!-- [GEO & SEO 극대화] -->
-<title>5 Whys 분석 도구 v7.8.1 | 근본 원인 추적 및 문제 해결 엔진 | 파란랩</title>
-<meta name="description" content="도요타의 5 Whys 기법으로 문제의 표면이 아닌 근본 원인(Root Cause)을 찾아내세요. 재발 방지를 위한 과학적 문제 해결 프레임워크를 제공합니다.">
-<meta name="keywords" content="5Whys, 근본원인분석, RCA, 도요타생산방식, 문제해결기법, 오노다이이치, 파란랩, 의사결정과학">
-<link rel="canonical" href="https://paranlab.com/5whys/">
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="/core.js" defer></script>
 
-<!-- Open Graph -->
-<meta property="og:title" content="파란랩 5 Whys 분석 엔진: 현상 뒤의 진짜 원인을 찾다">
-<meta property="og:description" content="5번의 질문으로 도출하는 근본 원인 분석. 시스템적 재발 방지 대책을 수립하세요.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://paranlab.com/5whys/">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>❓</text></svg>">
-
-<!-- 구조화 데이터 (JSON-LD) -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "5 Whys 기법을 활용한 근본 원인 분석(Root Cause Analysis) 방법론",
-  "description": "도요타 생산 방식의 핵심인 5 Whys의 이론적 배경과 실전 적용 프로세스를 다룹니다.",
-  "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
-  "publisher": { "@type": "Organization", "name": "파란랩" },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/5whys/" }
-}
-</script>
-
-<!-- 라이브러리 로드 -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script src="/core.js" defer></script>
-
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-    body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-    .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-    .break-keep { word-break: keep-all; }
-    .why-connector { width: 2px; height: 24px; background: #e2e8f0; margin: 0 auto; }
-    @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
-</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .break-keep { word-break: keep-all; }
+        .why-connector { width: 2px; height: 24px; background: #e2e8f0; margin: 0 auto; }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
+    </style>
 </head>
 <body>
-<div id="header-root"></div>
-<div id="root"></div>
-<div id="footer-root"></div>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
 
-<script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    const DEFAULT_TOOL_SAMPLE = {
-        problem: "최근 3개월간 식당의 점심 매출이 전년 대비 40% 급감했다.",
-        whys: [
-            "단골 고객들의 방문 횟수가 눈에 띄게 줄어들었기 때문이다.",
-            "음식의 맛이 예전과 달라졌다는 평가가 많아졌기 때문이다.",
-            "메인 주방장이 교체된 후 레시피 일관성이 깨졌기 때문이다.",
-            "신임 주방장 교육 시 표준 레시피 매뉴얼이 전달되지 않았기 때문이다.",
-            "주방 인력 교체 시 인수인계 프로세스가 시스템화되어 있지 않았기 때문이다."
-        ],
-        rootCause: "주방 인력 교체 시의 체계적인 인수인계 및 교육 시스템 부재",
-        action: "전 메뉴 표준 레시피 디지털화 및 신규 인력 투입 시 7일간의 필수 교육 프로세스 구축",
-        isDefault: true
-    };
+        const DEFAULT_TOOL_SAMPLE = {
+            problem: "최근 3개월간 식당의 점심 매출이 전년 대비 40% 급감했다.",
+            whys: [
+                "단골 고객들의 방문 횟수가 눈에 띄게 줄어들었기 때문이다.",
+                "음식의 맛이 예전과 달라졌다는 평가가 많아졌기 때문이다.",
+                "메인 주방장이 교체된 후 레시피 일관성이 깨졌기 때문이다.",
+                "신임 주방장 교육 시 표준 레시피 매뉴얼이 전달되지 않았기 때문이다.",
+                "주방 인력 교체 시 인수인계 프로세스가 시스템화되어 있지 않았기 때문이다."
+            ],
+            rootCause: "주방 인력 교체 시의 체계적인 인수인계 및 교육 시스템 부재",
+            action: "전 메뉴 표준 레시피 디지털화 및 신규 인력 투입 시 7일간의 필수 교육 프로세스 구축",
+            isDefault: true
+        };
 
-    function FiveWhysApp() {
-        const [isLoaded, setIsLoaded] = useState(false);
-        const [step, setStep] = useState(4); 
-        const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+        function FiveWhysApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(4); 
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-        useEffect(() => {
-            const initData = () => {
-                try {
-                    const saved = localStorage.getItem('paranlab-5whys');
-                    if (saved) {
-                        const parsed = JSON.parse(saved);
-                        setData({
-                            ...parsed,
-                            whys: Array.isArray(parsed.whys) ? parsed.whys : DEFAULT_TOOL_SAMPLE.whys,
-                            isDefault: false
-                        });
-                    } else {
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
+            useEffect(() => {
+                const initData = () => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-5whys');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({
+                                ...parsed,
+                                whys: Array.isArray(parsed.whys) ? parsed.whys : DEFAULT_TOOL_SAMPLE.whys,
+                                isDefault: false
+                            });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
                         setData(DEFAULT_TOOL_SAMPLE);
                     }
-                } catch (e) {
-                    console.error("Data Recovery Triggered:", e);
-                    setData(DEFAULT_TOOL_SAMPLE);
+                    setIsLoaded(true);
+                };
+                setTimeout(initData, 300);
+            }, []);
+
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-5whys', JSON.stringify(data));
                 }
-                setIsLoaded(true);
+            }, [data, isLoaded]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    const link = document.createElement('a');
+                    link.download = '5whys-report.png';
+                    link.href = canvas.toDataURL();
+                    link.click();
+                } catch (err) { console.error(err); }
             };
-            setTimeout(initData, 300);
-        }, []);
 
-        useEffect(() => {
-            if (isLoaded && !data.isDefault) {
-                localStorage.setItem('paranlab-5whys', JSON.stringify(data));
-            }
-        }, [data, isLoaded]);
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
-        if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
-
-        return (
-            <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
-                {/* [디자인 시스템] 상단 컨트롤 바 */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
-                        <button onClick={() => {localStorage.removeItem('paranlab-5whys'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
-                    </div>
-                    <div className="text-right hidden md:block">
-                        <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
-                        <p className="text-white font-bold text-xs">5 WHYS ANALYSIS ENGINE</p>
-                    </div>
-                </div>
-
-                {/* 위저드 네비게이션 */}
-                <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
-                    {['문제', '추적', '결론', '결과'].map((name, i) => (
-                        <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
-                            {i + 1}. {name}
+            return (
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-5whys'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                    ))}
-                </nav>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">5 WHYS ANALYSIS ENGINE</p>
+                        </div>
+                    </div>
 
-                {/* [디자인 시스템] 중앙 리포트 카드 */}
-                <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                    {step === 1 && (
-                        <section className="space-y-8 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">1. 문제 정의(Problem Definition)</h2>
-                            <p className="text-slate-500 font-bold break-keep">해결하고자 하는 현상을 구체적이고 객관적인 수치로 정의하세요.</p>
-                            <textarea value={data.problem} onChange={e => setData({...data, problem: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all text-center" placeholder="문제를 입력하세요..." />
-                            <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 원인 추적</button>
-                        </section>
-                    )}
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['문제 정의', '원인 추적', '결론 도출', '결과 리포트'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
 
-                    {step === 2 && (
-                        <section className="space-y-6 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">2. 원인 추적(Why Tracking)</h2>
-                            <div className="space-y-2">
-                                {data.whys.map((why, i) => (
-                                    <div key={i}>
-                                        <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
-                                            <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-black shrink-0">{i+1}</span>
-                                            <input type="text" value={why} onChange={e => {
-                                                const newWhys = [...data.whys];
-                                                newWhys[i] = e.target.value;
-                                                setData({...data, whys: newWhys, isDefault: false});
-                                            }} className="w-full bg-transparent border-none outline-none font-bold text-slate-700" placeholder="왜 그런가요?" />
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
+
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {step === 1 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <div className="text-center">
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">1. 문제 정의</h2>
+                                    <p className="text-slate-500 font-bold break-keep">해결하고자 하는 현상을 구체적으로 정의하세요.</p>
+                                </div>
+                                <textarea value={data.problem} onChange={e => setData({...data, problem: e.target.value, isDefault: false})} className="w-full h-48 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all text-center" placeholder="문제를 입력하세요..." />
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 원인 추적</button>
+                            </section>
+                        )}
+
+                        {step === 2 && (
+                            <section className="space-y-6 animate-in fade-in">
+                                <div className="text-center">
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">2. 원인 추적 (Why Tracking)</h2>
+                                    <p className="text-slate-500 font-bold break-keep">꼬리에 꼬리를 무는 질문으로 본질에 접근하세요.</p>
+                                </div>
+                                <div className="space-y-2">
+                                    {data.whys.map((why, i) => (
+                                        <div key={i}>
+                                            <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-2xl border border-slate-100">
+                                                <span className="w-8 h-8 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-black shrink-0">{i+1}</span>
+                                                <input type="text" value={why} onChange={e => {
+                                                    const newWhys = [...data.whys];
+                                                    newWhys[i] = e.target.value;
+                                                    setData({...data, whys: newWhys, isDefault: false});
+                                                }} className="w-full bg-transparent border-none outline-none font-bold text-slate-700" placeholder="왜 그런가요?" />
+                                            </div>
+                                            {i < 4 && <div className="why-connector"></div>}
                                         </div>
-                                        {i < 4 && <div className="why-connector"></div>}
-                                    </div>
-                                ))}
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 결론 도출</button>
-                            </div>
-                        </section>
-                    )}
-
-                    {step === 3 && (
-                        <section className="space-y-8 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">3. 근본 원인 및 해결책</h2>
-                            <div className="space-y-6">
-                                <div className="p-6 bg-slate-900 rounded-2xl">
-                                    <label className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Root Cause</label>
-                                    <textarea value={data.rootCause} onChange={e => setData({...data, rootCause: e.target.value, isDefault: false})} className="w-full h-24 bg-transparent border-none outline-none text-white font-black text-lg" placeholder="진짜 원인은 무엇인가요?" />
+                                    ))}
                                 </div>
-                                <div className="p-6 bg-emerald-500 rounded-2xl">
-                                    <label className="text-emerald-100 text-[10px] font-black uppercase tracking-widest mb-2 block">Action Plan</label>
-                                    <textarea value={data.action} onChange={e => setData({...data, action: e.target.value, isDefault: false})} className="w-full h-24 bg-transparent border-none outline-none text-white font-black text-lg" placeholder="어떻게 해결할까요?" />
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 결론 도출</button>
                                 </div>
-                            </div>
-                            <div className="flex gap-4">
-                                <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
-                            </div>
-                        </section>
-                    )}
-
-                    {step === 4 && (
-                        <section className="animate-in zoom-in duration-500">
-                            <div className="text-center mb-12">
-                                <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">5 Whys Root Cause Report</span>
-                                <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">문제 해결 분석 리포트</h2>
-                            </div>
-                            
-                            <div className="bg-slate-50 p-8 rounded-[2rem] mb-12 border border-slate-100">
-                                <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Initial Problem</h3>
-                                <p className="text-xl md:text-2xl font-black text-slate-800 leading-tight break-keep">"{data.problem}"</p>
-                            </div>
-
-                            <div className="space-y-4 mb-12">
-                                {data.whys.map((why, i) => why && (
-                                    <div key={i} className="flex gap-4 items-center">
-                                        <div className="w-10 h-10 bg-white border-2 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black text-sm shrink-0 shadow-md">{i+1}</div>
-                                        <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-600 text-sm md:text-base break-keep">{why}</div>
-                                    </div>
-                                ))}
-                            </div>
-
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                <div className="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl">
-                                    <h3 className="text-blue-400 font-black text-[10px] uppercase tracking-widest mb-6">Root Cause</h3>
-                                    <p className="text-lg md:text-xl font-black leading-relaxed break-keep">{data.rootCause}</p>
-                                </div>
-                                <div className="p-8 bg-emerald-500 text-white rounded-[2.5rem] shadow-2xl">
-                                    <h3 className="text-emerald-100 font-black text-[10px] uppercase tracking-widest mb-6">Action Plan</h3>
-                                    <p className="text-lg md:text-xl font-black leading-relaxed break-keep">{data.action}</p>
-                                </div>
-                            </div>
-                        </section>
-                    )}
-                </article>
-
-                {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
-                {step === 4 && (
-                    <section className="grid grid-cols-2 gap-3 mt-8 no-print">
-                        <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
-                        <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
-                        <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
-                        <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
-                    </section>
-                )}
-
-                {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
-                <section className="mt-24 border-t border-slate-200 pt-16">
-                    <article className="prose prose-slate max-w-none">
-                        <header>
-                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">5 Whys 분석: 도요타의 혁신을 이끈 근본 원인 분석(RCA) 방법론</h1>
-                            <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
-                                표면적인 현상을 넘어 시스템의 본질적인 결함을 찾아내는 5 Whys 기법의 수학적 논리와 실전 적용 전략을 심층 분석합니다.
-                            </p>
-                        </header>
-
-                        <div className="space-y-16 text-slate-600 leading-relaxed">
-                            <section>
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 5 Whys 분석의 정의와 역사적 배경</h2>
-                                <p className="text-lg">
-                                    <strong>5 Whys 분석</strong>은 도요타 생산 방식(TPS)의 창시자인 <strong>오노 다이이치(Taiichi Ohno)</strong>가 제안한 문제 해결 기법입니다. 이 모델은 어떤 문제의 현상에 대해 '왜?'라는 질문을 최소 5번 반복함으로써, 표면적인 원인이 아닌 시스템적인 <strong>근본 원인(Root Cause)</strong>을 찾아내는 데 목적이 있습니다.
-                                </p>
-                                <p className="text-lg">
-                                    오노 다이이치는 "5번의 질문을 던지는 것만으로도 문제의 본질에 도달할 수 있으며, 이를 통해 재발 방지 대책을 수립할 수 있다"고 강조했습니다. 현재 이 기법은 린(Lean) 경영, 식스 시그마(Six Sigma), 카이젠(Kaizen) 등 현대 품질 관리 및 경영 혁신의 핵심 도구로 자리 잡았습니다.
-                                </p>
                             </section>
+                        )}
 
-                            <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
-                                <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 5 Whys의 핵심 원칙과 논리적 구조</h2>
-                                <div className="space-y-8">
-                                    <div>
-                                        <h3 className="text-xl font-black text-blue-800 mb-3">🔍 사람이 아닌 프로세스에 집중</h3>
-                                        <p className="text-base font-medium">"누가 실수했는가?"를 묻는 대신 "왜 시스템이 그 실수를 방지하지 못했는가?"를 탐구합니다. 비난이 아닌 개선을 목적으로 합니다.</p>
+                        {step === 3 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <div className="text-center">
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">3. 근본 원인 및 해결책</h2>
+                                </div>
+                                <div className="space-y-6">
+                                    <div className="p-6 bg-slate-900 rounded-2xl">
+                                        <label className="text-blue-400 text-[10px] font-black uppercase tracking-widest mb-2 block">Root Cause</label>
+                                        <textarea value={data.rootCause} onChange={e => setData({...data, rootCause: e.target.value, isDefault: false})} className="w-full h-24 bg-transparent border-none outline-none text-white font-black text-lg" placeholder="진짜 원인은 무엇인가요?" />
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-black text-rose-800 mb-3">🔗 인과관계의 사슬(Chain of Causality)</h3>
-                                        <p className="text-base font-medium">각 단계의 답변은 반드시 이전 단계의 직접적인 원인이어야 합니다. 논리적 비약 없이 꼬리에 꼬리를 무는 질문을 이어가야 합니다.</p>
+                                    <div className="p-6 bg-emerald-500 rounded-2xl">
+                                        <label className="text-emerald-100 text-[10px] font-black uppercase tracking-widest mb-2 block">Action Plan</label>
+                                        <textarea value={data.action} onChange={e => setData({...data, action: e.target.value, isDefault: false})} className="w-full h-24 bg-transparent border-none outline-none text-white font-black text-lg" placeholder="어떻게 해결할까요?" />
                                     </div>
-                                    <div>
-                                        <h3 className="text-xl font-black text-emerald-800 mb-3">✅ Therefore 테스트</h3>
-                                        <p className="text-base font-medium">답변을 거꾸로 읽었을 때(원인 → 결과) 자연스러운 인과관계가 성립하는지 확인하여 분석의 타당성을 검증합니다.</p>
+                                </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 4 && (
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">5 Whys Root Cause Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">문제 해결 분석 리포트</h2>
+                                </div>
+                                
+                                <div className="bg-slate-50 p-8 rounded-[2rem] mb-12 border border-slate-100">
+                                    <h3 className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-4">Initial Problem</h3>
+                                    <p className="text-xl md:text-2xl font-black text-slate-800 leading-tight break-keep">"{data.problem}"</p>
+                                </div>
+
+                                <div className="space-y-4 mb-12">
+                                    {data.whys.map((why, i) => why && (
+                                        <div key={i} className="flex gap-4 items-center">
+                                            <div className="w-10 h-10 bg-white border-2 border-blue-600 text-blue-600 rounded-full flex items-center justify-center font-black text-sm shrink-0 shadow-md">{i+1}</div>
+                                            <div className="flex-1 bg-white p-4 rounded-2xl shadow-sm border border-slate-100 font-bold text-slate-600 text-sm md:text-base break-keep">{why}</div>
+                                        </div>
+                                    ))}
+                                </div>
+
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-8 bg-slate-900 text-white rounded-[2.5rem] shadow-2xl">
+                                        <h3 className="text-blue-400 font-black text-[10px] uppercase tracking-widest mb-6">Root Cause</h3>
+                                        <p className="text-lg md:text-xl font-black leading-relaxed break-keep">{data.rootCause}</p>
+                                    </div>
+                                    <div className="p-8 bg-emerald-500 text-white rounded-[2.5rem] shadow-2xl">
+                                        <h3 className="text-emerald-100 font-black text-[10px] uppercase tracking-widest mb-6">Action Plan</h3>
+                                        <p className="text-lg md:text-xl font-black leading-relaxed break-keep">{data.action}</p>
                                     </div>
                                 </div>
                             </section>
-
-                            <section>
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 통제 가능한 원인 찾기</h2>
-                                <p className="text-lg">
-                                    5 Whys 분석 시 가장 흔한 실수는 "경기가 안 좋아서" 또는 "고객의 변심"과 같이 우리가 통제할 수 없는 외부 요인을 원인으로 지목하는 것입니다. 진정한 근본 원인은 <strong>우리가 시스템적으로 수정하거나 개선할 수 있는 지점</strong>이어야 합니다.
-                                </p>
-                                <p className="text-lg">
-                                    또한, 반드시 5번을 채울 필요는 없습니다. 근본 원인이 명확히 드러났다면 3번 만에 멈출 수도 있고, 복잡한 문제라면 7~8번까지 이어질 수도 있습니다. 중요한 것은 '현상 수습'이 아닌 '재발 방지'가 가능한 지점까지 파고드는 것입니다.
-                                </p>
-                            </section>
-
-                            <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
-                                <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <a href="https://en.wikipedia.org/wiki/Five_whys" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                        <h4 className="font-black mb-2">Wikipedia: Five Whys</h4>
-                                        <p className="text-xs text-slate-400">5 Whys의 역사적 배경과 도요타 생산 방식에서의 역할에 대한 상세 정의</p>
-                                    </a>
-                                    <a href="https://www.britannica.com/topic/quality-control" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                        <h4 className="font-black mb-2">Britannica: Quality Control</h4>
-                                        <p className="text-xs text-slate-400">브리태니커 백과사전이 정의하는 품질 관리와 문제 해결 방법론의 기초</p>
-                                    </a>
-                                </div>
-                            </section>
-
-                            <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Ohno, T. (1988). <em>Toyota Production System: Beyond Large-Scale Production</em>. Productivity Press.</li>
-                                    <li>• Liker, J. K. (2004). <em>The Toyota Way: 14 Management Principles</em>. McGraw-Hill.</li>
-                                    <li>• Spear, S., & Bowen, H. K. (1999). "Decoding the DNA of the Toyota Production System". <em>Harvard Business Review</em>.</li>
-                                    <li>• Ishikawa, K. (1985). <em>What is Total Quality Control? The Japanese Way</em>. Prentice Hall.</li>
-                                    <li>• Senge, P. M. (1990). <em>The Fifth Discipline: The Art & Practice of The Learning Organization</em>. Doubleday.</li>
-                                </ul>
-                            </section>
-                        </div>
+                        )}
                     </article>
-                </section>
 
-                {/* [패밀리 사이트] */}
-                <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
-                    <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
-                    <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
-                        🚀 팩트폭격연구소(factbomber.kr) 바로가기
-                    </a>
-                </footer>
-            </main>
-        );
-    }
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
+                    {step === 4 && (
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
+                    )}
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(FiveWhysApp));
-</script>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
+
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">5 Whys 분석: 도요타의 혁신을 이끈 근본 원인 분석(RCA) 방법론</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    표면적인 현상을 넘어 시스템의 본질적인 결함을 찾아내는 5 Whys 기법의 논리적 구조와 실전 적용 전략을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 5 Whys 분석의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>5 Whys 분석</strong>은 도요타 생산 방식(TPS)의 창시자인 <strong>오노 다이이치(Taiichi Ohno)</strong>가 제안한 문제 해결 기법입니다. 이 모델은 어떤 문제의 현상에 대해 '왜?'라는 질문을 최소 5번 반복함으로써, 표면적인 원인이 아닌 시스템적인 <strong>근본 원인(Root Cause)</strong>을 찾아내는 데 목적이 있습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        오노 다이이치는 "5번의 질문을 던지는 것만으로도 문제의 본질에 도달할 수 있으며, 이를 통해 재발 방지 대책을 수립할 수 있다"고 강조했습니다. 현재 이 기법은 린(Lean) 경영, 식스 시그마(Six Sigma), 카이젠(Kaizen) 등 현대 품질 관리 및 경영 혁신의 핵심 도구로 자리 잡았습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 5 Whys의 핵심 원칙과 논리적 구조</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-800 mb-3">🔍 사람이 아닌 프로세스에 집중</h3>
+                                            <p className="text-base font-medium">"누가 실수했는가?"를 묻는 대신 "왜 시스템이 그 실수를 방지하지 못했는가?"를 탐구합니다. 비난이 아닌 개선을 목적으로 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-700 mb-3">🔗 인과관계의 사슬(Chain of Causality)</h3>
+                                            <p className="text-base font-medium">각 단계의 답변은 반드시 이전 단계의 직접적인 원인이어야 합니다. 논리적 비약 없이 꼬리에 꼬리를 무는 질문을 이어가야 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-800 mb-3">✅ Therefore 테스트</h3>
+                                            <p className="text-base font-medium">답변을 거꾸로 읽었을 때(원인 → 결과) 자연스러운 인과관계가 성립하는지 확인하여 분석의 타당성을 검증합니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 통제 가능한 원인 찾기</h2>
+                                    <p className="text-lg">
+                                        5 Whys 분석 시 가장 흔한 실수는 "경기가 안 좋아서" 또는 "고객의 변심"과 같이 우리가 통제할 수 없는 외부 요인을 원인으로 지목하는 것입니다. 진정한 근본 원인은 <strong>우리가 시스템적으로 수정하거나 개선할 수 있는 지점</strong>이어야 합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        또한, 반드시 5번을 채울 필요는 없습니다. 근본 원인이 명확히 드러났다면 3번 만에 멈출 수도 있고, 복잡한 문제라면 7~8번까지 이어질 수도 있습니다. 중요한 것은 '현상 수습'이 아닌 '재발 방지'가 가능한 지점까지 파고드는 것입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/Five_whys" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: Five Whys</h4>
+                                            <p className="text-xs text-slate-400">5 Whys의 역사적 배경과 도요타 생산 방식에서의 역할에 대한 상세 정의</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=Root+Cause+Analysis+5+Whys+Methodology" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: RCA Research</h4>
+                                            <p className="text-xs text-slate-400">근본 원인 분석(RCA)과 5 Whys 기법에 관한 최신 학술 논문 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Ohno, T. (1988). <em>Toyota Production System: Beyond Large-Scale Production</em>. Productivity Press.</li>
+                                        <li>• Liker, J. K. (2004). <em>The Toyota Way: 14 Management Principles</em>. McGraw-Hill.</li>
+                                        <li>• Spear, S., & Bowen, H. K. (1999). "Decoding the DNA of the Toyota Production System". <em>Harvard Business Review</em>.</li>
+                                        <li>• Ishikawa, K. (1985). <em>What is Total Quality Control? The Japanese Way</em>. Prentice Hall.</li>
+                                        <li>• Senge, P. M. (1990). <em>The Fifth Discipline: The Art & Practice of The Learning Organization</em>. Doubleday.</li>
+                                    </ul>
+                                </section>
+                            </div>
+                        </article>
+                    </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
+                </main>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(FiveWhysApp));
+    </script>
 </body>
 </html>
