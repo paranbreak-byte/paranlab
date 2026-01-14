@@ -2,27 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [SEO 표준] -->
-    <title>SWOT 분석 도구 | 전략 수립을 위한 강점·약점 분석 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="기업이나 개인의 강점, 약점, 기회, 위협을 분석하고 최적의 TOWS 전략을 도출하세요. 내부 역량과 외부 환경을 교차 분석하여 성공적인 비즈니스 시나리오를 설계합니다.">
-    <meta name="keywords" content="SWOT분석, TOWS매트릭스, 경영전략, 강점약점분석, 사업계획서, 파란랩, 알버트험프리, 전략수립">
-    <meta property="og:title" content="파란랩 SWOT 분석 엔진">
-    <meta property="og:description" content="위기를 기회로 바꾸는 전략의 힘, SWOT 분석으로 시작하세요.">
-    <meta property="og:type" content="website">
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>SWOT 분석 도구 v7.8.1 | 전략 수립을 위한 강점·약점 및 TOWS 매트릭스 엔진 | 파란랩</title>
+    <meta name="description" content="기업이나 개인의 강점, 약점, 기회, 위협을 분석하고 최적의 TOWS 전략을 도출하세요. 내부 역량과 외부 환경을 교차 분석하여 성공적인 비즈니스 시나리오를 설계하는 전문 전략 도구입니다.">
+    <meta name="keywords" content="SWOT분석, TOWS매트릭스, 경영전략, 강점약점분석, 사업계획서, 파란랩, 알버트험프리, 전략수립, 의사결정과학">
     <link rel="canonical" href="https://paranlab.com/swot/">
     
-    <!-- [구조화 데이터 표준] -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 SWOT 분석 엔진: 위기를 기회로 바꾸는 전략의 힘">
+    <meta property="og:description" content="내부 역량과 외부 환경의 교차 분석을 통해 실행 가능한 4대 전략 시나리오를 도출하세요.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/swot/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🧩</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 SWOT 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "강점, 약점, 기회, 위협 요소를 분석하고 이를 결합하여 4가지 핵심 전략을 도출하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      "@type": "TechArticle",
+      "headline": "SWOT 분석과 TOWS 매트릭스를 활용한 전략 수립 방법론",
+      "description": "알버트 험프리의 SWOT 프레임워크와 하인츠 바이리히의 TOWS 매트릭스를 결합한 통합 전략 분석 프로세스를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/swot/" }
     }
     </script>
 
@@ -36,11 +43,12 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .swot-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .break-keep { word-break: keep-all; }
+        .swot-card { transition: transform 0.3s ease; }
         .swot-card:hover { transform: translateY(-5px); }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -51,7 +59,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (영희의 유기농 베이커리)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "영희의 유기농 베이커리 창업 전략",
             data: {
@@ -71,13 +78,13 @@
 
         function SwotApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 샘플 우선 노출
+            const [step, setStep] = useState(4); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-swot');
                         if (saved) {
@@ -86,13 +93,15 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-swot', JSON.stringify(data));
@@ -120,274 +129,262 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-swot'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-swot'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Strategy Science</p>
-                            <p className="font-bold text-sm">PARAN LAB SWOT v7.7</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">SWOT STRATEGY ENGINE</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['주제 정의', 'SWOT 도출', '전략 수립', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['주제', 'SWOT', 'TOWS', '결과'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                    {/* 메인 컨텐츠 카드 */}
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Subject */}
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">분석할 대상을 정의하세요</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">분석 주제 설정</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">전략을 수립할 비즈니스나 개인의 목표를 입력하세요.</p>
                                 </div>
-                                <input 
-                                    type="text" 
-                                    value={data.subject} 
-                                    onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
-                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="예: 영희의 베이커리 창업 전략"
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: SWOT 요소 분석</button>
-                            </div>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-6 bg-slate-50 rounded-2xl border-none outline-none text-xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="예: 신규 브랜드 런칭 전략" />
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: SWOT 요소 분석</button>
+                            </section>
                         )}
 
-                        {/* Step 2: SWOT Input */}
                         {step === 2 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. SWOT Analysis</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">내부 역량과 외부 환경을 분석하세요</h2>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="p-8 bg-blue-50 rounded-[3rem] border border-blue-100 space-y-4">
-                                        <h3 className="text-xl font-black text-blue-700 flex items-center gap-2">💪 STRENGTHS (강점)</h3>
-                                        <textarea value={data.data.s} onChange={e => setData({...data, data: {...data.data, s: e.target.value}, isDefault: false})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" placeholder="우리만이 가진 내부적 강점은?" />
+                            <section className="space-y-8 animate-in fade-in">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-6 bg-blue-50 rounded-3xl border border-blue-100 space-y-3">
+                                        <h3 className="text-lg font-black text-blue-700 flex items-center gap-2">💪 STRENGTHS (강점)</h3>
+                                        <textarea value={data.data.s} onChange={e => setData({...data, data: {...data.data, s: e.target.value}, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-xl border-none outline-none text-sm font-bold shadow-inner" placeholder="내부적 강점..." />
                                     </div>
-                                    <div className="p-8 bg-rose-50 rounded-[3rem] border border-rose-100 space-y-4">
-                                        <h3 className="text-xl font-black text-rose-700 flex items-center gap-2">⚠️ WEAKNESSES (약점)</h3>
-                                        <textarea value={data.data.w} onChange={e => setData({...data, data: {...data.data, w: e.target.value}, isDefault: false})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" placeholder="보완해야 할 내부적 약점은?" />
+                                    <div className="p-6 bg-rose-50 rounded-3xl border border-rose-100 space-y-3">
+                                        <h3 className="text-lg font-black text-rose-700 flex items-center gap-2">⚠️ WEAKNESSES (약점)</h3>
+                                        <textarea value={data.data.w} onChange={e => setData({...data, data: {...data.data, w: e.target.value}, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-xl border-none outline-none text-sm font-bold shadow-inner" placeholder="내부적 약점..." />
                                     </div>
-                                    <div className="p-8 bg-emerald-50 rounded-[3rem] border border-emerald-100 space-y-4">
-                                        <h3 className="text-xl font-black text-emerald-700 flex items-center gap-2">🌟 OPPORTUNITIES (기회)</h3>
-                                        <textarea value={data.data.o} onChange={e => setData({...data, data: {...data.data, o: e.target.value}, isDefault: false})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" placeholder="활용 가능한 외부적 기회는?" />
+                                    <div className="p-6 bg-emerald-50 rounded-3xl border border-emerald-100 space-y-3">
+                                        <h3 className="text-lg font-black text-emerald-700 flex items-center gap-2">🌟 OPPORTUNITIES (기회)</h3>
+                                        <textarea value={data.data.o} onChange={e => setData({...data, data: {...data.data, o: e.target.value}, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-xl border-none outline-none text-sm font-bold shadow-inner" placeholder="외부적 기회..." />
                                     </div>
-                                    <div className="p-8 bg-amber-50 rounded-[3rem] border border-amber-100 space-y-4">
-                                        <h3 className="text-xl font-black text-amber-700 flex items-center gap-2">🚫 THREATS (위협)</h3>
-                                        <textarea value={data.data.t} onChange={e => setData({...data, data: {...data.data, t: e.target.value}, isDefault: false})} className="w-full h-40 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner" placeholder="대비해야 할 외부적 위협은?" />
+                                    <div className="p-6 bg-amber-50 rounded-3xl border border-amber-100 space-y-3">
+                                        <h3 className="text-lg font-black text-amber-700 flex items-center gap-2">🚫 THREATS (위협)</h3>
+                                        <textarea value={data.data.t} onChange={e => setData({...data, data: {...data.data, t: e.target.value}, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-xl border-none outline-none text-sm font-bold shadow-inner" placeholder="외부적 위협..." />
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 교차 전략 수립</button>
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 교차 전략 수립</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 3: TOWS Strategies */}
                         {step === 3 && (
-                            <div className="animate-in fade-in space-y-10">
-                                <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 03. TOWS Matrix</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">SWOT 요소를 결합하여 전략을 세우세요</h2>
-                                </div>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                                    <div className="p-8 border-2 border-blue-200 rounded-[3rem] space-y-4">
-                                        <h3 className="text-xl font-black text-blue-700">SO 전략 (강점+기회)</h3>
-                                        <p className="text-xs text-slate-400 font-bold">강점을 활용해 기회를 선점하는 공격적 전략</p>
-                                        <textarea value={data.strategies.so} onChange={e => setData({...data, strategies: {...data.strategies, so: e.target.value}, isDefault: false})} className="w-full h-32 p-6 bg-slate-50 rounded-2xl border-none outline-none text-sm font-bold" />
+                            <section className="space-y-8 animate-in fade-in">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <div className="p-6 border-2 border-blue-100 rounded-3xl space-y-3">
+                                        <h3 className="text-lg font-black text-blue-700">SO 전략 (강점+기회)</h3>
+                                        <textarea value={data.strategies.so} onChange={e => setData({...data, strategies: {...data.strategies, so: e.target.value}, isDefault: false})} className="w-full h-24 p-4 bg-slate-50 rounded-xl border-none outline-none text-xs font-bold" placeholder="공격적 전략..." />
                                     </div>
-                                    <div className="p-8 border-2 border-rose-200 rounded-[3rem] space-y-4">
-                                        <h3 className="text-xl font-black text-rose-700">ST 전략 (강점+위협)</h3>
-                                        <p className="text-xs text-slate-400 font-bold">강점으로 위협을 회피하거나 극복하는 전략</p>
-                                        <textarea value={data.strategies.st} onChange={e => setData({...data, strategies: {...data.strategies, st: e.target.value}, isDefault: false})} className="w-full h-32 p-6 bg-slate-50 rounded-2xl border-none outline-none text-sm font-bold" />
+                                    <div className="p-6 border-2 border-rose-100 rounded-3xl space-y-3">
+                                        <h3 className="text-lg font-black text-rose-700">ST 전략 (강점+위협)</h3>
+                                        <textarea value={data.strategies.st} onChange={e => setData({...data, strategies: {...data.strategies, st: e.target.value}, isDefault: false})} className="w-full h-24 p-4 bg-slate-50 rounded-xl border-none outline-none text-xs font-bold" placeholder="차별화 전략..." />
                                     </div>
-                                    <div className="p-8 border-2 border-emerald-200 rounded-[3rem] space-y-4">
-                                        <h3 className="text-xl font-black text-emerald-700">WO 전략 (약점+기회)</h3>
-                                        <p className="text-xs text-slate-400 font-bold">약점을 보완하여 기회를 포착하는 만회 전략</p>
-                                        <textarea value={data.strategies.wo} onChange={e => setData({...data, strategies: {...data.strategies, wo: e.target.value}, isDefault: false})} className="w-full h-32 p-6 bg-slate-50 rounded-2xl border-none outline-none text-sm font-bold" />
+                                    <div className="p-6 border-2 border-emerald-100 rounded-3xl space-y-3">
+                                        <h3 className="text-lg font-black text-emerald-700">WO 전략 (약점+기회)</h3>
+                                        <textarea value={data.strategies.wo} onChange={e => setData({...data, strategies: {...data.strategies, wo: e.target.value}, isDefault: false})} className="w-full h-24 p-4 bg-slate-50 rounded-xl border-none outline-none text-xs font-bold" placeholder="만회 전략..." />
                                     </div>
-                                    <div className="p-8 border-2 border-amber-200 rounded-[3rem] space-y-4">
-                                        <h3 className="text-xl font-black text-amber-700">WT 전략 (약점+위협)</h3>
-                                        <p className="text-xs text-slate-400 font-bold">약점을 보완하고 위협을 최소화하는 생존 전략</p>
-                                        <textarea value={data.strategies.wt} onChange={e => setData({...data, strategies: {...data.strategies, wt: e.target.value}, isDefault: false})} className="w-full h-32 p-6 bg-slate-50 rounded-2xl border-none outline-none text-sm font-bold" />
+                                    <div className="p-6 border-2 border-amber-100 rounded-3xl space-y-3">
+                                        <h3 className="text-lg font-black text-amber-700">WT 전략 (약점+위협)</h3>
+                                        <textarea value={data.strategies.wt} onChange={e => setData({...data, strategies: {...data.strategies, wt: e.target.value}, isDefault: false})} className="w-full h-24 p-4 bg-slate-50 rounded-xl border-none outline-none text-xs font-bold" placeholder="생존 전략..." />
                                     </div>
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 4: Result Report */}
                         {step === 4 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        Strategic SWOT & TOWS Report
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        전략 분석 결과
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Strategic SWOT & TOWS Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">{data.subject}</h2>
                                 </div>
-
-                                {/* SWOT Matrix Visualization */}
-                                <div className="grid grid-cols-2 gap-4 mb-16">
-                                    <div className="p-10 bg-blue-50 rounded-[3.5rem] border border-blue-100 swot-card relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-blue-600">S</div>
-                                        <h3 className="font-black text-blue-800 mb-6 text-xl">Strengths</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[120px]">{data.data.s || "기록 없음"}</p>
+                                
+                                <div className="grid grid-cols-2 gap-4 mb-12">
+                                    <div className="p-8 bg-blue-50 rounded-[2rem] border border-blue-100 swot-card relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-blue-600">S</div>
+                                        <h3 className="font-black text-blue-800 mb-4 text-lg">Strengths</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.data.s || "기록 없음"}</p>
                                     </div>
-                                    <div className="p-10 bg-rose-50 rounded-[3.5rem] border border-rose-100 swot-card relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-rose-600">W</div>
-                                        <h3 className="font-black text-rose-800 mb-6 text-xl">Weaknesses</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[120px]">{data.data.w || "기록 없음"}</p>
+                                    <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 swot-card relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-rose-600">W</div>
+                                        <h3 className="font-black text-rose-800 mb-4 text-lg">Weaknesses</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.data.w || "기록 없음"}</p>
                                     </div>
-                                    <div className="p-10 bg-emerald-50 rounded-[3.5rem] border border-emerald-100 swot-card relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-emerald-600">O</div>
-                                        <h3 className="font-black text-emerald-800 mb-6 text-xl">Opportunities</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[120px]">{data.data.o || "기록 없음"}</p>
+                                    <div className="p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100 swot-card relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-emerald-600">O</div>
+                                        <h3 className="font-black text-emerald-800 mb-4 text-lg">Opportunities</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.data.o || "기록 없음"}</p>
                                     </div>
-                                    <div className="p-10 bg-amber-50 rounded-[3.5rem] border border-amber-100 swot-card relative overflow-hidden">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-amber-600">T</div>
-                                        <h3 className="font-black text-amber-800 mb-6 text-xl">Threats</h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[120px]">{data.data.t || "기록 없음"}</p>
+                                    <div className="p-8 bg-amber-50 rounded-[2rem] border border-amber-100 swot-card relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-amber-600">T</div>
+                                        <h3 className="font-black text-amber-800 mb-4 text-lg">Threats</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.data.t || "기록 없음"}</p>
                                     </div>
                                 </div>
 
-                                {/* TOWS Strategies List */}
-                                <div className="space-y-8">
-                                    <h3 className="text-3xl font-black text-slate-900 mb-8 flex items-center gap-3">
-                                        🎯 핵심 실행 전략 (TOWS)
-                                    </h3>
+                                <div className="space-y-6">
+                                    <h3 className="text-2xl font-black text-slate-900 mb-6 flex items-center gap-2">🎯 핵심 실행 전략 (TOWS)</h3>
                                     {[
                                         { k: 'so', n: '공격적 전략 (SO)', c: 'bg-blue-600', t: data.strategies.so, desc: '강점을 활용해 기회를 선점하십시오.' },
                                         { k: 'st', n: '차별화 전략 (ST)', c: 'bg-slate-800', t: data.strategies.st, desc: '강점으로 외부 위협을 정면 돌파하십시오.' },
                                         { k: 'wo', n: '국면전환 전략 (WO)', c: 'bg-emerald-600', t: data.strategies.wo, desc: '약점을 보완하여 기회를 포착하십시오.' },
                                         { k: 'wt', n: '방어적 전략 (WT)', c: 'bg-amber-600', t: data.strategies.wt, desc: '약점을 보완하고 위협을 최소화하십시오.' }
                                     ].map(s => s.t && (
-                                        <div key={s.k} className="flex flex-col md:flex-row gap-8 items-start p-10 bg-slate-50 rounded-[4rem] border border-slate-100 shadow-sm">
-                                            <div className="shrink-0">
-                                                <div className={`${s.c} text-white px-6 py-3 rounded-2xl text-sm font-black shadow-lg`}>{s.n}</div>
-                                            </div>
+                                        <div key={s.k} className="flex flex-col md:flex-row gap-6 items-start p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 shadow-sm">
+                                            <div className={`${s.c} text-white px-4 py-2 rounded-xl text-xs font-black shadow-md shrink-0`}>{s.n}</div>
                                             <div className="flex-1">
-                                                <p className="text-xs font-black text-slate-400 uppercase tracking-widest mb-2">{s.desc}</p>
-                                                <p className="text-xl text-slate-700 font-bold leading-relaxed whitespace-pre-wrap">{s.t}</p>
+                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">{s.desc}</p>
+                                                <p className="text-base text-slate-700 font-bold leading-relaxed whitespace-pre-wrap break-keep">{s.t}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Strategic Insight by PARANLAB.COM
-                                    </p>
-                                </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 4 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/swot/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                SWOT 분석과 TOWS 매트릭스: 전략적 사고의 정석
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>SWOT 분석</strong>은 1960년대 스탠퍼드 대학교의 <strong>알버트 험프리(Albert Humphrey)</strong>가 고안한 비즈니스 전략 프레임워크입니다. 이 모델은 기업이나 개인이 처한 상황을 내부적 요인인 <strong>강점(Strengths)</strong>과 <strong>약점(Weaknesses)</strong>, 그리고 외부적 요인인 <strong>기회(Opportunities)</strong>와 <strong>위협(Threats)</strong>의 4가지 관점으로 구조화합니다. SWOT 분석은 복잡한 경영 환경을 단순 명료하게 시각화하여 의사결정의 기초 데이터를 제공하는 데 탁월한 효능이 있습니다.
-                                </p>
-                                <p>
-                                    하지만 단순히 요소를 나열하는 것만으로는 실행 가능한 전략이 나오지 않습니다. 이를 보완하기 위해 1982년 <strong>하인츠 바이리히(Heinz Weihrich)</strong> 교수는 SWOT 요소를 서로 교차시켜 구체적인 행동 지침을 도출하는 <strong>TOWS 매트릭스</strong>를 제안했습니다. TOWS는 내부 역량과 외부 환경의 조합을 통해 4가지 핵심 전략 시나리오를 생성합니다: 1) 강점으로 기회를 잡는 SO 전략, 2) 강점으로 위협을 돌파하는 ST 전략, 3) 약점을 보완해 기회를 얻는 WO 전략, 4) 약점을 방어하고 위협을 피하는 WT 전략입니다.
-                                </p>
-                                <p>
-                                    파란랩의 SWOT 분석 엔진은 이러한 고전적 전략 이론을 현대적인 데이터 시각화 기술과 결합하여, 당신의 비즈니스가 나아가야 할 최적의 경로를 과학적으로 설계하도록 돕습니다. 내부의 힘을 믿고 외부의 흐름을 타는 것, 그것이 바로 전략의 본질입니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 내부 역량 분석 (S/W)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        우리가 통제할 수 있는 자원과 능력을 평가합니다. 기술력, 브랜드 가치, 인적 자원 등 경쟁 우위 요소(S)와 자본 부족, 낮은 인지도 등 개선이 필요한 요소(W)를 객관적으로 직시해야 합니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">2. 외부 환경 분석 (O/T)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        우리가 통제할 수 없는 시장의 흐름을 읽습니다. 새로운 트렌드, 정책 변화 등 활용 가능한 기회(O)와 강력한 경쟁자, 경기 침체 등 대비해야 할 위협(T)을 식별합니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">3. 교차 전략의 수립 (TOWS)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        나열된 요소들을 연결하여 '어떻게 행동할 것인가'를 결정합니다. 특히 SO 전략은 성장의 엔진이 되며, WT 전략은 생존을 위한 방어막이 됩니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-amber-600 shadow-sm">
-                                    <h4 className="font-black text-amber-600 mb-6 text-2xl">4. 지속적인 업데이트</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        전략은 고정된 것이 아닙니다. 시장 환경이 변함에 따라 SWOT 요소를 주기적으로 업데이트하고 그에 따른 TOWS 전략을 유연하게 수정해 나가야 합니다.
-                                    </p>
-                                </div>
-                            </div>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Humphrey, A. S. (2005). "SWOT Analysis for Management Accountability". <em>SRI Alumni Association Newsletter</em>.</li>
-                                    <li>• Weihrich, H. (1982). "The TOWS matrix—A tool for situational analysis". <em>Long Range Planning</em>, 15(2), 54-66.</li>
-                                    <li>• Porter, M. E. (1980). <em>Competitive Strategy: Techniques for Analyzing Industries and Competitors</em>. Free Press.</li>
-                                    <li>• Hill, T., & Westbrook, R. (1997). "SWOT analysis: It's time for a product recall". <em>Long Range Planning</em>.</li>
-                                </ul>
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">SWOT 분석과 TOWS 매트릭스: 전략적 의사결정의 정석</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    내부 역량과 외부 환경을 통합적으로 진단하여 위기를 기회로 바꾸는 SWOT 프레임워크와 실행 가능한 전략 시나리오를 도출하는 TOWS 매트릭스를 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. SWOT 분석의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>SWOT 분석</strong>은 1960년대 스탠퍼드 대학교의 <strong>알버트 험프리(Albert Humphrey)</strong>가 고안한 비즈니스 전략 프레임워크입니다. 이 모델은 기업이나 개인이 처한 상황을 내부적 요인인 <strong>강점(Strengths)</strong>과 <strong>약점(Weaknesses)</strong>, 그리고 외부적 요인인 <strong>기회(Opportunities)</strong>와 <strong>위협(Threats)</strong>의 4가지 관점으로 구조화합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        SWOT 분석은 복잡한 경영 환경을 단순 명료하게 시각화하여 의사결정의 기초 데이터를 제공하는 데 탁월한 효능이 있습니다. 단순히 요소를 나열하는 것을 넘어, 현재의 위치를 객관적으로 파악하고 미래의 방향성을 설정하는 전략 수립의 가장 기초적인 단계로 활용됩니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. TOWS 매트릭스: 실행 가능한 전략의 도출</h2>
+                                    <div className="space-y-6 text-lg">
+                                        <p>1982년 <strong>하인츠 바이리히(Heinz Weihrich)</strong> 교수는 SWOT 요소를 서로 교차시켜 구체적인 행동 지침을 도출하는 TOWS 매트릭스를 제안했습니다.</p>
+                                        <ul className="list-disc pl-6 space-y-4 font-medium">
+                                            <li><strong>SO 전략 (강점-기회):</strong> 내부 강점을 활용하여 외부 기회를 선점하는 가장 공격적인 성장 전략입니다.</li>
+                                            <li><strong>ST 전략 (강점-위협):</strong> 내부 강점을 통해 외부의 위협 요인을 회피하거나 극복하는 차별화 전략입니다.</li>
+                                            <li><strong>WO 전략 (약점-기회):</strong> 내부 약점을 보완하거나 외부 자원을 활용하여 기회를 포착하는 국면 전환 전략입니다.</li>
+                                            <li><strong>WT 전략 (약점-위협):</strong> 약점을 방어하고 위협을 최소화하여 생존을 도모하는 방어적 전략입니다.</li>
+                                        </ul>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 객관적 진단과 유연한 대응</h2>
+                                    <p className="text-lg">
+                                        SWOT 분석을 수행할 때 가장 주의해야 할 점은 <strong>'객관성'</strong>입니다. 자신의 강점을 과대평가하거나 약점을 숨기려 할 경우, 잘못된 전략이 도출될 수 있습니다. 또한, 외부 환경은 끊임없이 변하므로 주기적인 업데이트가 필수적입니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        파란랩의 SWOT 엔진은 사용자가 각 요소를 텍스트로 구체화하고 이를 시각적으로 결합하도록 설계되었습니다. 도출된 TOWS 전략 중 현재의 자원과 역량으로 즉시 실행 가능한 우선순위를 정하고, 이를 구체적인 액션 플랜으로 연결하십시오.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/SWOT_analysis" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: SWOT Analysis</h4>
+                                            <p className="text-xs text-slate-400">SWOT 분석의 역사적 배경과 전략적 프레임워크에 대한 상세 학술 정의</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=TOWS+matrix+situational+analysis+Heinz+Weihrich" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: TOWS Matrix</h4>
+                                            <p className="text-xs text-slate-400">하인츠 바이리히의 TOWS 매트릭스 이론과 실전 적용에 관한 학술 논문 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Humphrey, A. S. (2005). "SWOT Analysis for Management Accountability". <em>SRI Alumni Association Newsletter</em>.</li>
+                                        <li>• Weihrich, H. (1982). "The TOWS matrix—A tool for situational analysis". <em>Long Range Planning</em>, 15(2), 54-66.</li>
+                                        <li>• Porter, M. E. (1980). <em>Competitive Strategy: Techniques for Analyzing Industries and Competitors</em>. Free Press.</li>
+                                        <li>• Hill, T., & Westbrook, R. (1997). "SWOT analysis: It's time for a product recall". <em>Long Range Planning</em>.</li>
+                                        <li>• Helms, M. M., & Nixon, J. (2010). "Exploring SWOT analysis - where are we now? A review of academic research from the last decade". <em>Journal of Strategy and Management</em>.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(SwotApp));
     </script>
 </body>
