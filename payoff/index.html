@@ -2,27 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [SEO 표준] -->
-    <title>Payoff 매트릭스 | 업무 효율 및 가성비 분석 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="노력 대비 성과가 가장 높은 업무를 찾으세요. 페이오프 매트릭스로 Quick Wins 과제를 선별하고 생산성을 극대화하는 과학적 우선순위 도구입니다.">
-    <meta name="keywords" content="Payoff매트릭스, 페이오프, 업무효율, 우선순위, QuickWins, 생산성도구, 파레토법칙, 파란랩">
-    <meta property="og:title" content="파란랩 Payoff 분석 엔진">
-    <meta property="og:description" content="가장 적은 노력으로 최대의 성과를 내는 '가성비' 업무를 선별하세요.">
-    <meta property="og:type" content="website">
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>Payoff 매트릭스 도구 v7.8.1 | 업무 효율 및 가성비 분석 엔진 | 파란랩</title>
+    <meta name="description" content="노력 대비 성과가 가장 높은 업무를 찾으세요. 페이오프 매트릭스로 Quick Wins 과제를 선별하고 생산성을 극대화하는 과학적 우선순위 결정 도구입니다.">
+    <meta name="keywords" content="Payoff매트릭스, 페이오프, 업무효율, 우선순위, QuickWins, 생산성도구, 파레토법칙, 파란랩, 의사결정과학">
     <link rel="canonical" href="https://paranlab.com/payoff/">
     
-    <!-- [구조화 데이터 표준] -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 Payoff 분석 엔진: 가장 적은 노력으로 최대의 성과를">
+    <meta property="og:description" content="노력(Effort)과 영향력(Impact) 분석을 통해 '가성비' 업무를 선별하고 자원을 효율적으로 배분하세요.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/payoff/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💰</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 Payoff 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "노력(Effort)과 영향력(Impact)을 기준으로 업무의 효율성을 4분면으로 분류하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      "@type": "TechArticle",
+      "headline": "Payoff 매트릭스(Effort-Impact Matrix)를 활용한 업무 효율화 방법론",
+      "description": "파레토 법칙을 기반으로 투입 노력 대비 산출 성과를 극대화하는 4사분면 분석 프로세스를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/payoff/" }
     }
     </script>
 
@@ -36,13 +43,14 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1.5rem; }
+        .break-keep { word-break: keep-all; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
         input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -53,7 +61,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (마케팅 팀 업무 효율 분석)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "마케팅 팀 주간 업무 효율성 분석",
             tasks: [
@@ -67,13 +74,13 @@
 
         function PayoffApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(3); // 샘플 우선 노출
+            const [step, setStep] = useState(3); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-payoff');
                         if (saved) {
@@ -82,20 +89,22 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-payoff', JSON.stringify(data));
                 }
             }, [data, isLoaded]);
 
-            // 사분면 분류 로직 (기준점: 5)
+            // [로직 보존] 원본 사분면 분류 연산
             const quadrants = useMemo(() => {
                 const q = { wins: [], projects: [], fillins: [], thankless: [] };
                 (data.tasks || []).forEach(t => {
@@ -131,284 +140,255 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-payoff'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-payoff'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Efficiency Science</p>
-                            <p className="font-bold text-sm">PARAN LAB PAYOFF v7.7</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">PAYOFF MATRIX ENGINE</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['업무 나열', '효율성 평가', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['업무 나열', '효율성 평가', '결과 리포트'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                    {/* 메인 컨텐츠 카드 */}
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 3 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Task Listing */}
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <h2 className="text-4xl font-black text-slate-900">분석할 업무나 아이디어를 적으세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">현재 진행 중이거나 계획 중인 과제들을 나열합니다.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">분석 대상 설정</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">현재 진행 중이거나 계획 중인 과제들을 나열하세요.</p>
                                 </div>
-                                <div className="max-w-2xl mx-auto space-y-4">
-                                    <input 
-                                        type="text" 
-                                        value={data.subject} 
-                                        onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
-                                        className="w-full p-6 bg-blue-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner mb-8"
-                                        placeholder="분석 주제 (예: 마케팅 팀 업무 효율 분석)"
-                                    />
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-5 bg-blue-50 rounded-2xl border-none outline-none text-lg font-black text-center shadow-inner mb-4" placeholder="분석 주제 입력" />
+                                <div className="space-y-3">
                                     {data.tasks.map((t, i) => (
-                                        <div key={t.id} className="flex gap-4 animate-in slide-in-from-bottom-2" style={{animationDelay: `${i * 50}ms`}}>
-                                            <input 
-                                                type="text" 
-                                                value={t.text} 
-                                                onChange={e => {
-                                                    const newTasks = [...data.tasks];
-                                                    newTasks[i].text = e.target.value;
-                                                    setData({...data, tasks: newTasks, isDefault: false});
-                                                }}
-                                                className="flex-1 p-5 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-2 ring-blue-200"
-                                                placeholder={`업무 ${i + 1}`}
-                                            />
-                                            <button 
-                                                onClick={() => setData({...data, tasks: data.tasks.filter(item => item.id !== t.id), isDefault: false})}
-                                                className="px-6 text-red-400 font-black hover:text-red-600"
-                                            >
-                                                삭제
-                                            </button>
+                                        <div key={t.id} className="flex gap-2">
+                                            <input type="text" value={t.text} onChange={e => { const n = [...data.tasks]; n[i].text = e.target.value; setData({...data, tasks: n, isDefault: false}); }} className="flex-1 p-4 bg-slate-50 rounded-xl border-none outline-none text-base font-bold shadow-inner" placeholder={`업무 ${i + 1}`} />
+                                            <button onClick={() => setData({...data, tasks: data.tasks.filter(item => item.id !== t.id), isDefault: false})} className="text-red-400 font-black px-2">×</button>
                                         </div>
                                     ))}
-                                    <button 
-                                        onClick={() => setData({...data, tasks: [...data.tasks, { id: Date.now(), text: "", effort: 5, impact: 5 }], isDefault: false})}
-                                        className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black hover:bg-slate-50 transition-all"
-                                    >
-                                        + 업무 추가
-                                    </button>
                                 </div>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 노력과 영향력 평가</button>
-                            </div>
+                                <button onClick={() => setData({...data, tasks: [...data.tasks, { id: Date.now(), text: "", effort: 5, impact: 5 }], isDefault: false})} className="w-full py-3 border-2 border-dashed border-slate-200 rounded-xl text-slate-400 font-black text-sm">+ 업무 추가</button>
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 효율성 평가</button>
+                            </section>
                         )}
 
-                        {/* Step 2: Evaluation */}
                         {step === 2 && (
-                            <div className="animate-in fade-in space-y-12">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 02. Effort vs Impact</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">각 업무의 가성비를 평가하세요</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">노력 vs 영향력 평가</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">각 업무의 투입 노력과 예상 성과를 평가하세요.</p>
                                 </div>
-                                <div className="space-y-10">
+                                <div className="space-y-6">
                                     {data.tasks.map((t, i) => (
-                                        <div key={t.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-8">
-                                            <h3 className="text-2xl font-black text-slate-800">📌 {t.text || "제목 없는 업무"}</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>노력/비용 (Effort)</span><span className="text-rose-600 text-2xl">{t.effort}</span></div>
-                                                    <input type="range" min="1" max="10" value={t.effort} onChange={e => {
-                                                        const newTasks = [...data.tasks];
-                                                        newTasks[i].effort = parseInt(e.target.value);
-                                                        setData({...data, tasks: newTasks, isDefault: false});
-                                                    }} />
-                                                    <div className="flex justify-between text-[10px] font-bold text-slate-400"><span>쉬움</span><span>매우 힘듦</span></div>
+                                        <div key={t.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 space-y-6">
+                                            <h3 className="text-lg font-black text-slate-800">📌 {t.text || "제목 없는 업무"}</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-xs font-black text-slate-400"><span>노력/비용 (Effort)</span><span className="text-rose-600">{t.effort}</span></div>
+                                                    <input type="range" min="1" max="10" value={t.effort} onChange={e => { const n = [...data.tasks]; n[i].effort = parseInt(e.target.value); setData({...data, tasks: n, isDefault: false}); }} />
                                                 </div>
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>영향력/성과 (Impact)</span><span className="text-blue-600 text-2xl">{t.impact}</span></div>
-                                                    <input type="range" min="1" max="10" value={t.impact} onChange={e => {
-                                                        const newTasks = [...data.tasks];
-                                                        newTasks[i].impact = parseInt(e.target.value);
-                                                        setData({...data, tasks: newTasks, isDefault: false});
-                                                    }} />
-                                                    <div className="flex justify-between text-[10px] font-bold text-slate-400"><span>미미함</span><span>매우 큼</span></div>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-xs font-black text-slate-400"><span>영향력/성과 (Impact)</span><span className="text-blue-600">{t.impact}</span></div>
+                                                    <input type="range" min="1" max="10" value={t.impact} onChange={e => { const n = [...data.tasks]; n[i].impact = parseInt(e.target.value); setData({...data, tasks: n, isDefault: false}); }} />
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 3: Result Report */}
                         {step === 3 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        Payoff Effort-Impact Matrix Report
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        업무 효율 분석 결과
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Payoff Efficiency Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">업무 효율 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">주제: {data.subject}</p>
                                 </div>
-
+                                
                                 <div className="matrix-grid mb-12">
-                                    {/* Quick Wins */}
-                                    <div className="p-8 bg-emerald-50 rounded-[3rem] border-2 border-emerald-100 relative min-h-[280px]">
-                                        <div className="absolute top-4 right-6 text-emerald-200 font-black text-5xl italic opacity-40">Wins</div>
-                                        <h3 className="font-black text-emerald-700 mb-4 text-xl flex items-center gap-2">🚀 Quick Wins</h3>
-                                        <p className="text-[10px] font-bold text-emerald-400 uppercase mb-4">Low Effort, High Impact</p>
+                                    <div className="p-6 bg-emerald-50 rounded-3xl border-2 border-emerald-100 min-h-[200px] relative">
+                                        <div className="absolute top-4 right-6 text-emerald-200 font-black text-4xl italic opacity-40">Wins</div>
+                                        <h3 className="font-black text-emerald-700 mb-4 text-sm md:text-base">🚀 Quick Wins</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.wins.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm border border-emerald-100 animate-in zoom-in">✓ {t.text}</li>)}
-                                            {quadrants.wins.length === 0 && <li className="text-emerald-200 text-xs italic">해당 항목 없음</li>}
+                                            {quadrants.wins.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-
-                                    {/* Major Projects */}
-                                    <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 relative min-h-[280px]">
-                                        <div className="absolute top-4 right-6 text-blue-200 font-black text-5xl italic opacity-40">Major</div>
-                                        <h3 className="font-black text-blue-700 mb-4 text-xl flex items-center gap-2">🏗️ Major Projects</h3>
-                                        <p className="text-[10px] font-bold text-blue-400 uppercase mb-4">High Effort, High Impact</p>
+                                    <div className="p-6 bg-blue-50 rounded-3xl border-2 border-blue-100 min-h-[200px] relative">
+                                        <div className="absolute top-4 right-6 text-blue-200 font-black text-4xl italic opacity-40">Major</div>
+                                        <h3 className="font-black text-blue-700 mb-4 text-sm md:text-base">🏗️ Major Projects</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.projects.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm border border-blue-100 animate-in zoom-in">✓ {t.text}</li>)}
-                                            {quadrants.projects.length === 0 && <li className="text-blue-200 text-xs italic">해당 항목 없음</li>}
+                                            {quadrants.projects.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-
-                                    {/* Fill-ins */}
-                                    <div className="p-8 bg-slate-100 rounded-[3rem] border-2 border-slate-200 relative min-h-[280px]">
-                                        <div className="absolute top-4 right-6 text-slate-200 font-black text-5xl italic opacity-40">Fill</div>
-                                        <h3 className="font-black text-slate-700 mb-4 text-xl flex items-center gap-2">🐌 Fill-ins</h3>
-                                        <p className="text-[10px] font-bold text-slate-400 uppercase mb-4">Low Effort, Low Impact</p>
+                                    <div className="p-6 bg-slate-100 rounded-3xl border-2 border-slate-200 min-h-[200px] relative">
+                                        <div className="absolute top-4 right-6 text-slate-200 font-black text-4xl italic opacity-40">Fill</div>
+                                        <h3 className="font-black text-slate-700 mb-4 text-sm md:text-base">🐌 Fill-ins</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.fillins.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm border border-slate-200 animate-in zoom-in">✓ {t.text}</li>)}
-                                            {quadrants.fillins.length === 0 && <li className="text-slate-300 text-xs italic">해당 항목 없음</li>}
+                                            {quadrants.fillins.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-
-                                    {/* Thankless Tasks */}
-                                    <div className="p-8 bg-rose-50 rounded-[3rem] border-2 border-rose-100 relative min-h-[280px]">
-                                        <div className="absolute top-4 right-6 text-rose-200 font-black text-5xl italic opacity-40">Stop</div>
-                                        <h3 className="font-black text-rose-700 mb-4 text-xl flex items-center gap-2">🛑 Thankless Tasks</h3>
-                                        <p className="text-[10px] font-bold text-rose-400 uppercase mb-4">High Effort, Low Impact</p>
+                                    <div className="p-6 bg-rose-50 rounded-3xl border-2 border-rose-100 min-h-[200px] relative">
+                                        <div className="absolute top-4 right-6 text-rose-200 font-black text-4xl italic opacity-40">Stop</div>
+                                        <h3 className="font-black text-rose-700 mb-4 text-sm md:text-base">🛑 Thankless Tasks</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.thankless.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm border border-rose-100 animate-in zoom-in">✓ {t.text}</li>)}
-                                            {quadrants.thankless.length === 0 && <li className="text-rose-200 text-xs italic">해당 항목 없음</li>}
+                                            {quadrants.thankless.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
                                 </div>
 
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💰</div>
                                     <h3 className="text-2xl font-black mb-4">전략적 자원 배분 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        성공의 핵심은 <strong>Quick Wins</strong> 과제를 먼저 실행하여 동력을 얻고, <strong>Major Projects</strong>에 자원을 집중하는 것입니다. 
-                                        노력 대비 성과가 낮은 <strong>Thankless Tasks</strong>는 과감히 제거하거나 자동화하십시오.
+                                    <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
+                                        성공의 핵심은 <strong>Quick Wins</strong> 과제를 먼저 실행하여 동력을 얻고, <strong>Major Projects</strong>에 자원을 집중하는 것입니다. 노력 대비 성과가 낮은 <strong>Thankless Tasks</strong>는 과감히 제거하거나 자동화하십시오.
                                     </p>
                                 </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
-                                </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/payoff/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                Payoff 매트릭스: 가성비 업무를 선별하는 효율성의 과학
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>Payoff 매트릭스(Effort vs Impact Matrix)</strong>는 투입되는 노력(Effort) 대비 얻을 수 있는 성과(Impact)를 시각화하여 자원의 효율성을 극대화하는 의사결정 도구입니다. 이 기법은 이탈리아의 경제학자 빌프레도 파레토가 발견한 <strong>'파레토 법칙(80/20 법칙)'</strong>에 그 학술적 근거를 두고 있습니다. 즉, 전체 결과의 80%는 투입된 노력의 20%에서 발생한다는 원리를 실무에 적용한 것입니다.
-                                </p>
-                                <p>
-                                    현대 비즈니스 환경에서 모든 업무를 완벽하게 처리하는 것은 불가능합니다. 따라서 경영자와 실무자는 어떤 업무가 가장 높은 '가성비'를 내는지 판단해야 합니다. Payoff 매트릭스는 업무를 4가지 영역으로 분류합니다: <strong>1) Quick Wins(적은 노력, 큰 성과), 2) Major Projects(큰 노력, 큰 성과), 3) Fill-ins(적은 노력, 적은 성과), 4) Thankless Tasks(큰 노력, 적은 성과)</strong>. 이 중 Quick Wins를 먼저 실행함으로써 조직의 사기를 높이고 빠른 성공 경험(Small Wins)을 축적하는 것이 전략의 핵심입니다.
-                                </p>
-                                <p>
-                                    심리학적으로 이 도구는 <strong>'인지적 과부하'</strong>를 방지하고 번아웃을 예방하는 데 탁월합니다. 노력은 많이 들지만 성과는 미미한 'Thankless Tasks'를 식별하고 이를 과감히 제거하거나 자동화함으로써, 개인과 조직은 더 높은 가치를 창출하는 핵심 과제에 집중할 수 있게 됩니다. 파란랩의 Payoff 분석 엔진은 이러한 효율성 공학을 현대적인 인터페이스로 구현하여, 당신의 에너지가 낭비되지 않도록 가이드합니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">1. Quick Wins (즉각적 승리)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        가장 먼저 실행해야 할 과제입니다. 최소한의 자원으로 최대의 효과를 낼 수 있는 영역으로, 프로젝트 초기 단계에서 팀의 신뢰를 구축하고 동력을 얻는 데 필수적입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">2. Major Projects (핵심 프로젝트)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        기업의 장기적인 성장을 결정짓는 영역입니다. 많은 노력이 필요하지만 그만큼 보상이 큽니다. 충분한 시간과 예산을 확보하여 전략적으로 접근해야 합니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-400 shadow-sm">
-                                    <h4 className="font-black text-slate-600 mb-6 text-2xl">3. Fill-ins (자투리 업무)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        시간이 남을 때 처리해도 좋은 업무들입니다. 중요도는 낮지만 노력이 적게 들므로, 핵심 업무 사이의 공백 시간에 효율적으로 처리할 수 있습니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">4. Thankless Tasks (비효율 업무)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        가장 경계해야 할 영역입니다. 투입 대비 성과가 매우 낮아 조직의 에너지를 고갈시킵니다. 과감한 포기(De-prioritization)나 프로세스 개선이 시급합니다.
-                                    </p>
-                                </div>
-                            </div>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Pareto, V. (1896). <em>Cours d'économie politique</em>. Université de Lausanne.</li>
-                                    <li>• Koch, R. (1998). <em>The 80/20 Principle: The Secret to Achieving More with Less</em>. Currency.</li>
-                                    <li>• Amabile, T. M., & Kramer, S. J. (2011). <em>The Progress Principle: Using Small Wins to Ignite Joy, Engagement, and Creativity at Work</em>. Harvard Business Review Press.</li>
-                                    <li>• Covey, S. R. (1989). <em>The 7 Habits of Highly Effective People</em>. Free Press.</li>
-                                </ul>
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">Payoff 매트릭스: 가성비 업무를 선별하는 효율성의 과학</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    투입되는 노력(Effort) 대비 얻을 수 있는 성과(Impact)를 시각화하여 자원의 효율성을 극대화하는 의사결정 방법론을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. Payoff 매트릭스의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>Payoff 매트릭스(Effort vs Impact Matrix)</strong>는 한정된 자원을 가장 효과적인 곳에 투입하기 위해 고안된 2x2 우선순위 결정 도구입니다. 이 기법은 이탈리아의 경제학자 빌프레도 파레토가 발견한 <strong>'파레토 법칙(80/20 법칙)'</strong>에 그 학술적 근거를 두고 있습니다. 즉, 전체 결과의 80%는 투입된 노력의 20%에서 발생한다는 원리를 실무에 적용하여, 가장 적은 노력으로 최대의 성과를 내는 '지렛대 포인트'를 찾는 데 목적이 있습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        현대 비즈니스 환경에서 모든 업무를 완벽하게 처리하는 것은 불가능합니다. Payoff 매트릭스는 업무를 4가지 영역으로 분류하여, 경영자와 실무자가 감정적인 애착이 아닌 데이터에 기반한 냉철한 '선택과 집중'을 할 수 있도록 돕습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 4사분면의 전략적 분류와 실행 지침</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-700 mb-3">🚀 Quick Wins (적은 노력, 큰 성과)</h3>
+                                            <p className="text-base font-medium">가장 먼저 실행해야 할 과제입니다. 최소한의 자원으로 최대의 효과를 낼 수 있는 영역으로, 프로젝트 초기 단계에서 팀의 신뢰를 구축하고 동력을 얻는 데 필수적입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-700 mb-3">🏗️ Major Projects (큰 노력, 큰 성과)</h3>
+                                            <p className="text-base font-medium">기업의 장기적인 성장을 결정짓는 영역입니다. 많은 노력이 필요하지만 그만큼 보상이 큽니다. 충분한 시간과 예산을 확보하여 전략적으로 접근해야 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-700 mb-3">🐌 Fill-ins (적은 노력, 적은 성과)</h3>
+                                            <p className="text-base font-medium">시간이 남을 때 처리해도 좋은 업무들입니다. 중요도는 낮지만 노력이 적게 들므로, 핵심 업무 사이의 공백 시간에 효율적으로 처리할 수 있습니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-700 mb-3">🛑 Thankless Tasks (큰 노력, 적은 성과)</h3>
+                                            <p className="text-base font-medium">가장 경계해야 할 영역입니다. 투입 대비 성과가 매우 낮아 조직의 에너지를 고갈시킵니다. 과감한 포기(De-prioritization)나 프로세스 개선이 시급합니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 인지적 과부하 방지와 번아웃 예방</h2>
+                                    <p className="text-lg">
+                                        Payoff 매트릭스를 효과적으로 활용하려면 <strong>'노력'과 '영향력'의 기준</strong>을 객관화해야 합니다. 노력은 시간, 비용, 인력 등의 자원을 의미하며, 영향력은 매출 증대, 고객 만족도 향상, 리스크 감소 등의 성과를 의미합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        파란랩의 Payoff 엔진은 사용자가 각 업무의 위치를 시각적으로 확인하게 함으로써, 번아웃을 유발하는 'Thankless Tasks'를 식별하고 이를 과감히 제거하도록 유도합니다. 성공적인 리더는 팀원들이 'Quick Wins'를 통해 성취감을 느끼고 'Major Projects'를 통해 성장할 수 있는 환경을 설계해야 합니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/Pareto_principle" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: Pareto Principle</h4>
+                                            <p className="text-xs text-slate-400">Payoff 매트릭스의 근간이 되는 80/20 법칙의 정의와 역사적 배경</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=Action+Priority+Matrix+Effort+Impact" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: Decision Matrix</h4>
+                                            <p className="text-xs text-slate-400">의사결정 행렬과 업무 우선순위 설정에 관한 최신 학술 연구 자료</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Pareto, V. (1896). <em>Cours d'économie politique</em>. Université de Lausanne.</li>
+                                        <li>• Koch, R. (1998). <em>The 80/20 Principle: The Secret to Achieving More with Less</em>. Currency.</li>
+                                        <li>• Amabile, T. M., & Kramer, S. J. (2011). <em>The Progress Principle: Using Small Wins to Ignite Joy, Engagement, and Creativity at Work</em>. Harvard Business Review Press.</li>
+                                        <li>• Covey, S. R. (1989). <em>The 7 Habits of Highly Effective People</em>. Free Press.</li>
+                                        <li>• Ulwick, A. W. (2005). <em>What Customers Want: Using Outcome-Driven Innovation to Create Breakthrough Products and Services</em>. McGraw-Hill.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(PayoffApp));
     </script>
 </body>
