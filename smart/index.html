@@ -2,27 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [SEO 표준] -->
-    <title>SMART 목표 설정 도구 | 구체적인 목표 달성 엔진 | 파란랩(Paran Lab)</title>
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>SMART 목표 설정 도구 v7.8.1 | 구체적인 목표 달성 및 성과 관리 엔진 | 파란랩</title>
     <meta name="description" content="막연한 다짐을 SMART한 목표로 바꾸세요. 구체성, 측정 가능성, 달성 가능성, 적절성, 기한을 기준으로 성공 확률을 높이는 과학적 목표 설정 도구입니다.">
-    <meta name="keywords" content="SMART목표, 목표설정기법, 성과관리, 자기계발, 피터드러커, 조지도란, 파란랩, 목표구체화">
-    <meta property="og:title" content="파란랩 SMART 목표 설정 엔진">
-    <meta property="og:description" content="측정할 수 없다면 관리할 수 없습니다. 당신의 목표를 SMART하게 디자인하세요.">
-    <meta property="og:type" content="website">
+    <meta name="keywords" content="SMART목표, 목표설정기법, 성과관리, 자기계발, 피터드러커, 조지도란, 파란랩, 목표구체화, 의사결정과학">
     <link rel="canonical" href="https://paranlab.com/smart/">
     
-    <!-- [구조화 데이터 표준] -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 SMART 목표 설정 엔진: 측정할 수 없다면 관리할 수 없다">
+    <meta property="og:description" content="S.M.A.R.T 5대 원칙으로 당신의 목표를 정교하게 디자인하세요. 실행력을 극대화하는 전문 리포트 생성.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/smart/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📏</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 SMART 목표 설정 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "S.M.A.R.T 원칙에 따라 목표를 구체화하고 실행력을 높이는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      "@type": "TechArticle",
+      "headline": "SMART 원칙을 활용한 과학적 목표 설정 방법론",
+      "description": "조지 도란이 제안한 SMART 목표 설정의 5가지 핵심 요소와 인지 심리학적 효과를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/smart/" }
     }
     </script>
 
@@ -36,11 +43,12 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .smart-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .break-keep { word-break: keep-all; }
+        .smart-card { transition: transform 0.3s ease; }
         .smart-card:hover { transform: translateY(-5px); }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -51,7 +59,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (영어 회화 마스터)
         const DEFAULT_TOOL_SAMPLE = {
             goal: "비즈니스 영어 회화 역량 강화",
             s: "해외 클라이언트와 통역 없이 30분 이상 기술 미팅을 주도할 수 있는 수준의 회화 능력 확보.",
@@ -72,18 +79,17 @@
 
         function SmartApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(4); // 샘플 우선 노출
+            const [step, setStep] = useState(4); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-smart');
                         if (saved) {
                             const parsed = JSON.parse(saved);
-                            // 하이브리드 매핑: 시나리오 데이터 구조 대응
                             const source = parsed.data || parsed;
                             setData({
                                 goal: source.goal || "",
@@ -98,13 +104,15 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-smart', JSON.stringify(data));
@@ -132,236 +140,239 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-smart'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-smart'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Goal Science</p>
-                            <p className="font-bold text-sm">PARAN LAB SMART v7.7</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">SMART GOAL ENGINE</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['주제 정의', 'S-M 분석', 'A-R-T 분석', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['주제', 'S-M 분석', 'A-R-T 분석', '결과'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                    {/* 메인 컨텐츠 카드 */}
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 4 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Subject */}
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Main Goal</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">막연한 다짐을 한 문장으로 적으세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">이 목표를 SMART 원칙에 따라 정교하게 다듬을 것입니다.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">핵심 목표 설정</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">막연한 다짐을 한 문장으로 적으세요.</p>
                                 </div>
-                                <input 
-                                    type="text" 
-                                    value={data.goal} 
-                                    onChange={e => setData({...data, goal: e.target.value, isDefault: false})}
-                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="예: 영어 회화 마스터하기"
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 구체성 및 측정 가능성 설정</button>
-                            </div>
+                                <input type="text" value={data.goal} onChange={e => setData({...data, goal: e.target.value, isDefault: false})} className="w-full p-6 bg-slate-50 rounded-2xl border-none outline-none text-xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="예: 영어 회화 마스터하기" />
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: S-M 분석</button>
+                            </section>
                         )}
 
-                        {/* Step 2: S & M */}
                         {step === 2 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 {[SMART_CONFIG[0], SMART_CONFIG[1]].map(f => (
-                                    <div key={f.k} className={`p-10 ${f.light} rounded-[3rem] border ${f.border} space-y-6`}>
-                                        <div className="flex items-center gap-4">
-                                            <div className={`${f.c} text-white w-12 h-12 rounded-xl flex items-center justify-center font-black shadow-lg`}>{f.k.toUpperCase()}</div>
-                                            <h3 className={`text-2xl font-black ${f.text}`}>{f.n}</h3>
+                                    <div key={f.k} className={`p-8 ${f.light} rounded-3xl border ${f.border} space-y-4`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`${f.c} text-white w-10 h-10 rounded-xl flex items-center justify-center font-black shadow-md`}>{f.k.toUpperCase()}</div>
+                                            <h3 className={`text-xl font-black ${f.text}`}>{f.n}</h3>
                                         </div>
-                                        <p className="text-sm font-bold opacity-60">{f.d}</p>
-                                        <textarea 
-                                            value={data[f.k]} 
-                                            onChange={e => setData({...data, [f.k]: e.target.value, isDefault: false})}
-                                            className="w-full h-32 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-opacity-30 transition-all"
-                                            placeholder="내용을 입력하세요..."
-                                        />
+                                        <p className="text-xs font-bold opacity-50">{f.d}</p>
+                                        <textarea value={data[f.k]} onChange={e => setData({...data, [f.k]: e.target.value, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-base font-bold shadow-inner focus:ring-2 ring-blue-200 transition-all" placeholder="내용을 입력하세요..." />
                                     </div>
                                 ))}
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음 단계</button>
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음 단계</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 3: A, R, T */}
                         {step === 3 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 {[SMART_CONFIG[2], SMART_CONFIG[3], SMART_CONFIG[4]].map(f => (
-                                    <div key={f.k} className={`p-10 ${f.light} rounded-[3rem] border ${f.border} space-y-6`}>
-                                        <div className="flex items-center gap-4">
-                                            <div className={`${f.c} text-white w-12 h-12 rounded-xl flex items-center justify-center font-black shadow-lg`}>{f.k.toUpperCase()}</div>
-                                            <h3 className={`text-2xl font-black ${f.text}`}>{f.n}</h3>
+                                    <div key={f.k} className={`p-8 ${f.light} rounded-3xl border ${f.border} space-y-4`}>
+                                        <div className="flex items-center gap-3">
+                                            <div className={`${f.c} text-white w-10 h-10 rounded-xl flex items-center justify-center font-black shadow-md`}>{f.k.toUpperCase()}</div>
+                                            <h3 className={`text-xl font-black ${f.text}`}>{f.n}</h3>
                                         </div>
-                                        <p className="text-sm font-bold opacity-60">{f.d}</p>
-                                        <textarea 
-                                            value={data[f.k]} 
-                                            onChange={e => setData({...data, [f.k]: e.target.value, isDefault: false})}
-                                            className="w-full h-32 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-opacity-30 transition-all"
-                                            placeholder="내용을 입력하세요..."
-                                        />
+                                        <p className="text-xs font-bold opacity-50">{f.d}</p>
+                                        <textarea value={data[f.k]} onChange={e => setData({...data, [f.k]: e.target.value, isDefault: false})} className="w-full h-32 p-4 bg-white rounded-2xl border-none outline-none text-base font-bold shadow-inner focus:ring-2 ring-blue-200 transition-all" placeholder="내용을 입력하세요..." />
                                     </div>
                                 ))}
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 4: Result Report */}
                         {step === 4 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        SMART Goal Optimization Report
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        목표 구체화 분석 결과
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">핵심 목표: {data.goal || "미정"}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">SMART Goal Optimization Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">목표 구체화 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">핵심 목표: {data.goal}</p>
                                 </div>
-
+                                
                                 <div className="grid grid-cols-1 md:grid-cols-5 gap-4 mb-12">
                                     {SMART_CONFIG.map(f => (
                                         <div key={f.k} className="flex flex-col h-full smart-card">
-                                            <div className={`${f.c} text-white p-6 rounded-t-[2.5rem] text-center font-black text-2xl shadow-lg`}>
-                                                {f.k.toUpperCase()}
-                                            </div>
-                                            <div className={`flex-1 p-8 ${f.light} rounded-b-[2.5rem] border-x border-b ${f.border} shadow-sm`}>
-                                                <h4 className={`text-[10px] font-black uppercase tracking-widest mb-4 ${f.text}`}>{f.n.split(' ')[0]}</h4>
-                                                <p className="text-sm font-bold text-slate-700 leading-relaxed">
-                                                    {data[f.k] || "기록된 내용이 없습니다."}
-                                                </p>
+                                            <div className={`${f.c} text-white p-4 rounded-t-2xl text-center font-black text-xl shadow-md`}>{f.k.toUpperCase()}</div>
+                                            <div className={`flex-1 p-6 ${f.light} rounded-b-2xl border-x border-b ${f.border} shadow-sm`}>
+                                                <h4 className={`text-[10px] font-black uppercase tracking-widest mb-3 ${f.text}`}>{f.n.split(' ')[0]}</h4>
+                                                <p className="text-xs font-bold text-slate-700 leading-relaxed break-keep">{data[f.k] || "기록 없음"}</p>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
 
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">📏</div>
-                                    <h3 className="text-2xl font-black mb-4">목표 달성을 위한 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        "측정할 수 없다면 관리할 수 없고, 관리할 수 없다면 개선할 수 없다." 
-                                        피터 드러커의 명언처럼, 구체화된 목표는 이미 절반의 성공입니다. 
-                                        설정하신 기한 <strong>[{data.t || "미정"}]</strong>까지 매일의 성과를 측정하며 정진하십시오.
+                                    <h3 className="text-2xl font-black mb-4">목표 달성 제언</h3>
+                                    <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
+                                        "측정할 수 없다면 관리할 수 없고, 관리할 수 없다면 개선할 수 없다." 피터 드러커의 명언처럼, 구체화된 목표는 이미 절반의 성공입니다. 설정하신 기한 <strong>[{data.t || "미정"}]</strong>까지 매일의 성과를 측정하며 정진하십시오.
                                     </p>
                                 </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
-                                </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 4 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/smart/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                SMART 목표 설정: 성공을 디자인하는 5가지 과학적 원칙
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>SMART 목표 설정</strong> 기법은 1981년 경영 컨설턴트 <strong>조지 도란(George T. Doran)</strong>이 <em>Management Review</em>에 발표한 논문에서 처음 제안되었습니다. 이 모델은 막연한 희망 사항이나 다짐을 실행 가능한 구체적인 계획으로 변환하여 개인과 조직의 성과를 극대화하는 데 목적이 있습니다. 현대 경영학의 아버지 <strong>피터 드러커(Peter Drucker)</strong>의 '목표에 의한 관리(MBO)' 철학을 실무적으로 가장 완벽하게 구현한 도구로 평가받습니다.
-                                </p>
-                                <p>
-                                    SMART는 <strong>Specific(구체성), Measurable(측정 가능성), Achievable(달성 가능성), Relevant(적절성), Time-bound(기한)</strong>의 약자입니다. 심리학적으로 인간의 뇌는 모호한 목표보다 명확하고 수치화된 목표를 마주했을 때 더 높은 동기부여와 집중력을 발휘합니다. 목표가 구체적일수록 뇌의 망상활성계(RAS)가 활성화되어 목표 달성에 필요한 정보를 더 예민하게 포착하게 되며, 기한이 정해졌을 때 '마감 효과(Deadline Effect)'를 통해 실행력이 비약적으로 상승합니다.
-                                </p>
-                                <p>
-                                    많은 사람들이 목표 달성에 실패하는 이유는 의지력이 부족해서가 아니라, 목표 자체가 'SMART'하지 않기 때문입니다. "운동을 열심히 하겠다"는 다짐은 뇌에게 구체적인 명령을 내리지 못하지만, "매주 월, 수, 금 아침 7시에 30분간 조깅을 하겠다"는 SMART한 목표는 즉각적인 행동을 유도합니다. 파란랩의 SMART 목표 설정 엔진은 이러한 인지 심리학적 원리를 바탕으로 당신의 비전이 단순한 꿈에 머물지 않고 현실이 되도록 가이드합니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. Specific (구체성)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        목표는 누구나 이해할 수 있을 만큼 명확해야 합니다. '무엇을, 왜, 어떻게' 할 것인지 육하원칙에 따라 정의하십시오. 모호함은 실행의 적입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-800 shadow-sm">
-                                    <h4 className="font-black text-slate-800 mb-6 text-2xl">2. Measurable (측정 가능성)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        진척 상황을 확인할 수 있는 수치나 지표가 필요합니다. "얼마나 많이", "어떻게 알 수 있는가"에 대한 답을 통해 성공을 정량화하십시오.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. Achievable (달성 가능성)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        목표는 도전적이되 현실적이어야 합니다. 현재의 자원과 역량을 고려하여 실현 가능한 범위를 설정하십시오. 너무 높은 목표는 오히려 무력감을 줍니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">4. Time-bound (기한)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        마감 기한이 없는 목표는 영원히 미뤄집니다. "언제까지"라는 명확한 타임라인을 설정하여 긴장감과 추진력을 확보하십시오.
-                                    </p>
-                                </div>
-                            </div>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Doran, G. T. (1981). "There's a S.M.A.R.T. way to write management's goals and objectives". <em>Management Review</em>, 70(11), 35-36.</li>
-                                    <li>• Drucker, P. F. (1954). <em>The Practice of Management</em>. Harper & Row.</li>
-                                    <li>• Locke, E. A., & Latham, G. P. (2002). "Building a practically useful theory of goal setting and task motivation". <em>American Psychologist</em>.</li>
-                                    <li>• Rubin, R. S. (2002). "Will the Real SMART Goals Please Stand Up?". <em>The Industrial-Organizational Psychologist</em>.</li>
-                                </ul>
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">SMART 목표 설정: 성공을 디자인하는 5가지 과학적 원칙</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    조지 도란이 제안하고 피터 드러커가 강조한 SMART 프레임워크를 통해 막연한 다짐을 실행 가능한 성과로 전환하는 방법을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. SMART 목표 설정의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>SMART 목표 설정</strong> 기법은 1981년 경영 컨설턴트 <strong>조지 도란(George T. Doran)</strong>이 <em>Management Review</em>에 발표한 논문에서 처음 제안되었습니다. 이 모델은 막연한 희망 사항이나 다짐을 실행 가능한 구체적인 계획으로 변환하여 개인과 조직의 성과를 극대화하는 데 목적이 있습니다. 현대 경영학의 아버지 <strong>피터 드러커(Peter Drucker)</strong>의 '목표에 의한 관리(MBO)' 철학을 실무적으로 가장 완벽하게 구현한 도구로 평가받습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        SMART는 구체성(Specific), 측정 가능성(Measurable), 달성 가능성(Achievable), 적절성(Relevant), 기한(Time-bound)의 약자입니다. 심리학적으로 인간의 뇌는 모호한 목표보다 명확하고 수치화된 목표를 마주했을 때 더 높은 동기부여와 집중력을 발휘합니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. SMART의 5대 핵심 요소 분석</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-800 mb-3">🎯 Specific (구체성)</h3>
+                                            <p className="text-base font-medium">목표는 누구나 이해할 수 있을 만큼 명확해야 합니다. '무엇을, 왜, 어떻게' 할 것인지 육하원칙에 따라 정의하십시오. 모호함은 실행의 적입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-800 mb-3">📊 Measurable (측정 가능성)</h3>
+                                            <p className="text-base font-medium">진척 상황을 확인할 수 있는 수치나 지표가 필요합니다. "얼마나 많이", "어떻게 알 수 있는가"에 대한 답을 통해 성공을 정량화하십시오.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-800 mb-3">✅ Achievable (달성 가능성)</h3>
+                                            <p className="text-base font-medium">목표는 도전적이되 현실적이어야 합니다. 현재의 자원과 역량을 고려하여 실현 가능한 범위를 설정하십시오. 너무 높은 목표는 오히려 무력감을 줍니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-indigo-800 mb-3">🔗 Relevant (적절성)</h3>
+                                            <p className="text-base font-medium">이 목표가 당신의 장기적인 비전이나 조직의 전략과 연결되는지 확인하십시오. 의미 없는 목표 달성은 자원 낭비일 뿐입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-800 mb-3">⏰ Time-bound (기한)</h3>
+                                            <p className="text-base font-medium">마감 기한이 없는 목표는 영원히 미뤄집니다. 명확한 타임라인을 설정하여 긴장감과 추진력을 확보하십시오.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 뇌과학적 목표 달성</h2>
+                                    <p className="text-lg">
+                                        목표가 구체적일수록 뇌의 <strong>망상활성계(RAS)</strong>가 활성화되어 목표 달성에 필요한 정보를 더 예민하게 포착하게 됩니다. 파란랩의 SMART 엔진은 사용자가 각 단계에 집중하여 자신의 다짐을 텍스트로 구체화하도록 설계되었습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        단순히 "운동을 열심히 하겠다"는 다짐 대신, "매주 월, 수, 금 아침 7시에 30분간 조깅을 하겠다"는 SMART한 목표를 세우십시오. 구체화된 목표는 뇌에게 내리는 명확한 명령어가 되어 당신의 실행력을 비약적으로 상승시킬 것입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/SMART_criteria" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: SMART Criteria</h4>
+                                            <p className="text-xs text-slate-400">SMART 원칙의 정의와 경영학적 활용 사례에 대한 상세 학술 정의</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=George+T.+Doran+SMART+goals+Management+Review" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: SMART Research</h4>
+                                            <p className="text-xs text-slate-400">조지 도란의 원전 논문 및 목표 설정 이론에 관한 최신 학술 자료 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Doran, G. T. (1981). "There's a S.M.A.R.T. way to write management's goals and objectives". <em>Management Review</em>.</li>
+                                        <li>• Drucker, P. F. (1954). <em>The Practice of Management</em>. Harper & Row.</li>
+                                        <li>• Locke, E. A., & Latham, G. P. (2002). "Building a practically useful theory of goal setting and task motivation". <em>American Psychologist</em>.</li>
+                                        <li>• Rubin, R. S. (2002). "Will the Real SMART Goals Please Stand Up?". <em>The Industrial-Organizational Psychologist</em>.</li>
+                                        <li>• Blanchard, K., & Johnson, S. (1982). <em>The One Minute Manager</em>. Morrow.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(SmartApp));
     </script>
 </body>
