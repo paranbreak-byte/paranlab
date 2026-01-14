@@ -2,27 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [SEO 표준] -->
-    <title>PMI 평가 도구 | 아이디어의 장단점과 흥미로운 점 분석 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="에드워드 드 보노의 PMI 기법으로 아이디어를 객관적으로 평가하세요. Plus, Minus, Interesting 세 가지 관점으로 감정을 배제한 최선의 의사결정을 돕습니다.">
-    <meta name="keywords" content="PMI기법, 아이디어평가, 의사결정방법론, 창의적사고, 기획서작성, 파란랩, 에드워드드보노, CoRT">
-    <meta property="og:title" content="파란랩 PMI 분석 엔진">
-    <meta property="og:description" content="좋다/나쁘다의 이분법을 넘어 아이디어의 진짜 가치를 발견하세요.">
-    <meta property="og:type" content="website">
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>PMI 평가 도구 v7.8.1 | 아이디어의 장단점과 흥미로운 점 분석 엔진 | 파란랩</title>
+    <meta name="description" content="에드워드 드 보노의 PMI 기법으로 아이디어를 객관적으로 평가하세요. Plus, Minus, Interesting 세 가지 관점으로 감정을 배제한 최선의 의사결정을 돕는 창의적 사고 도구입니다.">
+    <meta name="keywords" content="PMI기법, 아이디어평가, 의사결정방법론, 창의적사고, 기획서작성, 파란랩, 에드워드드보노, CoRT, 수평적사고">
     <link rel="canonical" href="https://paranlab.com/pmi/">
     
-    <!-- [구조화 데이터 표준] -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 PMI 분석 엔진: 좋다/나쁘다를 넘어선 입체적 평가">
+    <meta property="og:description" content="아이디어의 진짜 가치를 발견하는 3가지 시선. PMI 리포트로 더 정교한 기획을 완성하세요.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/pmi/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💡</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 PMI 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "에드워드 드 보노의 PMI 이론을 바탕으로 아이디어의 장점, 단점, 흥미로운 점을 분석하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      "@type": "TechArticle",
+      "headline": "PMI(Plus, Minus, Interesting) 기법을 활용한 아이디어 평가 방법론",
+      "description": "에드워드 드 보노의 CoRT 사고 프로그램 중 하나인 PMI 기법의 이론적 배경과 실전 적용 프로세스를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/pmi/" }
     }
     </script>
 
@@ -36,11 +43,12 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .pmi-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .break-keep { word-break: keep-all; }
+        .pmi-card { transition: transform 0.3s ease; }
         .pmi-card:hover { transform: translateY(-5px); }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -51,7 +59,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (사내 복지 구독 서비스 전환)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "사내 복지 포인트의 구독 서비스 전환 안건",
             plus: "직원들의 복지 선택권이 대폭 확대됨. 매달 새로운 혜택 제공으로 만족도 상승. 관리 부서의 개별 정산 업무 간소화.",
@@ -62,13 +69,13 @@
 
         function PmiApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(5); // 샘플 우선 노출
+            const [step, setStep] = useState(5); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-pmi');
                         if (saved) {
@@ -77,13 +84,15 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-pmi', JSON.stringify(data));
@@ -111,266 +120,241 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-pmi'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-pmi'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Evaluation Science</p>
-                            <p className="font-bold text-sm">PARAN LAB PMI v7.7</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">PMI EVALUATION ENGINE</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['주제 정의', 'Plus', 'Minus', 'Interesting', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['주제', 'Plus', 'Minus', 'Interesting', '결과'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                    {/* 메인 컨텐츠 카드 */}
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 5 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Subject */}
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 01. Subject</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">평가할 아이디어나 주제를 입력하세요</h2>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">평가 주제 설정</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">분석할 아이디어나 제안을 입력하세요.</p>
                                 </div>
-                                <input 
-                                    type="text" 
-                                    value={data.subject} 
-                                    onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
-                                    className="w-full p-8 bg-slate-50 rounded-[2.5rem] border-none outline-none text-3xl font-black text-center shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="예: 주 4일 근무제 도입 안건"
-                                />
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음: 장점(Plus) 분석</button>
-                            </div>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-6 bg-slate-50 rounded-2xl border-none outline-none text-xl font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="예: 주 4일 근무제 도입 안건" />
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 장점(Plus) 분석</button>
+                            </section>
                         )}
 
-                        {/* Step 2: Plus */}
                         {step === 2 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-emerald-600 font-black text-sm uppercase tracking-widest">Step 02. Plus</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">이 아이디어의 좋은 점은 무엇인가요?</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">긍정적인 측면과 기대 효과를 모두 적으세요.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">Plus (긍정적 측면)</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">이 아이디어의 좋은 점과 기대 효과를 모두 적으세요.</p>
                                 </div>
-                                <textarea 
-                                    value={data.plus} 
-                                    onChange={e => setData({...data, plus: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-emerald-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-emerald-200 transition-all"
-                                    placeholder="장점들을 나열하세요..."
-                                />
+                                <textarea value={data.plus} onChange={e => setData({...data, plus: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-emerald-50 rounded-3xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-emerald-200 transition-all" placeholder="장점들을 나열하세요..." />
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 단점(Minus) 분석</button>
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 단점(Minus) 분석</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 3: Minus */}
                         {step === 3 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-rose-600 font-black text-sm uppercase tracking-widest">Step 03. Minus</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">이 아이디어의 나쁜 점은 무엇인가요?</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">부정적인 측면, 리스크, 비용 등을 냉정하게 적으세요.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">Minus (부정적 측면)</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">이 아이디어의 나쁜 점과 리스크를 냉정하게 적으세요.</p>
                                 </div>
-                                <textarea 
-                                    value={data.minus} 
-                                    onChange={e => setData({...data, minus: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-rose-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-rose-200 transition-all"
-                                    placeholder="단점들을 나열하세요..."
-                                />
+                                <textarea value={data.minus} onChange={e => setData({...data, minus: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-rose-50 rounded-3xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-rose-200 transition-all" placeholder="단점들을 나열하세요..." />
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(2)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(4)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">다음: 흥미로운 점(Interesting) 분석</button>
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 흥미로운 점(Interesting)</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 4: Interesting */}
                         {step === 4 && (
-                            <div className="animate-in fade-in space-y-8">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <span className="text-blue-600 font-black text-sm uppercase tracking-widest">Step 04. Interesting</span>
-                                    <h2 className="text-4xl font-black text-slate-900 mt-2">흥미롭거나 고려할 점은 무엇인가요?</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">장단점은 아니지만 주목할 만한 가치나 파생될 아이디어를 적으세요.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">Interesting (흥미로운 점)</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">장단점은 아니지만 주목할 만한 가치나 파생될 아이디어를 적으세요.</p>
                                 </div>
-                                <textarea 
-                                    value={data.interesting} 
-                                    onChange={e => setData({...data, interesting: e.target.value, isDefault: false})}
-                                    className="w-full h-64 p-8 bg-blue-50 rounded-[3rem] border-none outline-none text-xl font-bold shadow-inner focus:ring-4 ring-blue-200 transition-all"
-                                    placeholder="흥미로운 포인트들을 나열하세요..."
-                                />
+                                <textarea value={data.interesting} onChange={e => setData({...data, interesting: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-blue-50 rounded-3xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-200 transition-all" placeholder="흥미로운 포인트들을 나열하세요..." />
                                 <div className="flex gap-4">
-                                    <button onClick={() => setStep(3)} className="flex-1 py-6 bg-slate-100 text-slate-600 rounded-[2rem] font-black text-xl">이전</button>
-                                    <button onClick={() => setStep(5)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl">최종 리포트 생성</button>
+                                    <button onClick={() => setStep(3)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(5)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
                                 </div>
-                            </div>
+                            </section>
                         )}
 
-                        {/* Step 5: Result Report */}
                         {step === 5 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        PMI Idea Evaluation Report
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        아이디어 분석 결과
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject || "미정"}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">PMI Idea Evaluation Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">아이디어 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">주제: {data.subject}</p>
                                 </div>
-
-                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mb-12">
-                                    {/* Plus Card */}
-                                    <div className="p-10 bg-emerald-50 rounded-[3.5rem] border border-emerald-100 shadow-sm relative overflow-hidden pmi-card">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-emerald-200">+</div>
-                                        <h3 className="font-black text-emerald-700 mb-6 flex items-center gap-2 text-2xl">
-                                            ✅ PLUS
-                                        </h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">
-                                            {data.plus || "기록된 장점이 없습니다."}
-                                        </p>
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+                                    <div className="p-8 bg-emerald-50 rounded-[2.5rem] border border-emerald-100 shadow-sm relative overflow-hidden pmi-card">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-emerald-200">+</div>
+                                        <h3 className="font-black text-emerald-700 mb-4 flex items-center gap-2 text-xl">✅ PLUS</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.plus || "기록된 장점이 없습니다."}</p>
                                     </div>
-
-                                    {/* Minus Card */}
-                                    <div className="p-10 bg-rose-50 rounded-[3.5rem] border border-rose-100 shadow-sm relative overflow-hidden pmi-card">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-rose-200">-</div>
-                                        <h3 className="font-black text-rose-700 mb-6 flex items-center gap-2 text-2xl">
-                                            ❌ MINUS
-                                        </h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">
-                                            {data.minus || "기록된 단점이 없습니다."}
-                                        </p>
+                                    <div className="p-8 bg-rose-50 rounded-[2.5rem] border border-rose-100 shadow-sm relative overflow-hidden pmi-card">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-rose-200">-</div>
+                                        <h3 className="font-black text-rose-700 mb-4 flex items-center gap-2 text-xl">❌ MINUS</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.minus || "기록된 단점이 없습니다."}</p>
                                     </div>
-
-                                    {/* Interesting Card */}
-                                    <div className="p-10 bg-blue-50 rounded-[3.5rem] border border-blue-100 shadow-sm relative overflow-hidden pmi-card">
-                                        <div className="absolute -top-4 -right-4 text-8xl opacity-10 font-black text-blue-200">?</div>
-                                        <h3 className="font-black text-blue-700 mb-6 flex items-center gap-2 text-2xl">
-                                            💡 INTERESTING
-                                        </h3>
-                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap min-h-[150px]">
-                                            {data.interesting || "기록된 흥미로운 점이 없습니다."}
-                                        </p>
+                                    <div className="p-8 bg-blue-50 rounded-[2.5rem] border border-blue-100 shadow-sm relative overflow-hidden pmi-card">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-blue-200">?</div>
+                                        <h3 className="font-black text-blue-700 mb-4 flex items-center gap-2 text-xl">💡 INTERESTING</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-sm break-keep">{data.interesting || "기록된 흥미로운 점이 없습니다."}</p>
                                     </div>
                                 </div>
 
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">⚖️</div>
                                     <h3 className="text-2xl font-black mb-4">종합적 의사결정 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        PMI 분석은 단순히 장단점을 나열하는 것이 아니라, <strong>'판단을 유보하고 다각도로 탐색'</strong>하는 데 목적이 있습니다. 
-                                        특히 'Interesting' 영역에서 발견된 통찰을 바탕으로 아이디어를 보완하여 최선의 결론을 도출하십시오.
+                                    <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
+                                        PMI 분석은 단순히 장단점을 나열하는 것이 아니라, <strong>'판단을 유보하고 다각도로 탐색'</strong>하는 데 목적이 있습니다. 특히 'Interesting' 영역에서 발견된 통찰을 바탕으로 아이디어를 보완하여 최선의 결론을 도출하십시오.
                                     </p>
                                 </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
-                                </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 5 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/pmi/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                PMI 기법: 감정을 배제한 객관적 평가의 과학
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>PMI(Plus, Minus, Interesting)</strong> 기법은 창의적 사고의 대가인 <strong>에드워드 드 보노(Edward de Bono)</strong>가 제안한 CoRT(Cognitive Research Trust) 사고 프로그램의 핵심 도구입니다. 이 기법은 어떤 아이디어나 제안을 마주했을 때 즉각적으로 '좋다' 혹은 '싫다'라고 판단하는 인간의 본능적인 감정적 편향을 억제하고, 의도적으로 세 가지 관점에서 아이디어를 탐색하게 함으로써 균형 잡힌 결론을 내리게 돕습니다.
-                                </p>
-                                <p>
-                                    전통적인 의사결정 방식은 대개 '찬성' 혹은 '반대'의 논리로 흐르기 쉽습니다. 하지만 PMI는 결론을 내리기 전 충분한 <strong>'판단 유보(Suspension of Judgment)'</strong> 시간을 갖게 합니다. 먼저 아이디어의 긍정적인 면(Plus)을 집중적으로 찾아내고, 그 다음 부정적인 면(Minus)을 냉정하게 분석하며, 마지막으로 장단점은 아니지만 주목할 만한 가치가 있는 요소(Interesting)를 탐색합니다.
-                                </p>
-                                <p>
-                                    특히 <strong>'Interesting(흥미로운 점)'</strong> 단계는 PMI 기법의 정수입니다. 이는 "이 아이디어에서 어떤 흥미로운 일이 벌어질 수 있는가?" 혹은 "이것이 다른 어떤 것과 연결될 수 있는가?"를 묻는 과정입니다. 이를 통해 단순히 아이디어를 평가하는 것을 넘어, 아이디어를 확장시키고 새로운 통찰을 얻는 창의적 도약이 가능해집니다. 파란랩의 PMI 분석 엔진은 이러한 심리학적 원리를 현대적인 인터페이스로 구현하여, 당신의 기획과 선택이 논리적 완결성을 갖추도록 가이드합니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">1. Plus (긍정적 측면)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        아이디어가 가진 장점, 이익, 기대 효과를 나열합니다. 비판적인 시각을 잠시 거두고 이 아이디어가 왜 좋은지에만 집중하여 가치를 발견하는 단계입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">2. Minus (부정적 측면)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        아이디어가 가진 단점, 리스크, 비용, 부작용을 분석합니다. 낙관적인 기대를 배제하고 발생 가능한 모든 문제점을 냉철하게 짚어내어 실패를 예방합니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">3. Interesting (흥미로운 점)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        좋고 나쁨을 떠나 아이디어에서 파생될 수 있는 흥미로운 가능성이나 고려 사항을 적습니다. 새로운 아이디어의 씨앗이 되는 가장 창의적인 단계입니다.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">4. 균형 잡힌 결론</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        세 가지 관점의 분석 결과를 종합하여 최종 결정을 내립니다. 감정적 선호가 아닌 데이터와 논리에 기반한 최선의 선택을 내릴 수 있습니다.
-                                    </p>
-                                </div>
-                            </div>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• De Bono, E. (1982). <em>De Bono's Thinking Course</em>. BBC Books.</li>
-                                    <li>• De Bono, E. (1992). <em>Serious Creativity: Using the Power of Lateral Thinking to Create New Ideas</em>. Harper Business.</li>
-                                    <li>• De Bono, E. (1970). <em>Lateral Thinking: Creativity Step by Step</em>. Harper & Row.</li>
-                                    <li>• CoRT Thinking Program. (1973). <em>CoRT 1: Breadth</em>. Pergamon Press.</li>
-                                </ul>
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">PMI 기법: 감정을 배제한 객관적 평가와 창의적 사고의 과학</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    에드워드 드 보노의 CoRT 사고 프로그램을 통해 아이디어를 다각도로 분석하고, 단순한 찬반 논리를 넘어선 최적의 의사결정 전략을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. PMI 기법의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>PMI(Plus, Minus, Interesting)</strong> 기법은 창의적 사고의 대가인 <strong>에드워드 드 보노(Edward de Bono)</strong>가 제안한 CoRT(Cognitive Research Trust) 사고 프로그램의 핵심 도구입니다. 이 기법은 어떤 아이디어나 제안을 마주했을 때 즉각적으로 '좋다' 혹은 '싫다'라고 판단하는 인간의 본능적인 감정적 편향을 억제하고, 의도적으로 세 가지 관점에서 아이디어를 탐색하게 함으로써 균형 잡힌 결론을 내리게 돕습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        전통적인 의사결정 방식은 대개 '찬성' 혹은 '반대'의 논리로 흐르기 쉽습니다. 하지만 PMI는 결론을 내리기 전 충분한 <strong>'판단 유보(Suspension of Judgment)'</strong> 시간을 갖게 합니다. 이는 뇌가 한 번에 한 가지 방향으로만 사고하도록 강제하여 인지적 혼란을 방지하는 수평적 사고(Lateral Thinking)의 실천적 모델입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. PMI의 3가지 분석 축</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-700 mb-3">✅ Plus (긍정적 측면)</h3>
+                                            <p className="text-base font-medium">아이디어가 가진 장점, 이익, 기대 효과를 나열합니다. 비판적인 시각을 잠시 거두고 이 아이디어가 왜 좋은지에만 집중하여 숨겨진 가치를 발견하는 단계입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-700 mb-3">❌ Minus (부정적 측면)</h3>
+                                            <p className="text-base font-medium">아이디어가 가진 단점, 리스크, 비용, 부작용을 분석합니다. 낙관적인 기대를 배제하고 발생 가능한 모든 문제점을 냉철하게 짚어내어 실패를 예방합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-700 mb-3">💡 Interesting (흥미로운 점)</h3>
+                                            <p className="text-base font-medium">좋고 나쁨을 떠나 아이디어에서 파생될 수 있는 흥미로운 가능성이나 고려 사항을 적습니다. "이 아이디어에서 어떤 흥미로운 일이 벌어질 수 있는가?"를 묻는 가장 창의적인 단계입니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 'Interesting'의 힘</h2>
+                                    <p className="text-lg">
+                                        PMI 기법의 진정한 차별점은 바로 <strong>'Interesting'</strong> 단계에 있습니다. 대부분의 사람들은 장단점 분석(Pros & Cons)에서 멈추지만, PMI는 그 너머를 보게 합니다. 흥미로운 점을 찾는 과정에서 아이디어는 수정되고 보완되며, 때로는 원래의 제안보다 훨씬 더 혁신적인 제안으로 진화합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        파란랩의 PMI 엔진은 사용자가 각 단계에 집중하여 자신의 생각을 텍스트로 구체화하도록 설계되었습니다. 회의나 개인 기획 단계에서 PMI를 사용하면, 감정적인 대립을 줄이고 모든 구성원이 동일한 방향을 바라보며 아이디어를 검토할 수 있는 '병렬적 사고' 환경을 구축할 수 있습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/P.M.I." target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: PMI Method</h4>
+                                            <p className="text-xs text-slate-400">PMI 기법의 정의와 에드워드 드 보노의 사고 프로그램 상세 정보</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=Edward+de+Bono+PMI+method+lateral+thinking" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: PMI Research</h4>
+                                            <p className="text-xs text-slate-400">수평적 사고와 PMI 기법에 관한 최신 학술 논문 및 연구 자료 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• De Bono, E. (1982). <em>De Bono's Thinking Course</em>. BBC Books.</li>
+                                        <li>• De Bono, E. (1992). <em>Serious Creativity: Using the Power of Lateral Thinking to Create New Ideas</em>. Harper Business.</li>
+                                        <li>• De Bono, E. (1970). <em>Lateral Thinking: Creativity Step by Step</em>. Harper & Row.</li>
+                                        <li>• CoRT Thinking Program. (1973). <em>CoRT 1: Breadth</em>. Pergamon Press.</li>
+                                        <li>• Ritchie, S. M., & Edwards, J. (1996). "Creative Thinking Instruction for Aboriginal Children". <em>Learning and Instruction</em>.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(PmiApp));
     </script>
 </body>
