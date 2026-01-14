@@ -2,11 +2,38 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>아이젠하워 매트릭스 | 업무 우선순위 결정 도구 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="긴급함과 중요도를 기준으로 업무 우선순위를 정하세요. 시간 관리의 정석, 아이젠하워 매트릭스로 생산성을 극대화하세요.">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>아이젠하워 매트릭스 도구 v7.8.1 | 업무 우선순위 및 시간 관리 엔진 | 파란랩</title>
+    <meta name="description" content="긴급함과 중요도를 기준으로 업무 우선순위를 정하세요. 드와이트 아이젠하워의 원칙을 바탕으로 생산성을 극대화하는 시간 관리 매트릭스 도구입니다.">
+    <meta name="keywords" content="아이젠하워매트릭스, 시간관리, 우선순위결정, 생산성도구, EisenhowerMatrix, 스티븐코비, 업무효율, 파란랩, 경영학도구">
+    <link rel="canonical" href="https://paranlab.com/eisenhower/">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 아이젠하워 매트릭스 엔진: 바쁜 것과 생산적인 것의 차이">
+    <meta property="og:description" content="중요도와 긴급도 분석을 통해 당신의 시간을 가장 가치 있는 곳에 투자하세요.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/eisenhower/">
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📅</text></svg>">
     
+    <!-- 구조화 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "아이젠하워 매트릭스(Eisenhower Matrix)를 활용한 시간 관리 방법론",
+      "description": "드와이트 아이젠하워 대통령의 의사결정 원칙과 스티븐 코비의 시간 관리 4사분면 이론을 심층적으로 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/eisenhower/" }
+    }
+    </script>
+
+    <!-- 라이브러리 로드 -->
     <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
     <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
     <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
@@ -16,13 +43,14 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1.5rem; }
+        .break-keep { word-break: keep-all; }
+        .matrix-grid { display: grid; grid-template-columns: 1fr 1fr; grid-template-rows: 1fr 1fr; gap: 1rem; }
         input[type=range] { -webkit-appearance: none; width: 100%; background: transparent; }
         input[type=range]::-webkit-slider-runnable-track { width: 100%; height: 10px; cursor: pointer; background: #e2e8f0; border-radius: 5px; }
         input[type=range]::-webkit-slider-thumb { height: 28px; width: 28px; border-radius: 50%; background: #2563eb; cursor: pointer; -webkit-appearance: none; margin-top: -10px; border: 4px solid white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -50,8 +78,9 @@
             const [step, setStep] = useState(3); 
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-eisenhower');
                         if (saved) {
@@ -60,10 +89,13 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
             useEffect(() => {
@@ -93,6 +125,7 @@
                 } catch (err) { setIsSharing(false); }
             };
 
+            // [로직 보존] 원본 사분면 분류 연산
             const quadrants = useMemo(() => {
                 const q = { q1: [], q2: [], q3: [], q4: [] };
                 (data.tasks || []).forEach(t => {
@@ -105,178 +138,239 @@
                 return q;
             }, [data.tasks]);
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-blue-500 transition-all">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-eisenhower'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg shadow-xl hover:bg-red-500 transition-all">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-eisenhower'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Productivity Science</p>
-                            <p className="font-bold text-sm">PARAN LAB EISENHOWER v7.8.1</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">EISENHOWER ENGINE</p>
                         </div>
                     </div>
 
                     {/* 위저드 네비게이션 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-12 no-print border-b-2 border-slate-200">
-                        {['업무 나열', '중요도 평가', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['업무 나열', '중요도 평가', '결과 리포트'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* 상단 광고 영역 */}
-                    <div className="mb-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
-                        ADVERTISEMENT
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
                     </div>
 
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        {/* 시나리오 배지 */}
-                        {(data.scenarioContext || data.isDefault) && step === 3 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
-                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
-                                </span>
-                            </div>
-                        )}
-
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-8">
-                                <div className="text-center">
-                                    <h2 className="text-4xl font-black text-slate-900">현재 머릿속의 업무들을 모두 적으세요</h2>
-                                    <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="mt-6 w-full p-6 bg-slate-50 rounded-3xl border-none outline-none text-2xl font-black text-center shadow-inner" placeholder="분석 주제 (예: 이번 주 업무 우선순위)" />
-                                </div>
-                                <div className="space-y-4">
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">업무 리스트 작성</h2>
+                                <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-5 bg-slate-50 rounded-2xl border-none outline-none text-lg font-black text-center shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="분석 주제 (예: 이번 주 업무 우선순위)" />
+                                <div className="space-y-3">
                                     {data.tasks.map((t, i) => (
-                                        <div key={t.id} className="flex gap-4">
-                                            <input type="text" value={t.text} onChange={e => { const n = [...data.tasks]; n[i].text = e.target.value; setData({...data, tasks: n, isDefault: false}); }} className="flex-1 p-6 bg-slate-50 rounded-2xl font-bold shadow-inner" placeholder="할 일을 입력하세요..." />
-                                            <button onClick={() => setData({...data, tasks: data.tasks.filter(item => item.id !== t.id), isDefault: false})} className="px-6 text-red-400 font-black hover:text-red-600 transition-colors">삭제</button>
+                                        <div key={t.id} className="flex gap-2">
+                                            <input type="text" value={t.text} onChange={e => { const n = [...data.tasks]; n[i].text = e.target.value; setData({...data, tasks: n, isDefault: false}); }} className="flex-1 p-4 bg-slate-50 rounded-xl font-bold border border-slate-100" placeholder="할 일을 입력하세요..." />
+                                            <button onClick={() => setData({...data, tasks: data.tasks.filter(item => item.id !== t.id), isDefault: false})} className="text-red-400 font-black px-2">×</button>
                                         </div>
                                     ))}
                                 </div>
-                                <button onClick={() => setData({...data, tasks: [...data.tasks, { id: Date.now(), text: "", urgent: 5, important: 5 }], isDefault: false})} className="w-full py-4 border-2 border-dashed border-slate-300 rounded-2xl text-slate-400 font-black hover:bg-slate-50 transition-all">+ 업무 추가</button>
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">다음 단계</button>
-                            </div>
+                                <button onClick={() => setData({...data, tasks: [...data.tasks, { id: Date.now(), text: "", urgent: 5, important: 5 }], isDefault: false})} className="w-full py-4 border-2 border-dashed border-slate-200 rounded-2xl text-slate-400 font-black">+ 업무 추가</button>
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음 단계</button>
+                            </section>
                         )}
 
                         {step === 2 && (
-                            <div className="animate-in fade-in space-y-12">
-                                <h2 className="text-4xl font-black text-slate-900 text-center">각 업무의 성격을 평가하세요</h2>
-                                <div className="space-y-10">
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">중요도 및 긴급도 평가</h2>
+                                <div className="space-y-6">
                                     {data.tasks.map((t, i) => (
-                                        <div key={t.id} className="p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 space-y-8">
-                                            <h3 className="text-2xl font-black text-slate-800">📌 {t.text || "제목 없는 업무"}</h3>
-                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12">
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>중요도 (1~10)</span><span className="text-blue-600 text-2xl">{t.important}</span></div>
+                                        <div key={t.id} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 space-y-6">
+                                            <h3 className="text-lg font-black text-slate-800">📌 {t.text || "제목 없는 업무"}</h3>
+                                            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-xs font-black text-slate-400"><span>중요도</span><span className="text-blue-600">{t.important}</span></div>
                                                     <input type="range" min="1" max="10" value={t.important} onChange={e => { const n = [...data.tasks]; n[i].important = parseInt(e.target.value); setData({...data, tasks: n, isDefault: false}); }} />
                                                 </div>
-                                                <div className="space-y-4">
-                                                    <div className="flex justify-between font-black text-slate-500"><span>긴급도 (1~10)</span><span className="text-rose-600 text-2xl">{t.urgent}</span></div>
+                                                <div className="space-y-2">
+                                                    <div className="flex justify-between text-xs font-black text-slate-400"><span>긴급도</span><span className="text-rose-600">{t.urgent}</span></div>
                                                     <input type="range" min="1" max="10" value={t.urgent} onChange={e => { const n = [...data.tasks]; n[i].urgent = parseInt(e.target.value); setData({...data, tasks: n, isDefault: false}); }} />
                                                 </div>
                                             </div>
                                         </div>
                                     ))}
                                 </div>
-                                <div className="flex gap-4"><button onClick={() => setStep(1)} className="flex-1 py-6 bg-slate-100 rounded-[2rem] font-black text-xl">이전</button><button onClick={() => setStep(3)} className="flex-[2] py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 리포트 생성</button></div>
-                            </div>
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
+                                </div>
+                            </section>
                         )}
 
                         {step === 3 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">Eisenhower Priority Matrix Report</span>
-                                    <h2 className="text-5xl font-black text-slate-900 mt-8 tracking-tight">업무 우선순위 분석 결과</h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">주제: {data.subject}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Eisenhower Priority Matrix Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">업무 우선순위 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">주제: {data.subject}</p>
                                 </div>
+                                
                                 <div className="matrix-grid mb-12">
-                                    <div className="p-8 bg-rose-50 rounded-[3rem] border-2 border-rose-100 relative min-h-[300px]">
-                                        <div className="absolute top-6 right-8 text-rose-200 font-black text-6xl italic opacity-40">Q1</div>
-                                        <h3 className="font-black text-rose-700 mb-4 text-xl">🚀 DO (즉시 실행)</h3>
+                                    <div className="p-6 bg-rose-50 rounded-3xl border-2 border-rose-100 relative min-h-[200px]">
+                                        <div className="absolute top-4 right-6 text-rose-200 font-black text-4xl italic opacity-40">Q1</div>
+                                        <h3 className="font-black text-rose-700 mb-4 text-sm md:text-base">🚀 DO (즉시 실행)</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.q1.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm">✓ {t.text}</li>)}
+                                            {quadrants.q1.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-                                    <div className="p-8 bg-blue-50 rounded-[3rem] border-2 border-blue-100 relative min-h-[300px]">
-                                        <div className="absolute top-6 right-8 text-blue-200 font-black text-6xl italic opacity-40">Q2</div>
-                                        <h3 className="font-black text-blue-700 mb-4 text-xl">📅 SCHEDULE (계획 수립)</h3>
+                                    <div className="p-6 bg-blue-50 rounded-3xl border-2 border-blue-100 relative min-h-[200px]">
+                                        <div className="absolute top-4 right-6 text-blue-200 font-black text-4xl italic opacity-40">Q2</div>
+                                        <h3 className="font-black text-blue-700 mb-4 text-sm md:text-base">📅 SCHEDULE (계획)</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.q2.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm">✓ {t.text}</li>)}
+                                            {quadrants.q2.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-                                    <div className="p-8 bg-amber-50 rounded-[3rem] border-2 border-amber-100 relative min-h-[300px]">
-                                        <div className="absolute top-6 right-8 text-amber-200 font-black text-6xl italic opacity-40">Q3</div>
-                                        <h3 className="font-black text-amber-700 mb-4 text-xl">🤝 DELEGATE (권한 위임)</h3>
+                                    <div className="p-6 bg-amber-50 rounded-3xl border-2 border-amber-100 relative min-h-[200px]">
+                                        <div className="absolute top-4 right-6 text-amber-200 font-black text-4xl italic opacity-40">Q3</div>
+                                        <h3 className="font-black text-amber-700 mb-4 text-sm md:text-base">🤝 DELEGATE (위임)</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.q3.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm">✓ {t.text}</li>)}
+                                            {quadrants.q3.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
-                                    <div className="p-8 bg-slate-100 rounded-[3rem] border-2 border-slate-200 relative min-h-[300px]">
-                                        <div className="absolute top-6 right-8 text-slate-200 font-black text-6xl italic opacity-40">Q4</div>
-                                        <h3 className="font-black text-slate-700 mb-4 text-xl">🗑️ ELIMINATE (삭제/거절)</h3>
+                                    <div className="p-6 bg-slate-100 rounded-3xl border-2 border-slate-200 relative min-h-[200px]">
+                                        <div className="absolute top-4 right-6 text-slate-200 font-black text-4xl italic opacity-40">Q4</div>
+                                        <h3 className="font-black text-slate-700 mb-4 text-sm md:text-base">🗑️ ELIMINATE (삭제)</h3>
                                         <ul className="space-y-2">
-                                            {quadrants.q4.map(t => <li key={t.id} className="bg-white px-4 py-2 rounded-xl text-sm font-black text-slate-700 shadow-sm">✓ {t.text}</li>)}
+                                            {quadrants.q4.map(t => <li key={t.id} className="bg-white px-3 py-2 rounded-lg text-xs font-bold text-slate-700 shadow-sm break-keep">✓ {t.text}</li>)}
                                         </ul>
                                     </div>
                                 </div>
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center">
-                                    <h3 className="text-2xl font-black mb-4">"바쁜 것과 생산적인 것은 다릅니다."</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">성공의 핵심은 Q2(중요하지만 긴급하지 않은 일)에 얼마나 많은 시간을 확보하느냐에 달려 있습니다. 지금 바로 Q4의 업무를 삭제하고 Q2를 위한 시간을 만드세요.</p>
+
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💡</div>
+                                    <h4 className="text-xl font-black mb-4 break-keep">"바쁜 것과 생산적인 것은 다릅니다."</h4>
+                                    <p className="text-base text-slate-400 leading-relaxed max-w-2xl mx-auto font-medium break-keep">
+                                        성공의 핵심은 Q2(중요하지만 긴급하지 않은 일)에 얼마나 많은 시간을 확보하느냐에 달려 있습니다. 지금 바로 Q4의 업무를 삭제하고 Q2를 위한 시간을 만드세요.
+                                    </p>
                                 </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* 하단 광고 영역 */}
-                    <div className="mt-12 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest border border-dashed border-slate-200">
-                        ADVERTISEMENT
-                    </div>
-
-                    {/* 액션 버튼 세트 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 3 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* 학술적 배경 */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">아이젠하워 매트릭스: 시간 관리의 과학</h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    아이젠하워 매트릭스(Eisenhower Matrix)는 미국 제34대 대통령 <strong>드와이트 D. 아이젠하워(Dwight D. Eisenhower)</strong>의 의사결정 원칙을 바탕으로 합니다. 그는 "중요한 일은 대개 긴급하지 않고, 긴급한 일은 대개 중요하지 않다"는 명언을 남겼습니다.
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
+
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">아이젠하워 매트릭스(Eisenhower Matrix): 생산성을 극대화하는 시간 관리의 과학</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    미국 제34대 대통령 드와이트 아이젠하워의 의사결정 원칙을 바탕으로, 긴급함과 중요도의 균형을 통해 삶의 질을 높이는 전략적 시간 관리 기법을 심층 분석합니다.
                                 </p>
-                                <p>
-                                    이 매트릭스는 업무를 '중요도'와 '긴급도'라는 두 가지 축으로 분류하여 4개의 사분면으로 나눕니다:
-                                    1. <strong>Q1 (중요하고 긴급함):</strong> 즉시 처리해야 하는 위기 상황이나 마감 임박 업무입니다.
-                                    2. <strong>Q2 (중요하지만 긴급하지 않음):</strong> 장기적인 계획, 자기계발, 관계 구축 등 생산성의 핵심이 되는 영역입니다.
-                                    3. <strong>Q3 (긴급하지만 중요하지 않음):</strong> 불필요한 회의, 수시로 울리는 알림 등 타인의 요구에 의한 업무입니다. 권한 위임이 필요합니다.
-                                    4. <strong>Q4 (중요하지도 긴급하지도 않음):</strong> 시간 낭비 요인입니다. 과감히 삭제해야 합니다.
-                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 아이젠하워 매트릭스의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>아이젠하워 매트릭스(Eisenhower Matrix)</strong>는 업무의 우선순위를 결정하기 위해 고안된 2x2 매트릭스 모델입니다. 이 기법은 제2차 세계대전의 영웅이자 미국 대통령이었던 <strong>드와이트 D. 아이젠하워(Dwight D. Eisenhower)</strong>가 사용했던 의사결정 원칙에서 유래되었습니다. 그는 "중요한 일은 대개 긴급하지 않고, 긴급한 일은 대개 중요하지 않다"는 명언을 남기며, 단순한 '바쁨'이 아닌 '생산성'에 집중할 것을 강조했습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        이후 스티븐 코비(Stephen Covey)가 그의 저서 '성공하는 사람들의 7가지 습관'에서 이 모델을 '시간 관리 매트릭스'로 소개하며 대중화되었습니다. 현재는 전 세계 비즈니스 리더와 생산성 전문가들이 가장 신뢰하는 시간 관리 프레임워크로 자리 잡았습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 4사분면의 전략적 분류와 실행 지침</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-700 mb-3">Q1. 중요하고 긴급한 일 (Do First)</h3>
+                                            <p className="text-base font-medium">즉시 처리해야 하는 위기 상황, 마감 임박 프로젝트, 긴급한 고객 요청 등이 해당합니다. 이 영역에만 매몰되면 스트레스와 번아웃이 발생하므로, 사전에 Q2 활동을 통해 Q1의 발생 빈도를 줄여야 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-700 mb-3">Q2. 중요하지만 긴급하지 않은 일 (Schedule)</h3>
+                                            <p className="text-base font-medium">장기적인 계획 수립, 자기계발, 관계 구축, 예방 활동 등이 포함됩니다. 생산성의 핵심이 되는 영역으로, 성공하는 사람들은 의도적으로 이 영역에 가장 많은 시간을 할당합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-amber-700 mb-3">Q3. 긴급하지만 중요하지 않은 일 (Delegate)</h3>
+                                            <p className="text-base font-medium">불필요한 회의, 수시로 울리는 메신저 알림, 타인의 사소한 부탁 등이 해당합니다. 이 영역은 '바쁜 척'을 하게 만들지만 실질적인 가치는 낮으므로, 권한 위임이나 시스템화를 통해 최소화해야 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-600 mb-3">Q4. 중요하지도 긴급하지도 않은 일 (Eliminate)</h3>
+                                            <p className="text-base font-medium">무의미한 웹서핑, 과도한 SNS 사용, 시간 낭비성 활동들입니다. 삶의 에너지를 갉아먹는 요인이므로 과감히 삭제하거나 거절해야 합니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: Q2 중심의 삶 설계하기</h2>
+                                    <p className="text-lg">
+                                        아이젠하워 매트릭스를 효과적으로 활용하려면 <strong>'중요도'의 기준</strong>을 명확히 세워야 합니다. 중요도란 나의 장기적인 목표와 가치에 부합하는 정도를 의미합니다. 매일 아침 업무를 시작하기 전, 파란랩의 아이젠하워 엔진을 통해 할 일들을 분류해 보세요.
+                                    </p>
+                                    <p className="text-lg">
+                                        특히 Q3의 업무를 Q1으로 착각하지 않도록 주의해야 합니다. 타인의 긴급함이 나의 중요함이 되어서는 안 됩니다. Q2 영역에 집중할 시간을 확보할 때 비로소 우리는 수동적인 반응이 아닌 능동적인 창조의 삶을 살 수 있습니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/Time_management" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: Time Management</h4>
+                                            <p className="text-xs text-slate-400">시간 관리의 역사와 아이젠하워 원칙을 포함한 다양한 방법론 상세 정의</p>
+                                        </a>
+                                        <a href="https://www.britannica.com/biography/Dwight-D-Eisenhower" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Britannica: Dwight D. Eisenhower</h4>
+                                            <p className="text-xs text-slate-400">브리태니커 백과사전이 기록한 아이젠하워의 생애와 그의 전략적 사고방식</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Covey, S. R. (1989). <em>The 7 Habits of Highly Effective People</em>. Free Press.</li>
+                                        <li>• Eisenhower, D. D. (1954). "Address to the Second Assembly of the World Council of Churches".</li>
+                                        <li>• Morgenstern, J. (2004). <em>Time Management from the Inside Out</em>. Henry Holt and Co.</li>
+                                        <li>• Allen, D. (2001). <em>Getting Things Done: The Art of Stress-Free Productivity</em>. Viking.</li>
+                                        <li>• Drucker, P. F. (1967). <em>The Effective Executive</em>. Harper & Row.</li>
+                                    </ul>
+                                </section>
                             </div>
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Covey, S. R. (1989). <em>The 7 Habits of Highly Effective People</em>. Free Press.</li>
-                                    <li>• Eisenhower, D. D. (1954). "Address to the Second Assembly of the World Council of Churches".</li>
-                                    <li>• Mackay, H. (2001). <em>Pushing the Envelope</em>. Ballantine Books.</li>
-                                </ul>
-                            </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
+
         const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(EisenhowerApp));
     </script>
