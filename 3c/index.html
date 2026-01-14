@@ -1,294 +1,337 @@
 <!DOCTYPE html>
-
 <html lang="ko">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>3C 분석 도구 v7.8.1 | 고객·경쟁사·자사 기반 전략 수립 엔진 | 파란랩</title>
+    <meta name="description" content="오마에 겐이치의 3C 모델을 통해 비즈니스 환경을 과학적으로 분석하세요. 고객(Customer), 경쟁사(Competitor), 자사(Company)의 조화를 통해 최적의 전략적 교집합을 도출합니다.">
+    <meta name="keywords" content="3C분석, 오마에겐이치, 전략삼각형, 경영전략, 시장분석, 경쟁우위, 파란랩, 비즈니스프레임워크, 의사결정과학">
+    <link rel="canonical" href="https://paranlab.com/3c/">
+    
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 3C 전략 분석 엔진: 성공적인 전략의 시작">
+    <meta property="og:description" content="고객, 경쟁사, 자사의 3가지 관점에서 시장의 기회를 포착하는 전문 전략 도구.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/3c/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "TechArticle",
+      "headline": "3C 모델(Customer, Competitor, Company)을 활용한 전략 수립 방법론",
+      "description": "오마에 겐이치의 전략 삼각형 이론을 바탕으로 외부 환경과 내부 역량을 통합 분석하는 프레임워크를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/3c/" }
+    }
+    </script>
 
-<!-- [GEO & SEO 극대화] -->
-<title>3C 분석 도구 v7.8.1 | 고객·경쟁사·자사 기반 전략 수립 엔진 | 파란랩</title>
-<meta name="description" content="오마에 겐이치의 3C 모델을 통해 비즈니스 환경을 과학적으로 분석하세요. 고객(Customer), 경쟁사(Competitor), 자사(Company)의 조화를 통해 최적의 전략적 교집합을 도출합니다.">
-<meta name="keywords" content="3C분석, 오마에겐이치, 전략삼각형, 경영전략, 시장분석, 경쟁우위, 파란랩, 비즈니스프레임워크">
-<link rel="canonical" href="https://paranlab.com/3c/">
+    <!-- 라이브러리 로드 -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
+    <script src="/core.js" defer></script>
 
-<!-- Open Graph -->
-<meta property="og:title" content="파란랩 3C 전략 분석 엔진: 성공적인 전략의 시작">
-<meta property="og:description" content="고객, 경쟁사, 자사의 3가지 관점에서 시장의 기회를 포착하는 전문 전략 도구.">
-<meta property="og:type" content="article">
-<meta property="og:url" content="https://paranlab.com/3c/">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🏢</text></svg>">
-
-<!-- 구조화 데이터 (JSON-LD) -->
-<script type="application/ld+json">
-{
-  "@context": "https://schema.org",
-  "@type": "TechArticle",
-  "headline": "3C 모델(Customer, Competitor, Company)을 활용한 전략 수립 방법론",
-  "description": "오마에 겐이치의 전략 삼각형 이론을 바탕으로 외부 환경과 내부 역량을 통합 분석하는 프레임워크를 다룹니다.",
-  "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
-  "publisher": { "@type": "Organization", "name": "파란랩" },
-  "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/3c/" }
-}
-</script>
-
-<!-- 라이브러리 로드 -->
-<script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
-<script src="https://cdn.tailwindcss.com"></script>
-<script src="https://html2canvas.hertzen.com/dist/html2canvas.min.js"></script>
-<script src="/core.js" defer></script>
-
-<style>
-    @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-    body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
-    .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
-    .break-keep { word-break: keep-all; }
-    @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
-</style>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
+        .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .break-keep { word-break: keep-all; }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
+    </style>
 </head>
 <body>
-<div id="header-root"></div>
-<div id="root"></div>
-<div id="footer-root"></div>
+    <div id="header-root"></div>
+    <div id="root"></div>
+    <div id="footer-root"></div>
 
-<script type="text/babel">
-    const { useState, useEffect, useMemo } = React;
+    <script type="text/babel">
+        const { useState, useEffect, useMemo } = React;
 
-    const DEFAULT_TOOL_SAMPLE = {
-        customer: "고급스러운 공간 경험과 일관된 커피 품질을 원하는 2040 직장인 및 카공족. 모바일 주문 편의성 중시.",
-        competitor: "저가형 프랜차이즈의 공세와 스페셜티 전문점 사이의 샌드위치 압박.",
-        company: "압도적인 브랜드 파워, 전국 핵심 상권의 직영 매장망, 강력한 로열티 프로그램.",
-        isDefault: true
-    };
+        const DEFAULT_TOOL_SAMPLE = {
+            customer: "고급스러운 공간 경험과 일관된 커피 품질을 원하는 2040 직장인 및 카공족. 모바일 주문 편의성 중시.",
+            competitor: "저가형 프랜차이즈의 공세와 스페셜티 전문점 사이의 샌드위치 압박.",
+            company: "압도적인 브랜드 파워, 전국 핵심 상권의 직영 매장망, 강력한 로열티 프로그램.",
+            isDefault: true
+        };
 
-    function ThreeCApp() {
-        const [isLoaded, setIsLoaded] = useState(false);
-        const [step, setStep] = useState(4); 
-        const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
+        function ThreeCApp() {
+            const [isLoaded, setIsLoaded] = useState(false);
+            const [step, setStep] = useState(4); 
+            const [isSharing, setIsSharing] = useState(false);
+            const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-        // [데이터 무결성] localStorage 읽기 및 자가 복구
-        useEffect(() => {
-            const initData = () => {
-                try {
-                    const saved = localStorage.getItem('paranlab-3c');
-                    if (saved) {
-                        const parsed = JSON.parse(saved);
-                        setData({ ...parsed, isDefault: false });
-                    } else {
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
+            useEffect(() => {
+                const initData = () => {
+                    try {
+                        const saved = localStorage.getItem('paranlab-3c');
+                        if (saved) {
+                            const parsed = JSON.parse(saved);
+                            setData({ ...parsed, isDefault: false });
+                        } else {
+                            setData(DEFAULT_TOOL_SAMPLE);
+                        }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
                         setData(DEFAULT_TOOL_SAMPLE);
                     }
-                } catch (e) {
-                    console.error("Data Recovery Triggered:", e);
-                    setData(DEFAULT_TOOL_SAMPLE);
+                    setIsLoaded(true);
+                };
+                setTimeout(initData, 300);
+            }, []);
+
+            useEffect(() => {
+                if (isLoaded && !data.isDefault) {
+                    localStorage.setItem('paranlab-3c', JSON.stringify(data));
                 }
-                setIsLoaded(true);
+            }, [data, isLoaded]);
+
+            const handleShare = async () => {
+                const element = document.getElementById('report-card');
+                if (!element) return;
+                setIsSharing(true);
+                try {
+                    const canvas = await html2canvas(element, { scale: 2, useCORS: true });
+                    canvas.toBlob(async (blob) => {
+                        const file = new File([blob], '3c-report.png', { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            await navigator.share({ files: [file], text: `[파란랩] 3C 전략 분석 리포트` });
+                        } else {
+                            const link = document.createElement('a');
+                            link.download = '3c-report.png';
+                            link.href = canvas.toDataURL();
+                            link.click();
+                        }
+                        setIsSharing(false);
+                    }, 'image/png');
+                } catch (err) { setIsSharing(false); }
             };
-            setTimeout(initData, 300);
-        }, []);
 
-        useEffect(() => {
-            if (isLoaded && !data.isDefault) {
-                localStorage.setItem('paranlab-3c', JSON.stringify(data));
-            }
-        }, [data, isLoaded]);
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
-        if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
-
-        return (
-            <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
-                {/* [디자인 시스템] 상단 컨트롤 바 */}
-                <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
-                    <div className="flex gap-3 w-full md:w-auto">
-                        <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
-                        <button onClick={() => {localStorage.removeItem('paranlab-3c'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
-                    </div>
-                    <div className="text-right hidden md:block">
-                        <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
-                        <p className="text-white font-bold text-xs">3C STRATEGY ENGINE</p>
-                    </div>
-                </div>
-
-                {/* 위저드 네비게이션 */}
-                <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
-                    {['고객', '경쟁사', '자사', '결과'].map((name, i) => (
-                        <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
-                            {i + 1}. {name}
+            return (
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-3c'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                    ))}
-                </nav>
-
-                {/* [디자인 시스템] 중앙 리포트 카드 */}
-                <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                    {step === 1 && (
-                        <section className="space-y-8 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">1. 고객(Customer) 분석</h2>
-                            <p className="text-slate-500 font-bold break-keep">시장의 규모, 성장성, 그리고 고객이 진짜 원하는 니즈(Needs)를 파악하세요.</p>
-                            <textarea value={data.customer} onChange={e => setData({...data, customer: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="고객 분석 내용 입력..." />
-                            <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 경쟁사 분석</button>
-                        </section>
-                    )}
-
-                    {step === 2 && (
-                        <section className="space-y-8 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">2. 경쟁사(Competitor) 분석</h2>
-                            <p className="text-slate-500 font-bold break-keep">경쟁자의 시장 점유율, 강점, 약점 및 현재의 전략적 움직임을 분석하세요.</p>
-                            <textarea value={data.competitor} onChange={e => setData({...data, competitor: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-rose-100 transition-all" placeholder="경쟁사 분석 내용 입력..." />
-                            <div className="flex gap-4">
-                                <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 자사 분석</button>
-                            </div>
-                        </section>
-                    )}
-
-                    {step === 3 && (
-                        <section className="space-y-8 animate-in fade-in">
-                            <h2 className="text-2xl md:text-3xl font-black text-slate-900">3. 자사(Company) 분석</h2>
-                            <p className="text-slate-500 font-bold break-keep">우리의 핵심 역량, 브랜드 가치, 가용 자원 및 수익 구조를 객관적으로 평가하세요.</p>
-                            <textarea value={data.company} onChange={e => setData({...data, company: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-emerald-100 transition-all" placeholder="자사 분석 내용 입력..." />
-                            <div className="flex gap-4">
-                                <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
-                                <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
-                            </div>
-                        </section>
-                    )}
-
-                    {step === 4 && (
-                        <section className="animate-in zoom-in duration-500">
-                            <div className="text-center mb-12">
-                                <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">3C Strategic Triangle Report</span>
-                                <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">비즈니스 전략 분석 결과</h2>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
-                                <div className="p-8 bg-blue-50 rounded-[2rem] border border-blue-100 shadow-sm relative overflow-hidden">
-                                    <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-blue-600">C</div>
-                                    <h3 className="font-black text-blue-800 mb-6 text-xl flex items-center gap-2">👥 Customer</h3>
-                                    <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.customer}</p>
-                                </div>
-                                <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 shadow-sm relative overflow-hidden">
-                                    <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-rose-600">C</div>
-                                    <h3 className="font-black text-rose-800 mb-6 text-xl flex items-center gap-2">⚔️ Competitor</h3>
-                                    <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.competitor}</p>
-                                </div>
-                                <div className="p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100 shadow-sm relative overflow-hidden">
-                                    <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-emerald-600">C</div>
-                                    <h3 className="font-black text-emerald-800 mb-6 text-xl flex items-center gap-2">🏢 Company</h3>
-                                    <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.company}</p>
-                                </div>
-                            </div>
-
-                            <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
-                                <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💡</div>
-                                <h3 className="text-2xl font-black mb-4">전략적 시사점</h3>
-                                <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
-                                    성공적인 전략은 <strong>고객이 원하고(C)</strong>, <strong>경쟁사가 제공하지 못하며(C)</strong>, <strong>우리가 잘할 수 있는(C)</strong> 영역의 교집합에서 탄생합니다. 이 세 가지 요소의 균형을 통해 독보적인 경쟁 우위를 설계하십시오.
-                                </p>
-                            </div>
-                        </section>
-                    )}
-                </article>
-
-                {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
-                {step === 4 && (
-                    <section className="grid grid-cols-2 gap-3 mt-8 no-print">
-                        <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
-                        <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
-                        <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
-                        <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
-                    </section>
-                )}
-
-                {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
-                <section className="mt-24 border-t border-slate-200 pt-16">
-                    <article className="prose prose-slate max-w-none">
-                        <header>
-                            <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">3C 분석(3C Analysis): 비즈니스 성공을 위한 전략적 삼각형 프레임워크</h1>
-                            <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
-                                오마에 겐이치의 전략 삼각형 이론을 바탕으로 외부 환경과 내부 역량을 통합 분석하여 지속 가능한 경쟁 우위를 확보하는 방법을 심층 분석합니다.
-                            </p>
-                        </header>
-
-                        <div className="space-y-16 text-slate-600 leading-relaxed">
-                            <section>
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 3C 분석의 정의와 역사적 배경</h2>
-                                <p className="text-lg">
-                                    <strong>3C 분석</strong>은 1980년대 초 세계적인 경영 컨설턴트 <strong>오마에 겐이치(Kenichi Ohmae)</strong>가 그의 저서 'The Mind of the Strategist'에서 제안한 비즈니스 프레임워크입니다. 이 모델은 비즈니스 전략을 수립할 때 반드시 고려해야 할 세 가지 핵심 요소인 <strong>고객(Customer), 경쟁사(Competitor), 자사(Company)</strong>를 분석하여 최적의 전략적 교집합을 도출하는 데 목적이 있습니다.
-                                </p>
-                                <p className="text-lg">
-                                    오마에 겐이치는 성공적인 전략이란 이 세 가지 요소가 조화롭게 맞물릴 때 탄생한다고 보았습니다. 이를 '전략적 삼각형(Strategic Triangle)'이라고도 부르며, 현대 경영학에서도 시장의 기회와 위협, 그리고 내부의 강점과 약점을 동시에 조망하는 가장 기초적이면서도 강력한 도구로 활용됩니다.
-                                </p>
-                            </section>
-
-                            <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
-                                <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 3C의 핵심 분석 포인트와 전략적 질문</h2>
-                                <div className="space-y-8">
-                                    <div>
-                                        <h3 className="text-xl font-black text-blue-800 mb-3">👥 Customer (고객 및 시장 분석)</h3>
-                                        <p className="text-base font-medium">시장의 규모와 성장성, 고객의 세분화(Segmentation), 그리고 그들이 해결하고자 하는 근본적인 문제(Needs)를 분석합니다. "우리의 타겟 고객은 누구이며, 그들이 진정으로 원하는 가치는 무엇인가?"라는 질문에 답해야 합니다.</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-black text-rose-800 mb-3">⚔️ Competitor (경쟁사 분석)</h3>
-                                        <p className="text-base font-medium">경쟁자의 수, 시장 점유율, 핵심 역량, 그리고 그들의 예상 반응을 분석합니다. "경쟁사는 누구이며, 그들의 강점과 약점은 무엇인가? 그들이 제공하지 못하는 우리만의 차별화 포인트는 무엇인가?"를 파악하는 것이 핵심입니다.</p>
-                                    </div>
-                                    <div>
-                                        <h3 className="text-xl font-black text-emerald-800 mb-3">🏢 Company (자사 분석)</h3>
-                                        <p className="text-base font-medium">우리의 브랜드 가치, 기술력, 자본력, 인적 자원 등 내부 역량을 객관적으로 평가합니다. "우리의 핵심 역량은 무엇이며, 어떤 자원을 통해 경쟁 우위를 지속할 수 있는가?"를 결정하여 선택과 집중의 영역을 설정합니다.</p>
-                                    </div>
-                                </div>
-                            </section>
-
-                            <section>
-                                <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 전략적 스위트 스팟(Sweet Spot) 도출</h2>
-                                <p className="text-lg">
-                                    3C 분석의 최종 목표는 단순히 정보를 나열하는 것이 아니라, 세 요소 사이의 <strong>'전략적 교집합'</strong>을 찾는 것입니다. 고객이 간절히 원하지만 경쟁사는 아직 제공하지 못하고 있으며, 우리만이 탁월하게 수행할 수 있는 영역이 바로 비즈니스의 '스위트 스팟'입니다.
-                                </p>
-                                <p className="text-lg">
-                                    분석 시 주의할 점은 각 요소를 독립적으로 보지 않는 것입니다. 고객의 니즈가 변하면 경쟁사의 전략도 변하며, 이에 따라 자사의 대응 방식도 달라져야 합니다. 3C 분석은 고정된 결과가 아니라 시장의 흐름에 따라 주기적으로 업데이트되어야 하는 동적인 도구입니다.
-                                </p>
-                            </section>
-
-                            <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
-                                <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                    <a href="https://en.wikipedia.org/wiki/3C%27s_model" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                        <h4 className="font-black mb-2">Wikipedia: 3C's Model</h4>
-                                        <p className="text-xs text-slate-400">3C 모델의 역사적 배경과 오마에 겐이치의 전략 이론에 대한 상세 정의</p>
-                                    </a>
-                                    <a href="https://www.britannica.com/topic/strategic-planning" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
-                                        <h4 className="font-black mb-2">Britannica: Strategic Planning</h4>
-                                        <p className="text-xs text-slate-400">브리태니커 백과사전이 정의하는 경영 전략 수립의 기초와 프레임워크</p>
-                                    </a>
-                                </div>
-                            </section>
-
-                            <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Ohmae, K. (1982). <em>The Mind of the Strategist: The Art of Japanese Business</em>. McGraw-Hill.</li>
-                                    <li>• Ohmae, K. (1991). <em>The Borderless World: Power and Strategy in the Interlinked Economy</em>. Harper Business.</li>
-                                    <li>• Porter, M. E. (1985). <em>Competitive Advantage: Creating and Sustaining Superior Performance</em>. Free Press.</li>
-                                    <li>• Grant, R. M. (2016). <em>Contemporary Strategy Analysis</em>. Wiley.</li>
-                                    <li>• Mintzberg, H. (1994). <em>The Rise and Fall of Strategic Planning</em>. Basic Books.</li>
-                                </ul>
-                            </section>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">3C STRATEGY ENGINE</p>
                         </div>
+                    </div>
+
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['고객', '경쟁사', '자사', '결과'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                                {i + 1}. {name}
+                            </div>
+                        ))}
+                    </nav>
+
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
+
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
+                        {(data.scenarioContext || data.isDefault) && step === 4 && (
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
+                                    💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
+                                </span>
+                            </div>
+                        )}
+
+                        {step === 1 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">1. 고객(Customer) 분석</h2>
+                                <p className="text-slate-500 font-bold break-keep">시장의 규모, 성장성, 그리고 고객이 진짜 원하는 니즈(Needs)를 파악하세요.</p>
+                                <textarea value={data.customer} onChange={e => setData({...data, customer: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all" placeholder="고객 분석 내용 입력..." />
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">다음: 경쟁사 분석</button>
+                            </section>
+                        )}
+
+                        {step === 2 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">2. 경쟁사(Competitor) 분석</h2>
+                                <p className="text-slate-500 font-bold break-keep">경쟁자의 시장 점유율, 강점, 약점 및 현재의 전략적 움직임을 분석하세요.</p>
+                                <textarea value={data.competitor} onChange={e => setData({...data, competitor: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-rose-100 transition-all" placeholder="경쟁사 분석 내용 입력..." />
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(1)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(3)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">다음: 자사 분석</button>
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 3 && (
+                            <section className="space-y-8 animate-in fade-in">
+                                <h2 className="text-2xl md:text-3xl font-black text-slate-900 text-center">3. 자사(Company) 분석</h2>
+                                <p className="text-slate-500 font-bold break-keep">우리의 핵심 역량, 브랜드 가치, 가용 자원 및 수익 구조를 객관적으로 평가하세요.</p>
+                                <textarea value={data.company} onChange={e => setData({...data, company: e.target.value, isDefault: false})} className="w-full h-64 p-6 bg-slate-50 rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-emerald-100 transition-all" placeholder="자사 분석 내용 입력..." />
+                                <div className="flex gap-4">
+                                    <button onClick={() => setStep(2)} className="flex-1 py-5 bg-slate-100 text-slate-600 rounded-2xl font-black">이전</button>
+                                    <button onClick={() => setStep(4)} className="flex-[2] py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg">최종 리포트 생성</button>
+                                </div>
+                            </section>
+                        )}
+
+                        {step === 4 && (
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">3C Strategic Triangle Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">비즈니스 전략 분석 결과</h2>
+                                </div>
+                                
+                                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-12">
+                                    <div className="p-8 bg-blue-50 rounded-[2rem] border border-blue-100 shadow-sm relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-blue-600">C</div>
+                                        <h3 className="font-black text-blue-800 mb-6 text-xl flex items-center gap-2">👥 Customer</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.customer}</p>
+                                    </div>
+                                    <div className="p-8 bg-rose-50 rounded-[2rem] border border-rose-100 shadow-sm relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-rose-600">C</div>
+                                        <h3 className="font-black text-rose-800 mb-6 text-xl flex items-center gap-2">⚔️ Competitor</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.competitor}</p>
+                                    </div>
+                                    <div className="p-8 bg-emerald-50 rounded-[2rem] border border-emerald-100 shadow-sm relative overflow-hidden">
+                                        <div className="absolute -top-4 -right-4 text-7xl opacity-10 font-black text-emerald-600">C</div>
+                                        <h3 className="font-black text-emerald-800 mb-6 text-xl flex items-center gap-2">🏢 Company</h3>
+                                        <p className="text-slate-700 font-bold leading-relaxed whitespace-pre-wrap text-base break-keep">{data.company}</p>
+                                    </div>
+                                </div>
+
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
+                                    <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">💡</div>
+                                    <h3 className="text-2xl font-black mb-4">전략적 시사점</h3>
+                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
+                                        성공적인 전략은 <strong>고객이 원하고(C)</strong>, <strong>경쟁사가 제공하지 못하며(C)</strong>, <strong>우리가 잘할 수 있는(C)</strong> 영역의 교집합에서 탄생합니다. 이 세 가지 요소의 균형을 통해 독보적인 경쟁 우위를 설계하십시오.
+                                    </p>
+                                </div>
+                            </section>
+                        )}
                     </article>
-                </section>
 
-                {/* [패밀리 사이트] */}
-                <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
-                    <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
-                    <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
-                        🚀 팩트폭격연구소(factbomber.kr) 바로가기
-                    </a>
-                </footer>
-            </main>
-        );
-    }
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
+                    {step === 4 && (
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
+                    )}
 
-    const root = ReactDOM.createRoot(document.getElementById('root'));
-    root.render(React.createElement(ThreeCApp));
-</script>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
+
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">3C 분석(3C Analysis): 비즈니스 성공을 위한 전략적 삼각형 프레임워크</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    오마에 겐이치의 전략 삼각형 이론을 바탕으로 외부 환경과 내부 역량을 통합 분석하여 지속 가능한 경쟁 우위를 확보하는 방법을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 3C 분석의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>3C 분석</strong>은 1980년대 초 세계적인 경영 컨설턴트 <strong>오마에 겐이치(Kenichi Ohmae)</strong>가 그의 저서 'The Mind of the Strategist'에서 제안한 비즈니스 프레임워크입니다. 이 모델은 비즈니스 전략을 수립할 때 반드시 고려해야 할 세 가지 핵심 요소인 <strong>고객(Customer), 경쟁사(Competitor), 자사(Company)</strong>를 분석하여 최적의 전략적 교집합을 도출하는 데 목적이 있습니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        오마에 겐이치는 성공적인 전략이란 이 세 가지 요소가 조화롭게 맞물릴 때 탄생한다고 보았습니다. 이를 '전략적 삼각형(Strategic Triangle)'이라고도 부르며, 현대 경영학에서도 시장의 기회와 위협, 그리고 내부의 강점과 약점을 동시에 조망하는 가장 기초적이면서도 강력한 도구로 활용됩니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 3C의 핵심 분석 포인트와 전략적 질문</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-800 mb-3">👥 Customer (고객 및 시장 분석)</h3>
+                                            <p className="text-base font-medium">시장의 규모와 성장성, 고객의 세분화(Segmentation), 그리고 그들이 해결하고자 하는 근본적인 문제(Needs)를 분석합니다. "우리의 타겟 고객은 누구이며, 그들이 진정으로 원하는 가치는 무엇인가?"라는 질문에 답해야 합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-800 mb-3">⚔️ Competitor (경쟁사 분석)</h3>
+                                            <p className="text-base font-medium">경쟁자의 수, 시장 점유율, 핵심 역량, 그리고 그들의 예상 반응을 분석합니다. "경쟁사는 누구이며, 그들의 강점과 약점은 무엇인가? 그들이 제공하지 못하는 우리만의 차별화 포인트는 무엇인가?"를 파악하는 것이 핵심입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-800 mb-3">🏢 Company (자사 분석)</h3>
+                                            <p className="text-base font-medium">우리의 브랜드 가치, 기술력, 자본력, 인적 자원 등 내부 역량을 객관적으로 평가합니다. "우리의 핵심 역량은 무엇이며, 어떤 자원을 통해 경쟁 우위를 지속할 수 있는가?"를 결정하여 선택과 집중의 영역을 설정합니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 전략적 스위트 스팟(Sweet Spot) 도출</h2>
+                                    <p className="text-lg">
+                                        3C 분석의 최종 목표는 단순히 정보를 나열하는 것이 아니라, 세 요소 사이의 <strong>'전략적 교집합'</strong>을 찾는 것입니다. 고객이 간절히 원하지만 경쟁사는 아직 제공하지 못하고 있으며, 우리만이 탁월하게 수행할 수 있는 영역이 바로 비즈니스의 '스위트 스팟'입니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        분석 시 주의할 점은 각 요소를 독립적으로 보지 않는 것입니다. 고객의 니즈가 변하면 경쟁사의 전략도 변하며, 이에 따라 자사의 대응 방식도 달라져야 합니다. 3C 분석은 고정된 결과가 아니라 시장의 흐름에 따라 주기적으로 업데이트되어야 하는 동적인 도구입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/3C%27s_model" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: 3C's Model</h4>
+                                            <p className="text-xs text-slate-400">3C 모델의 역사적 배경과 오마에 겐이치의 전략 이론에 대한 상세 정의</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=Kenichi+Ohmae+Strategic+Triangle+3C+model" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: 3C Research</h4>
+                                            <p className="text-xs text-slate-400">오마에 겐이치의 전략 삼각형 이론과 비즈니스 적용에 관한 학술 자료 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Ohmae, K. (1982). <em>The Mind of the Strategist: The Art of Japanese Business</em>. McGraw-Hill.</li>
+                                        <li>• Ohmae, K. (1991). <em>The Borderless World: Power and Strategy in the Interlinked Economy</em>. Harper Business.</li>
+                                        <li>• Porter, M. E. (1985). <em>Competitive Advantage: Creating and Sustaining Superior Performance</em>. Free Press.</li>
+                                        <li>• Grant, R. M. (2016). <em>Contemporary Strategy Analysis</em>. Wiley.</li>
+                                        <li>• Mintzberg, H. (1994). <em>The Rise and Fall of Strategic Planning</em>. Basic Books.</li>
+                                    </ul>
+                                </section>
+                            </div>
+                        </article>
+                    </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
+                </main>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(React.createElement(ThreeCApp));
+    </script>
 </body>
 </html>
