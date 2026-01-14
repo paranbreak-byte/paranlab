@@ -2,27 +2,34 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     
-    <!-- [SEO 표준] -->
-    <title>가치 사슬 분석 도구 | 내부 역량 최적화 및 부가가치 창출 진단 | 파란랩(Paran Lab)</title>
-    <meta name="description" content="마이클 포터의 가치 사슬(Value Chain) 모델로 비즈니스 프로세스를 분석하세요. 물류, 생산, 마케팅 등 각 단계의 경쟁 우위를 진단하고 부가가치 창출 지점을 발견합니다.">
-    <meta name="keywords" content="가치사슬분석, ValueChain, 마이클포터, 비즈니스프로세스, 경쟁우위, 내부역량분석, 파란랩, 전략수립">
-    <meta property="og:title" content="파란랩 가치 사슬 분석 엔진">
-    <meta property="og:description" content="비즈니스의 모든 활동을 사슬처럼 연결하여 진짜 경쟁력을 찾아내세요.">
-    <meta property="og:type" content="website">
+    <!-- [수익화 및 추적 표준: 애드센스 승인 최적화] -->
+    <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6902579674102145" crossorigin="anonymous"></script>
+    
+    <!-- [GEO & SEO 극대화] -->
+    <title>가치 사슬 분석 도구 v7.8.1 | 내부 역량 최적화 및 부가가치 창출 진단 엔진 | 파란랩</title>
+    <meta name="description" content="마이클 포터의 가치 사슬(Value Chain) 모델로 비즈니스 프로세스를 분석하세요. 물류, 생산, 마케팅 등 각 단계의 경쟁 우위를 진단하고 부가가치 창출 지점을 발견하는 전문 전략 도구입니다.">
+    <meta name="keywords" content="가치사슬분석, ValueChain, 마이클포터, 비즈니스프로세스, 경쟁우위, 내부역량분석, 파란랩, 전략수립, 의사결정과학">
     <link rel="canonical" href="https://paranlab.com/value-chain/">
     
-    <!-- [구조화 데이터 표준] -->
+    <!-- Open Graph -->
+    <meta property="og:title" content="파란랩 가치 사슬 분석 엔진: 비즈니스의 모든 활동을 가치로 연결하다">
+    <meta property="og:description" content="프로세스별 부가가치를 진단하고 독보적인 경쟁 우위를 설계하세요. 마이클 포터 이론 기반 전문 리포트 생성.">
+    <meta property="og:type" content="article">
+    <meta property="og:url" content="https://paranlab.com/value-chain/">
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⛓️</text></svg>">
+    
+    <!-- 구조화 데이터 (JSON-LD) -->
     <script type="application/ld+json">
     {
       "@context": "https://schema.org",
-      "@type": "SoftwareApplication",
-      "name": "파란랩 가치 사슬 분석 엔진",
-      "operatingSystem": "All",
-      "applicationCategory": "BusinessApplication",
-      "description": "마이클 포터의 가치 사슬 이론을 바탕으로 비즈니스 프로세스별 부가가치를 분석하는 도구",
-      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "KRW" }
+      "@type": "TechArticle",
+      "headline": "가치 사슬(Value Chain) 분석을 통한 비즈니스 프로세스 최적화 방법론",
+      "description": "마이클 포터가 제안한 본원적 활동과 지원 활동의 연계를 통해 경쟁 우위를 확보하는 전략적 프레임워크를 다룹니다.",
+      "author": { "@type": "Organization", "name": "파란랩(Paran Lab)" },
+      "publisher": { "@type": "Organization", "name": "파란랩" },
+      "mainEntityOfPage": { "@type": "WebPage", "@id": "https://paranlab.com/value-chain/" }
     }
     </script>
 
@@ -36,12 +43,13 @@
 
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
-        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; }
+        body { font-family: 'Pretendard', sans-serif; background-color: #f8fafc; margin: 0; overflow-x: hidden; -webkit-font-smoothing: antialiased; }
         .step-active { color: #2563eb; border-bottom: 4px solid #2563eb; }
+        .break-keep { word-break: keep-all; }
         .vc-arrow { position: relative; clip-path: polygon(0% 0%, 90% 0%, 100% 50%, 90% 100%, 0% 100%); }
-        .vc-card { transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
+        .vc-card { transition: transform 0.3s ease; }
         .vc-card:hover { transform: translateX(10px); border-color: #3b82f6; }
-        @media print { .no-print { display: none; } }
+        @media print { .no-print { display: none !important; } #report-card { border: none; shadow: none; } }
     </style>
 </head>
 <body>
@@ -52,7 +60,6 @@
     <script type="text/babel">
         const { useState, useEffect, useMemo } = React;
 
-        // [v7.7] 도구 전용 기본 샘플 (영희의 유기농 베이커리)
         const DEFAULT_TOOL_SAMPLE = {
             subject: "영희의 유기농 베이커리 가치 사슬 분석",
             activities: {
@@ -75,13 +82,13 @@
 
         function ValueChainApp() {
             const [isLoaded, setIsLoaded] = useState(false);
-            const [step, setStep] = useState(2); // 샘플 우선 노출
+            const [step, setStep] = useState(2); 
             const [isSharing, setIsSharing] = useState(false);
             const [data, setData] = useState(DEFAULT_TOOL_SAMPLE);
 
-            // [Part 2] 초기화 지연 및 안전한 데이터 로드
+            // [데이터 무결성] localStorage 읽기 및 자가 복구
             useEffect(() => {
-                const timer = setTimeout(() => {
+                const initData = () => {
                     try {
                         const saved = localStorage.getItem('paranlab-value-chain');
                         if (saved) {
@@ -95,13 +102,15 @@
                         } else {
                             setData(DEFAULT_TOOL_SAMPLE);
                         }
-                    } catch (e) { console.error("Init Error:", e); }
+                    } catch (e) {
+                        console.error("Data Recovery Triggered:", e);
+                        setData(DEFAULT_TOOL_SAMPLE);
+                    }
                     setIsLoaded(true);
-                }, 500);
-                return () => clearTimeout(timer);
+                };
+                setTimeout(initData, 300);
             }, []);
 
-            // 데이터 변경 시 자동 저장
             useEffect(() => {
                 if (isLoaded && !data.isDefault) {
                     localStorage.setItem('paranlab-value-chain', JSON.stringify(data));
@@ -129,110 +138,92 @@
                 } catch (err) { setIsSharing(false); }
             };
 
-            if (!isLoaded) return null;
+            if (!isLoaded) return <div className="flex justify-center items-center h-screen text-slate-400 font-black">LOADING ENGINE...</div>;
 
             return (
-                <main className="max-w-5xl mx-auto py-12 px-4 animate-in fade-in duration-700">
-                    {/* [Part 1] 마스터 컨트롤 바 */}
-                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-12 no-print bg-slate-900 p-6 rounded-[2.5rem] shadow-2xl">
-                        <div className="flex gap-4">
-                            <button onClick={() => setStep(1)} className="px-10 py-4 bg-blue-600 text-white rounded-2xl font-black text-lg hover:bg-blue-500 transition-all shadow-xl">✏️ 내 데이터로 수정</button>
-                            <button onClick={() => {localStorage.removeItem('paranlab-value-chain'); location.reload();}} className="px-10 py-4 bg-red-600 text-white rounded-2xl font-black text-lg hover:bg-red-500 transition-all shadow-xl">🔄 새로 시작</button>
+                <main className="max-w-5xl mx-auto py-8 md:py-12 px-4">
+                    {/* [디자인 시스템] 상단 컨트롤 바 */}
+                    <div className="flex flex-col md:flex-row justify-between items-center gap-4 mb-8 no-print bg-slate-900 p-5 rounded-3xl shadow-xl">
+                        <div className="flex gap-3 w-full md:w-auto">
+                            <button onClick={() => setStep(1)} className="flex-1 md:flex-none px-6 py-3 bg-blue-600 text-white rounded-xl font-black text-sm hover:bg-blue-500 transition-all">✏️ 수정</button>
+                            <button onClick={() => {localStorage.removeItem('paranlab-value-chain'); location.reload();}} className="flex-1 md:flex-none px-6 py-3 bg-slate-700 text-white rounded-xl font-black text-sm hover:bg-red-600 transition-all">🔄 초기화</button>
                         </div>
-                        <div className="text-right hidden md:block text-white">
-                            <p className="text-blue-400 font-black text-xs tracking-widest uppercase">Process Science</p>
-                            <p className="font-bold text-sm">PARAN LAB VALUE CHAIN v7.7</p>
+                        <div className="text-right hidden md:block">
+                            <p className="text-blue-400 font-black text-[10px] tracking-widest uppercase">Standard v7.8.1</p>
+                            <p className="text-white font-bold text-xs">VALUE CHAIN ENGINE</p>
                         </div>
                     </div>
 
-                    {/* [Part 3] 위저드 단계 표시 */}
-                    <nav className="flex justify-center gap-4 md:gap-12 mb-16 no-print border-b-2 border-slate-200">
-                        {['프로세스 분석', '최종 리포트'].map((name, i) => (
-                            <div key={i} className={`pb-6 text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
+                    {/* 위저드 네비게이션 */}
+                    <nav className="flex justify-between md:justify-center gap-2 md:gap-12 mb-8 no-print border-b border-slate-200 pb-4 overflow-x-auto">
+                        {['프로세스 분석', '결과 리포트'].map((name, i) => (
+                            <div key={i} className={`whitespace-nowrap text-xs md:text-sm font-black transition-all ${step === i + 1 ? 'step-active' : 'text-slate-300'}`}>
                                 {i + 1}. {name}
                             </div>
                         ))}
                     </nav>
 
-                    {/* [Part 3] 상단 광고 영역 */}
-                    <div className="mb-8 no-print flex justify-center min-h-[100px] bg-slate-100 rounded-2xl items-center text-slate-400 text-[10px] font-bold uppercase tracking-widest">AD Space (Top)</div>
+                    {/* [수익화] 상단 광고 슬롯 */}
+                    <div className="mb-8 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                    {/* 메인 컨텐츠 카드 */}
-                    <div id="report-card" className="bg-white p-8 md:p-16 rounded-[3.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
-                        
-                        {/* [Part 3] 샘플/시나리오 배지 */}
+                    {/* [디자인 시스템] 중앙 리포트 카드 */}
+                    <article id="report-card" className="bg-white p-6 md:p-16 rounded-[2.5rem] shadow-2xl border border-slate-100 relative overflow-hidden">
+                        {/* 시나리오 배지 */}
                         {(data.scenarioContext || data.isDefault) && step === 2 && (
-                            <div className="absolute top-8 right-8 no-print">
-                                <span className="bg-blue-600 text-white px-6 py-2 rounded-full text-xs font-black animate-bounce shadow-lg">
+                            <div className="absolute top-4 right-4 md:top-8 md:right-8 no-print">
+                                <span className="bg-blue-600 text-white px-4 py-1 rounded-full text-[10px] font-black animate-bounce shadow-lg">
                                     💡 {data.scenarioContext ? `시나리오: ${data.scenarioContext.title}` : "도구 샘플 데이터 적용됨"}
                                 </span>
                             </div>
                         )}
 
-                        {/* Step 1: Input */}
                         {step === 1 && (
-                            <div className="animate-in fade-in space-y-10">
+                            <section className="space-y-8 animate-in fade-in">
                                 <div className="text-center">
-                                    <h2 className="text-4xl font-black text-slate-900">비즈니스의 가치 창출 과정을 분석하세요</h2>
-                                    <p className="text-slate-500 mt-2 font-bold">각 단계에서 어떤 활동이 부가가치를 만드는지 입력합니다.</p>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-900">가치 창출 프로세스 분석</h2>
+                                    <p className="text-slate-500 mt-2 font-bold text-sm">각 단계에서 어떤 활동이 부가가치를 만드는지 입력하세요.</p>
                                 </div>
-                                
-                                <div className="max-w-3xl mx-auto space-y-8">
-                                    <div className="p-10 bg-blue-50 rounded-[3rem] border-2 border-blue-100 shadow-inner">
-                                        <label className="block text-[10px] font-black text-blue-400 uppercase mb-2 tracking-widest">Business Subject (분석 대상)</label>
-                                        <input 
-                                            type="text" 
-                                            value={data.subject} 
-                                            onChange={e => setData({...data, subject: e.target.value, isDefault: false})}
-                                            className="w-full p-4 bg-white rounded-2xl border-none outline-none text-2xl font-black text-center shadow-sm focus:ring-4 ring-blue-100"
-                                            placeholder="예: 프리미엄 유기농 베이커리 모델"
-                                        />
-                                    </div>
-
+                                <div className="max-w-3xl mx-auto space-y-6">
+                                    <input type="text" value={data.subject} onChange={e => setData({...data, subject: e.target.value, isDefault: false})} className="w-full p-5 bg-blue-50 rounded-2xl border-none outline-none text-lg font-black text-center shadow-inner mb-4" placeholder="분석 대상 입력" />
                                     {VC_CONFIG.map(s => (
-                                        <div key={s.k} className="p-8 bg-slate-50 rounded-[3rem] border border-slate-100 space-y-4 animate-in slide-in-from-bottom-2">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`${s.color} text-white w-10 h-10 rounded-xl flex items-center justify-center text-lg shadow-md`}>{s.icon}</div>
-                                                <h3 className="text-xl font-black text-slate-800">{s.n}</h3>
+                                        <div key={s.k} className="p-6 bg-slate-50 rounded-3xl border border-slate-100 space-y-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className={`${s.color} text-white w-8 h-8 rounded-lg flex items-center justify-center text-sm shadow-md`}>{s.icon}</div>
+                                                <h3 className="text-base font-black text-slate-800">{s.n}</h3>
                                             </div>
-                                            <p className="text-xs text-slate-400 font-bold ml-14">{s.d}</p>
                                             <textarea 
                                                 value={data.activities[s.k]} 
                                                 onChange={e => setData({...data, activities: {...data.activities, [s.k]: e.target.value}, isDefault: false})}
-                                                className="w-full h-32 p-6 bg-white rounded-2xl border-none outline-none text-lg font-bold shadow-inner focus:ring-4 ring-blue-100 transition-all ml-0 md:ml-14 md:w-[calc(100%-3.5rem)]"
-                                                placeholder="구체적인 활동 내용을 입력하세요..."
+                                                className="w-full h-24 p-4 bg-white rounded-xl border-none outline-none text-sm font-bold shadow-inner focus:ring-2 ring-blue-100 transition-all"
+                                                placeholder={`${s.d} 내용을 입력하세요...`}
                                             />
                                         </div>
                                     ))}
                                 </div>
-                                
-                                <button onClick={() => setStep(2)} className="w-full py-6 bg-blue-600 text-white rounded-[2rem] font-black text-xl shadow-2xl hover:bg-blue-700 transition-all">최종 가치 사슬 리포트 확인</button>
-                            </div>
+                                <button onClick={() => setStep(2)} className="w-full py-5 bg-blue-600 text-white rounded-2xl font-black text-lg shadow-lg hover:bg-blue-700 transition-all">최종 리포트 생성</button>
+                            </section>
                         )}
 
-                        {/* Step 2: Result Report */}
                         {step === 2 && (
-                            <div className="animate-in zoom-in duration-700">
-                                <div className="text-center mb-16">
-                                    <span className="bg-blue-100 text-blue-700 px-8 py-2 rounded-full text-xs font-black uppercase tracking-widest">
-                                        Porter's Value Chain Creation Map
-                                    </span>
-                                    <h2 className="text-5xl md:text-6xl font-black text-slate-900 mt-8 tracking-tight">
-                                        가치 사슬 분석 결과
-                                    </h2>
-                                    <p className="mt-4 text-slate-400 font-bold text-xl">대상: {data.subject || "미정"}</p>
+                            <section className="animate-in zoom-in duration-500">
+                                <div className="text-center mb-12">
+                                    <span className="bg-blue-100 text-blue-700 px-4 py-1 rounded-full text-[10px] font-black uppercase tracking-widest">Porter's Value Chain Analysis Report</span>
+                                    <h2 className="text-3xl md:text-5xl font-black text-slate-900 mt-6 tracking-tight break-keep">가치 사슬 분석 결과</h2>
+                                    <p className="mt-4 text-slate-400 font-bold text-lg break-keep">대상: {data.subject}</p>
                                 </div>
-
-                                <div className="flex flex-col gap-6 mb-16 max-w-4xl mx-auto">
+                                
+                                <div className="flex flex-col gap-4 mb-12 max-w-4xl mx-auto">
                                     {VC_CONFIG.map((s, i) => (
-                                        <div key={s.k} className="flex items-stretch gap-6 group animate-in slide-in-from-left duration-700" style={{animationDelay: `${i * 150}ms`}}>
-                                            <div className={`${s.color} text-white w-16 flex items-center justify-center font-black text-2xl rounded-3xl shadow-lg shrink-0 z-10`}>
+                                        <div key={s.k} className="flex items-stretch gap-4 group animate-in slide-in-from-left duration-700" style={{animationDelay: `${i * 100}ms`}}>
+                                            <div className={`${s.color} text-white w-12 flex items-center justify-center font-black text-xl rounded-2xl shadow-md shrink-0 z-10`}>
                                                 {i + 1}
                                             </div>
-                                            <div className="flex-1 p-10 bg-slate-50 rounded-[3.5rem] border border-slate-100 vc-arrow vc-card relative">
-                                                <div className="absolute top-6 right-12 text-4xl opacity-20">{s.icon}</div>
-                                                <h3 className="text-xs font-black text-blue-600 uppercase tracking-widest mb-4">{s.n}</h3>
-                                                <p className="text-xl text-slate-800 font-bold leading-relaxed whitespace-pre-wrap">
+                                            <div className="flex-1 p-8 bg-slate-50 rounded-[2.5rem] border border-slate-100 vc-arrow vc-card relative">
+                                                <div className="absolute top-4 right-8 text-3xl opacity-10">{s.icon}</div>
+                                                <h3 className="text-[10px] font-black text-blue-600 uppercase tracking-widest mb-2">{s.n}</h3>
+                                                <p className="text-base text-slate-800 font-bold leading-relaxed whitespace-pre-wrap break-keep">
                                                     {data.activities[s.k] || "기록된 활동이 없습니다."}
                                                 </p>
                                             </div>
@@ -240,97 +231,129 @@
                                     ))}
                                 </div>
 
-                                <div className="p-12 bg-slate-900 text-white rounded-[4rem] shadow-2xl text-center relative overflow-hidden">
+                                <div className="p-10 bg-slate-900 text-white rounded-[3rem] shadow-2xl text-center relative overflow-hidden">
                                     <div className="absolute top-0 left-0 p-10 opacity-10 text-9xl font-black">⛓️</div>
                                     <h3 className="text-2xl font-black mb-4">전략적 경쟁 우위 제언</h3>
-                                    <p className="text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto">
-                                        가치 사슬의 각 단계는 독립된 활동이 아니라 서로 연결된 <strong>'사슬'</strong>입니다. 
-                                        특정 단계에서의 혁신이 다음 단계의 비용을 절감하거나 가치를 높이는 <strong>연계(Linkage)</strong> 효과를 극대화하여 독보적인 경쟁 우위를 확보하십시오.
+                                    <p className="text-base md:text-lg text-slate-300 leading-relaxed font-medium max-w-3xl mx-auto break-keep">
+                                        가치 사슬의 각 단계는 독립된 활동이 아니라 서로 연결된 <strong>'사슬'</strong>입니다. 특정 단계에서의 혁신이 다음 단계의 비용을 절감하거나 가치를 높이는 <strong>연계(Linkage)</strong> 효과를 극대화하여 독보적인 경쟁 우위를 확보하십시오.
                                     </p>
                                 </div>
-
-                                <div className="mt-20 pt-8 border-t border-slate-100 text-center">
-                                    <p className="text-slate-300 font-black text-sm tracking-widest uppercase">
-                                        Analyzed by PARANLAB.COM
-                                    </p>
-                                </div>
-                            </div>
+                            </section>
                         )}
-                    </div>
+                    </article>
 
-                    {/* [Part 3] 결과 다운로드 및 공유 버튼 */}
+                    {/* [Mobile-First UX] 하단 2x2 그리드 버튼 세트 */}
                     {step === 2 && (
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-6 mt-12 no-print">
-                            <button onClick={() => ParanLabCore.saveAsImage('report-card')} className="py-7 bg-slate-900 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-slate-800 transition-all">🖼️ 이미지 저장</button>
-                            <button onClick={() => ParanLabCore.downloadHTML('report-card')} className="py-7 bg-blue-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-blue-700 transition-all">📄 HTML 다운로드</button>
-                            <button onClick={handleShare} disabled={isSharing} className="py-7 bg-yellow-500 text-slate-900 rounded-[2.5rem] font-black text-lg shadow-2xl flex items-center justify-center gap-2">{isSharing ? '⌛ 생성 중...' : '💬 이미지+링크 공유'}</button>
-                            <button onClick={() => ParanLabCore.copyToClipboard(`https://paranlab.com/value-chain/`)} className="py-7 bg-emerald-600 text-white rounded-[2.5rem] font-black text-lg shadow-2xl hover:bg-emerald-700 transition-all">🔗 링크 복사</button>
-                        </div>
+                        <section className="grid grid-cols-2 gap-3 mt-8 no-print">
+                            <button onClick={() => window.ParanLabCore.saveAsImage('report-card')} className="h-[56px] flex items-center justify-center bg-slate-900 text-white rounded-xl font-black text-sm shadow-lg hover:bg-slate-800 transition-all break-keep">🖼️ 이미지 저장</button>
+                            <button onClick={() => window.ParanLabCore.downloadHTML('report-card')} className="h-[56px] flex items-center justify-center bg-blue-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-blue-700 transition-all break-keep">📄 HTML 다운</button>
+                            <button onClick={() => window.ParanLabCore.copyToClipboard(window.location.href)} className="h-[56px] flex items-center justify-center bg-emerald-600 text-white rounded-xl font-black text-sm shadow-lg hover:bg-emerald-700 transition-all break-keep">🔗 링크 복사</button>
+                            <button onClick={() => window.print()} className="h-[56px] flex items-center justify-center bg-slate-200 text-slate-700 rounded-xl font-black text-sm shadow-lg hover:bg-slate-300 transition-all break-keep">🖨️ 리포트 인쇄</button>
+                        </section>
                     )}
 
-                    {/* [Part 3] 학술적 배경 설명 (1,000자 이상) */}
-                    <section className="mt-40 border-t-4 border-slate-200 pt-24">
-                        <div className="prose prose-slate max-w-none">
-                            <h3 className="text-4xl font-black text-slate-900 mb-12">
-                                가치 사슬(Value Chain): 경쟁 우위를 창출하는 내부 프로세스의 과학
-                            </h3>
-                            <div className="space-y-8 text-xl text-slate-600 leading-relaxed">
-                                <p>
-                                    <strong>가치 사슬(Value Chain)</strong> 분석은 하버드 경영대학원의 <strong>마이클 포터(Michael Porter)</strong> 교수가 1985년 그의 저서 <em>'경쟁 우위(Competitive Advantage)'</em>에서 제안한 비즈니스 분석 모델입니다. 이 모델은 기업이 제품이나 서비스를 생산하여 최종 고객에게 전달하기까지의 모든 활동을 하나의 사슬(Chain)처럼 연결하여 분석합니다. 이를 통해 어느 단계에서 부가가치가 창출되고, 어느 단계에서 불필요한 비용이 발생하는지 파악하여 전략적 의사결정을 돕습니다.
-                                </p>
-                                <p>
-                                    포터는 기업의 활동을 크게 두 가지로 나누었습니다. 첫째는 제품의 물리적 생성, 판매, 전달 및 서비스와 직접 관련된 <strong>'본원적 활동(Primary Activities)'</strong>입니다. 여기에는 물류 투입, 운영/생산, 물류 산출, 마케팅 및 영업, 서비스가 포함됩니다. 둘째는 본원적 활동이 원활하게 이루어지도록 뒷받침하는 <strong>'지원 활동(Support Activities)'</strong>으로, 기업 인프라, 인적 자원 관리, 기술 개발, 조달 등이 해당합니다.
-                                </p>
-                                <p>
-                                    가치 사슬 분석의 진정한 목적은 단순히 활동을 나열하는 것이 아니라, 각 활동 간의 <strong>'연계(Linkages)'</strong>를 최적화하는 데 있습니다. 예를 들어, 물류 투입 단계에서 고품질의 원재료를 확보하는 활동이 생산 단계의 불량률을 낮추고, 결과적으로 서비스 단계의 비용을 절감하는 식입니다. 이러한 연계 효과를 극대화할 때 기업은 경쟁사가 흉내 낼 수 없는 독보적인 경쟁 우위(Competitive Advantage)를 확보하게 됩니다. 파란랩의 가치 사슬 분석 엔진은 이러한 경영학적 원리를 시각화하여 당신의 비즈니스 프로세스를 혁신하도록 가이드합니다.
-                                </p>
-                            </div>
-                            
-                            <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-20">
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-blue-600 shadow-sm">
-                                    <h4 className="font-black text-blue-600 mb-6 text-2xl">1. 본원적 활동의 최적화</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        원재료 조달부터 고객 서비스까지 이어지는 5단계 프로세스를 정밀 진단합니다. 각 단계에서 고객이 기꺼이 비용을 지불할 만한 가치가 만들어지고 있는지 점검하십시오.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-slate-900 shadow-sm">
-                                    <h4 className="font-black text-slate-900 mb-6 text-2xl">2. 비용 구조와 마진 분석</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        가치 사슬은 총 가치에서 활동 비용을 뺀 '마진(Margin)'을 극대화하는 과정입니다. 부가가치 창출에 기여하지 못하는 고비용 저효율 단계를 식별하여 개선하십시오.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-emerald-600 shadow-sm">
-                                    <h4 className="font-black text-emerald-600 mb-6 text-2xl">3. 차별화 전략의 도출</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        경쟁사와 동일한 프로세스로는 초과 수익을 낼 수 없습니다. 가치 사슬의 특정 지점에서 압도적인 기술력이나 서비스 품질을 구현하여 독점적 지위를 확보하십시오.
-                                    </p>
-                                </div>
-                                <div className="p-10 bg-white rounded-[2.5rem] border-l-8 border-rose-600 shadow-sm">
-                                    <h4 className="font-black text-rose-600 mb-6 text-2xl">4. 전사적 정렬 (Alignment)</h4>
-                                    <p className="text-base text-slate-500 leading-relaxed font-medium">
-                                        개별 부서의 최적화가 아닌, 전체 가치 사슬의 흐름을 최적화해야 합니다. 지원 활동이 본원적 활동을 얼마나 효과적으로 돕고 있는지 통합적인 관점에서 분석하십시오.
-                                    </p>
-                                </div>
-                            </div>
+                    {/* [수익화] 하단 광고 슬롯 */}
+                    <div className="mt-12 no-print min-h-[100px] flex items-center justify-center bg-slate-100 rounded-2xl border border-dashed border-slate-200">
+                        <ins className="adsbygoogle" style={{display:'block'}} data-ad-client="ca-pub-6902579674102145" data-ad-slot="auto" data-ad-format="auto" data-full-width-responsive="true"></ins>
+                    </div>
 
-                            <div className="mt-20 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
-                                <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
-                                <ul className="text-base text-slate-500 space-y-4 font-medium">
-                                    <li>• Porter, M. E. (1985). <em>Competitive Advantage: Creating and Sustaining Superior Performance</em>. Free Press.</li>
-                                    <li>• Porter, M. E. (1996). "What is Strategy?". <em>Harvard Business Review</em>.</li>
-                                    <li>• Stabell, C. B., & Fjeldstad, Ø. D. (1998). "Configuring value for competitive advantage: On chains, shops, and networks". <em>Strategic Management Journal</em>.</li>
-                                    <li>• Kaplinsky, R., & Morris, M. (2001). <em>A Handbook for Value Chain Research</em>. IDRC.</li>
-                                </ul>
+                    {/* [GEO & SEO] 전문 학술 콘텐츠 섹션 */}
+                    <section className="mt-24 border-t border-slate-200 pt-16">
+                        <article className="prose prose-slate max-w-none">
+                            <header>
+                                <h1 className="text-3xl md:text-5xl font-black text-slate-900 mb-8 tracking-tight break-keep">가치 사슬(Value Chain): 경쟁 우위를 창출하는 내부 프로세스의 과학</h1>
+                                <p className="text-xl text-slate-500 font-bold leading-relaxed mb-12 break-keep">
+                                    마이클 포터의 가치 사슬 모델을 통해 비즈니스 프로세스를 정밀 진단하고, 비용 우위와 차별화의 원천을 발견하는 전략적 방법론을 심층 분석합니다.
+                                </p>
+                            </header>
+
+                            <div className="space-y-16 text-slate-600 leading-relaxed">
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">1. 가치 사슬 분석의 정의와 역사적 배경</h2>
+                                    <p className="text-lg">
+                                        <strong>가치 사슬(Value Chain)</strong> 분석은 1985년 하버드 경영대학원의 <strong>마이클 포터(Michael Porter)</strong> 교수가 그의 저서 '경쟁 우위(Competitive Advantage)'에서 제안한 비즈니스 분석 모델입니다. 이 모델은 기업이 제품이나 서비스를 생산하여 최종 고객에게 전달하기까지의 모든 활동을 하나의 사슬(Chain)처럼 연결하여 분석합니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        포터는 기업의 경쟁력이 단순히 개별 부서의 효율성에서 나오는 것이 아니라, 각 활동이 어떻게 유기적으로 결합되어 고객에게 가치를 전달하느냐에 달려 있다고 보았습니다. 가치 사슬 분석은 어느 단계에서 부가가치가 창출되고, 어느 단계에서 불필요한 비용이 발생하는지 파악하여 전략적 의사결정을 돕는 강력한 도구입니다.
+                                    </p>
+                                </section>
+
+                                <section className="bg-blue-50 p-8 md:p-12 rounded-[2.5rem] border-2 border-blue-100">
+                                    <h2 className="text-2xl md:text-3xl font-black text-blue-900 mb-6">2. 가치 사슬의 5대 본원적 활동 (Primary Activities)</h2>
+                                    <div className="space-y-8">
+                                        <div>
+                                            <h3 className="text-xl font-black text-blue-800 mb-3">🚛 물류 투입 (Inbound Logistics)</h3>
+                                            <p className="text-base font-medium">원재료의 수급, 보관, 재고 관리 활동입니다. 공급업체와의 효율적인 협력과 물류 최적화가 비용 우위의 시작점이 됩니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-slate-800 mb-3">⚙️ 운영 및 생산 (Operations)</h3>
+                                            <p className="text-base font-medium">투입된 원재료를 최종 제품으로 변환하는 제조 및 가공 활동입니다. 공정 혁신과 품질 관리를 통해 생산성을 극대화합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-emerald-800 mb-3">📦 물류 산출 (Outbound Logistics)</h3>
+                                            <p className="text-base font-medium">완성된 제품을 고객에게 전달하는 배송 및 유통 활동입니다. 신속하고 정확한 물류 시스템은 고객 만족도의 핵심 요소입니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-indigo-800 mb-3">📣 마케팅 및 영업 (Marketing & Sales)</h3>
+                                            <p className="text-base font-medium">고객이 제품을 인지하고 구매하도록 유도하는 활동입니다. 브랜드 가치 제고와 효과적인 판매 채널 확보가 중요합니다.</p>
+                                        </div>
+                                        <div>
+                                            <h3 className="text-xl font-black text-rose-800 mb-3">🤝 서비스 (Service)</h3>
+                                            <p className="text-base font-medium">제품 판매 후 제공되는 설치, 수리, 교육 등 고객 지원 활동입니다. 고객 생애 가치(LTV)를 높이는 결정적인 단계입니다.</p>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section>
+                                    <h2 className="text-2xl md:text-3xl font-black text-slate-800 mb-6">3. 실전 활용 가이드: 연계(Linkage)를 통한 혁신</h2>
+                                    <p className="text-lg">
+                                        가치 사슬 분석의 진정한 가치는 각 활동 간의 <strong>'연계(Linkages)'</strong>를 최적화하는 데 있습니다. 예를 들어, 물류 투입 단계에서 고품질의 원재료를 확보하는 활동이 생산 단계의 불량률을 낮추고, 결과적으로 서비스 단계의 비용을 절감하는 식입니다.
+                                    </p>
+                                    <p className="text-lg">
+                                        파란랩의 가치 사슬 엔진은 사용자가 각 단계의 활동을 텍스트로 구체화하고 시각적 흐름을 확인하게 함으로써, 비즈니스의 병목 지점을 찾아내도록 돕습니다. 분석 결과를 바탕으로 경쟁사보다 탁월한 가치를 제공하는 '차별화' 지점을 강화하거나, 불필요한 비용을 제거하는 '비용 우위' 전략을 수립하십시오.
+                                    </p>
+                                </section>
+
+                                <section className="bg-slate-900 text-white p-10 rounded-[2.5rem]">
+                                    <h2 className="text-2xl font-black mb-6">📚 학술적 권위 및 외부 자료</h2>
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <a href="https://en.wikipedia.org/wiki/Value_chain" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Wikipedia: Value Chain</h4>
+                                            <p className="text-xs text-slate-400">가치 사슬 모델의 역사적 배경과 본원적/지원 활동에 대한 상세 학술 정의</p>
+                                        </a>
+                                        <a href="https://scholar.google.com/scholar?q=Michael+Porter+Value+Chain+Competitive+Advantage" target="_blank" className="p-5 bg-slate-800 rounded-2xl hover:bg-blue-600 transition-all">
+                                            <h4 className="font-black mb-2">Google Scholar: Porter Research</h4>
+                                            <p className="text-xs text-slate-400">마이클 포터의 원전 논문 및 가치 사슬 분석에 관한 최신 학술 연구 자료 리스트</p>
+                                        </a>
+                                    </div>
+                                </section>
+
+                                <section className="mt-12 p-10 bg-slate-100 rounded-[3rem] border-2 border-slate-200">
+                                    <h4 className="font-black mb-8 text-2xl text-slate-800">📚 주요 참고 문헌 (References)</h4>
+                                    <ul className="text-base text-slate-500 space-y-4 font-medium">
+                                        <li>• Porter, M. E. (1985). <em>Competitive Advantage: Creating and Sustaining Superior Performance</em>. Free Press.</li>
+                                        <li>• Porter, M. E. (1996). "What is Strategy?". <em>Harvard Business Review</em>.</li>
+                                        <li>• Stabell, C. B., & Fjeldstad, Ø. D. (1998). "Configuring value for competitive advantage: On chains, shops, and networks". <em>Strategic Management Journal</em>.</li>
+                                        <li>• Kaplinsky, R., & Morris, M. (2001). <em>A Handbook for Value Chain Research</em>. IDRC.</li>
+                                        <li>• Gereffi, G., & Fernandez-Stark, K. (2011). <em>Global Value Chain Analysis: A Primer</em>. Duke University.</li>
+                                    </ul>
+                                </section>
                             </div>
-                        </div>
+                        </article>
                     </section>
+
+                    {/* [패밀리 사이트] */}
+                    <footer className="mt-20 py-12 border-t border-slate-200 text-center no-print">
+                        <p className="text-slate-400 font-bold mb-4">더 날카로운 분석이 필요하다면?</p>
+                        <a href="https://factbomber.kr" target="_blank" className="inline-flex items-center gap-2 px-8 py-4 bg-slate-900 text-white rounded-2xl font-black hover:bg-blue-600 transition-all shadow-lg">
+                            🚀 팩트폭격연구소(factbomber.kr) 바로가기
+                        </a>
+                    </footer>
                 </main>
             );
         }
 
-        // [Part 2] 안전한 렌더링 방식
-        const rootElement = document.getElementById('root');
-        const root = ReactDOM.createRoot(rootElement);
+        const root = ReactDOM.createRoot(document.getElementById('root'));
         root.render(React.createElement(ValueChainApp));
     </script>
 </body>
