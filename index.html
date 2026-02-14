@@ -21,7 +21,7 @@
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📊</text></svg>">
     
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="/core.js" defer></script>
+    <script src="./core.js" defer></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Pretendard:wght@400;600;700;900&display=swap');
         body { font-family: 'Pretendard', sans-serif; scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
@@ -162,7 +162,7 @@
             const scenarioContainer = document.getElementById('scenario-container');
             if (scenarioContainer && ParanLabCore.scenariosList) {
                 scenarioContainer.innerHTML = ParanLabCore.scenariosList.map(s => `
-                    <a href="/scenarios/?id=${s.id}" class="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl transition-all group relative overflow-hidden">
+                    <a href="scenarios/?id=${s.id}" class="bg-white p-10 rounded-[3rem] shadow-sm border border-slate-100 hover:shadow-2xl transition-all group relative overflow-hidden">
                         <div class="absolute top-0 right-0 p-8 opacity-10 text-6xl group-hover:scale-125 transition-transform">${s.icon}</div>
                         <span class="text-blue-600 font-black text-xs uppercase tracking-widest mb-2 block">${s.title}</span>
                         <h3 class="text-2xl font-black text-slate-800 group-hover:text-blue-600 transition-colors mb-4 break-keep">${s.subtitle}</h3>

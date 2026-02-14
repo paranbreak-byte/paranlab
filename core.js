@@ -14,37 +14,37 @@ window.ParanLabCore = {
 
     // 31개 도구 마스터 리스트
     toolsList: [
-        { id: 'ahp', name: 'AHP 분석', icon: '📊', category: 'Decision', href: '/ahp/' },
-        { id: 'pros-cons', name: 'Pros & Cons', icon: '⚖️', category: 'Decision', href: '/pros-cons/' },
-        { id: 'swot', name: 'SWOT 전략', icon: '🧩', category: 'Strategy', href: '/swot/' },
-        { id: 'mandalart', name: '만다라트', icon: '🕸️', category: 'Goal', href: '/mandalart/' },
-        { id: 'eisenhower', name: '아이젠하워', icon: '📅', category: 'Time', href: '/eisenhower/' },
-        { id: 'grow', name: 'GROW 코칭', icon: '🌱', category: 'Coaching', href: '/grow/' },
-        { id: 'smart', name: 'SMART 목표', icon: '📏', category: 'Goal', href: '/smart/' },
-        { id: 'okr', name: 'OKR 설정', icon: '🎯', category: 'Goal', href: '/okr/' },
-        { id: '5whys', name: '5 Whys', icon: '❓', category: 'Problem', href: '/5whys/' },
-        { id: 'logic-tree', name: '로직 트리', icon: '🌳', category: 'Problem', href: '/logic-tree/' },
-        { id: 'porter', name: '5 Forces', icon: '🛡️', category: 'Strategy', href: '/porter/' },
-        { id: 'cba', name: '비용편익분석', icon: '📈', category: 'Finance', href: '/cba/' },
-        { id: 'weighted', name: '가중치 점수', icon: '📝', category: 'Decision', href: '/weighted/' },
-        { id: 'ikigai', name: '이키가이', icon: '🌸', category: 'Self', href: '/ikigai/' },
-        { id: 'wheel', name: '인생 수레바퀴', icon: '🎡', category: 'Self', href: '/wheel/' },
-        { id: 'johari', name: '조하리의 창', icon: '🪟', category: 'Team', href: '/johari/' },
-        { id: 'scamper', name: 'SCAMPER', icon: '🔧', category: 'Creative', href: '/scamper/' },
-        { id: 'pmi', name: 'PMI 평가', icon: '💡', category: 'Creative', href: '/pmi/' },
-        { id: 'tree', name: '결정 트리', icon: '🌲', category: 'Risk', href: '/tree/' },
-        { id: 'vrio', name: 'VRIO 분석', icon: '💎', category: 'Strategy', href: '/vrio/' },
-        { id: 'pest', name: 'PEST 분석', icon: '🌐', category: 'Strategy', href: '/pest/' },
-        { id: 'affinity', name: '친화도법', icon: '📎', category: 'Team', href: '/affinity/' },
-        { id: 'force-field', name: '역장 분석', icon: '🏹', category: 'Problem', href: '/force-field/' },
-        { id: 'value-chain', name: '가치 사슬', icon: '⛓️', category: 'Strategy', href: '/value-chain/' },
-        { id: 'time-audit', name: '시간 감사', icon: '⏳', category: 'Time', href: '/time-audit/' },
-        { id: 'payoff', name: 'Payoff 분석', icon: '💰', category: 'Time', href: '/payoff/' },
-        { id: '3c', name: '3C 분석', icon: '🏢', category: 'Strategy', href: '/3c/' },
-        { id: 'ansoff', name: '안소프 매트릭스', icon: '📈', category: 'Strategy', href: '/ansoff/' },
-        { id: 'bcg', name: 'BCG 매트릭스', icon: '⭐', category: 'Strategy', href: '/bcg/' },
-        { id: 'paired', name: '쌍대 비교', icon: '⚔️', category: 'Decision', href: '/paired/' },
-        { id: '6hats', name: '여섯 색깔 모자', icon: '🎩', category: 'Creative', href: '/6hats/' }
+        { id: 'ahp', name: 'AHP 분석', icon: '📊', category: 'Decision', href: 'ahp/' },
+        { id: 'pros-cons', name: 'Pros & Cons', icon: '⚖️', category: 'Decision', href: 'pros-cons/' },
+        { id: 'swot', name: 'SWOT 전략', icon: '🧩', category: 'Strategy', href: 'swot/' },
+        { id: 'mandalart', name: '만다라트', icon: '🕸️', category: 'Goal', href: 'mandalart/' },
+        { id: 'eisenhower', name: '아이젠하워', icon: '📅', category: 'Time', href: 'eisenhower/' },
+        { id: 'grow', name: 'GROW 코칭', icon: '🌱', category: 'Coaching', href: 'grow/' },
+        { id: 'smart', name: 'SMART 목표', icon: '📏', category: 'Goal', href: 'smart/' },
+        { id: 'okr', name: 'OKR 설정', icon: '🎯', category: 'Goal', href: 'okr/' },
+        { id: '5whys', name: '5 Whys', icon: '❓', category: 'Problem', href: '5whys/' },
+        { id: 'logic-tree', name: '로직 트리', icon: '🌳', category: 'Problem', href: 'logic-tree/' },
+        { id: 'porter', name: '5 Forces', icon: '🛡️', category: 'Strategy', href: 'porter/' },
+        { id: 'cba', name: '비용편익분석', icon: '📈', category: 'Finance', href: 'cba/' },
+        { id: 'weighted', name: '가중치 점수', icon: '📝', category: 'Decision', href: 'weighted/' },
+        { id: 'ikigai', name: '이키가이', icon: '🌸', category: 'Self', href: 'ikigai/' },
+        { id: 'wheel', name: '인생 수레바퀴', icon: '🎡', category: 'Self', href: 'wheel/' },
+        { id: 'johari', name: '조하리의 창', icon: '🪟', category: 'Team', href: 'johari/' },
+        { id: 'scamper', name: 'SCAMPER', icon: '🔧', category: 'Creative', href: 'scamper/' },
+        { id: 'pmi', name: 'PMI 평가', icon: '💡', category: 'Creative', href: 'pmi/' },
+        { id: 'tree', name: '결정 트리', icon: '🌲', category: 'Risk', href: 'tree/' },
+        { id: 'vrio', name: 'VRIO 분석', icon: '💎', category: 'Strategy', href: 'vrio/' },
+        { id: 'pest', name: 'PEST 분석', icon: '🌐', category: 'Strategy', href: 'pest/' },
+        { id: 'affinity', name: '친화도법', icon: '📎', category: 'Team', href: 'affinity/' },
+        { id: 'force-field', name: '역장 분석', icon: '🏹', category: 'Problem', href: 'force-field/' },
+        { id: 'value-chain', name: '가치 사슬', icon: '⛓️', category: 'Strategy', href: 'value-chain/' },
+        { id: 'time-audit', name: '시간 감사', icon: '⏳', category: 'Time', href: 'time-audit/' },
+        { id: 'payoff', name: 'Payoff 분석', icon: '💰', category: 'Time', href: 'payoff/' },
+        { id: '3c', name: '3C 분석', icon: '🏢', category: 'Strategy', href: '3c/' },
+        { id: 'ansoff', name: '안소프 매트릭스', icon: '📈', category: 'Strategy', href: 'ansoff/' },
+        { id: 'bcg', name: 'BCG 매트릭스', icon: '⭐', category: 'Strategy', href: 'bcg/' },
+        { id: 'paired', name: '쌍대 비교', icon: '⚔️', category: 'Decision', href: 'paired/' },
+        { id: '6hats', name: '여섯 색깔 모자', icon: '🎩', category: 'Creative', href: '6hats/' }
     ],
 
     // 10개 시나리오 마스터 리스트 (상세 데이터 포함)
@@ -131,24 +131,34 @@ window.ParanLabCore = {
     renderHeader() {
         const header = document.getElementById('header-root');
         if (header) {
+            // GitHub Pages "project page" support (https://<user>.github.io/<repo>/)
+            const parts = (location.pathname || '').split('/').filter(Boolean);
+            const isGithubIO = /github\.io$/i.test(location.hostname || '');
+            const base = (isGithubIO && parts.length > 0) ? `/${parts[0]}/` : '/';
+
             header.innerHTML = `
                 <header class="fixed top-0 left-0 right-0 bg-white/80 backdrop-blur-md border-b z-50 no-print">
                     <div class="container mx-auto px-6 py-4 flex justify-between items-center">
-                        <a href="/" class="text-2xl font-black text-blue-600 tracking-tighter flex items-center gap-2">
+                        <a href="${base}" class="text-2xl font-black text-blue-600 tracking-tighter flex items-center gap-2">
                             <span class="bg-blue-600 text-white p-1 rounded-lg text-sm">📊</span> PARAN LAB
                         </a>
                         <nav class="flex gap-8 text-sm font-bold text-slate-600">
-                            <a href="/#tool-categories" class="hover:text-blue-600 transition-colors">도구함</a>
-                            <a href="/#scenario-grid" class="hover:text-blue-600 transition-colors">시나리오</a>
+                            <a href="${base}#tool-categories" class="hover:text-blue-600 transition-colors">도구함</a>
+                            <a href="${base}#scenario-grid" class="hover:text-blue-600 transition-colors">시나리오</a>
                         </nav>
                     </div>
-                </header>`;
+                </header>
+                <!-- Spacer for fixed header (prevents overlap with tool buttons on desktop/mobile) -->
+                <div class="h-[72px]"></div>`;
         }
     },
 
     renderFooter() {
         const footer = document.getElementById('footer-root');
         if (footer) {
+            const parts = (location.pathname || '').split('/').filter(Boolean);
+            const isGithubIO = /github\.io$/i.test(location.hostname || '');
+            const base = (isGithubIO && parts.length > 0) ? `/${parts[0]}/` : '/';
             footer.innerHTML = `
                 <footer class="bg-slate-900 text-white py-20 no-print">
                     <div class="container mx-auto px-6">
@@ -160,8 +170,8 @@ window.ParanLabCore = {
                             <div>
                                 <p class="font-black mb-4">Quick Links</p>
                                 <ul class="text-slate-400 text-sm space-y-2">
-                                    <li><a href="/#tool-categories" class="hover:text-white transition-colors">의사결정 도구함</a></li>
-                                    <li><a href="/#scenario-grid" class="hover:text-white transition-colors">실전 시나리오</a></li>
+                                    <li><a href="${base}#tool-categories" class="hover:text-white transition-colors">의사결정 도구함</a></li>
+                                    <li><a href="${base}#scenario-grid" class="hover:text-white transition-colors">실전 시나리오</a></li>
                                 </ul>
                             </div>
                             <div>
@@ -173,7 +183,7 @@ window.ParanLabCore = {
                             <div>
                                 <p class="font-black mb-4">Legal & Contact</p>
                                 <ul class="text-slate-400 text-sm space-y-2">
-                                    <li><a href="/privacy/" class="hover:text-white transition-colors">개인정보처리방침</a></li>
+                                    <li><a href="${base}privacy/" class="hover:text-white transition-colors">개인정보처리방침</a></li>
                                     <li class="pt-2 text-xs opacity-60">${this.config.contactEmail}</li>
                                 </ul>
                             </div>
